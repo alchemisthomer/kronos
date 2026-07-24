@@ -10,6 +10,8 @@ The methodology folder contains the intellectual core of the kronos framework �
 | [`SEVEN-CLAIMS.md`](SEVEN-CLAIMS.md) | The seven novel properties of the kronos methodology, described at conceptual level for design review and eventual patent disclosure |
 | [`SCORECARD.md`](SCORECARD.md) | The maturity scorecard model — four pillars, twelve dimensions, six levels — including the load-bearing property that L4 and L5 are only reachable via adversarial proof |
 | [`TEMPLATE.md`](TEMPLATE.md) | The engagement document scaffold that adopters instantiate for each engagement |
+| [`TOOL-BINDING.md`](TOOL-BINDING.md) | The four-layer tool binding contract: how the framework delegates attack execution to bare-shell tools, structured adapters, MCP-compliant tools, and native kronos tools |
+| [`INDUSTRY-ALIGNMENT.md`](INDUSTRY-ALIGNMENT.md) | Kronos's positioning against the compliance landscape (SOC 2, ISO 27001, PCI DSS, OWASP ASVS, NIST CSF, NIST AI RMF, AWS Well-Architected, MITRE ATT&CK / ATLAS / CAPEC / CWE / CVE, and more), plus the per-standard mapping strategy |
 
 ## Read order
 
@@ -19,6 +21,8 @@ For a first-time reader, the recommended order is:
 2. `SCORECARD.md` — what the framework produces as its primary consumer artifact.
 3. `SEVEN-CLAIMS.md` — why the framework is novel.
 4. `TEMPLATE.md` — the concrete artifact operators author.
+5. `TOOL-BINDING.md` — how tools plug into the framework.
+6. `INDUSTRY-ALIGNMENT.md` — where kronos sits in the compliance landscape.
 
 ## Companion documents (repo root)
 

@@ -100,6 +100,24 @@ Individual properties in this list have partial analogues in prior work:
 
 The **conjunction of all seven** — presumption-of-failure discipline, dialectic-based readiness proof, adversarial-proof-required maturity scorecard, git-native public-by-default evidence bus, system-agnostic threat catalog with coevolution, per-engagement production-safety mode as commercial primitive, and dual-use structural authorization discipline — is not present in any prior methodology this author is aware of.
 
+## Potential eighth claim — flagged for design review
+
+The positioning of kronos as *"the adversarial verification layer beneath every industry certification"* (see [`INDUSTRY-ALIGNMENT.md`](INDUSTRY-ALIGNMENT.md)) may constitute an eighth novel property beyond the seven articulated above. Prior work in the certification-preparation tool space includes vulnerability scanners (which produce technical evidence without certification-mapping structure), governance/risk/compliance platforms like RSA Archer and ServiceNow GRC (which produce documentation without adversarial evidence), and consulting practices (which produce narrative reports without reproducible evidence). None of these prior tools combine:
+
+- adversarial-proof evidence,
+- structural mapping to multiple industry-standard control frameworks (SOC 2, ISO 27001, PCI DSS, OWASP ASVS, NIST CSF, NIST AI RMF, AWS Well-Architected, MITRE ATT&CK / ATLAS / CAPEC / CWE / CVE),
+- explicit positioning as verification-layer-beneath-certification rather than certification-competitor,
+- mapping artifacts that are versioned and updateable as standards revise,
+- evidence that composes across multiple standards from a single engagement.
+
+Whether this positioning constitutes an eighth distinct claim, or is subsumed within claim 3 (executive maturity scorecard driven by adversarial proof) or claim 5 (adversarial coevolution through system-agnostic threat catalog), is a question deferred to the cross-LLM design review cycle. Reviewers are asked to interrogate:
+
+- Is the positioning genuinely novel, or is it a restatement of existing claims applied to certification context?
+- Does prior work exist (in security tools, GRC platforms, audit-preparation software) that already embodies this positioning?
+- If novel, does it warrant elevation to a formal claim, or should it remain a positioning statement without patent-claim status?
+
+The recommendation, pending review, is to flag but not elevate. Elevate only if reviewer consensus establishes distinct novelty.
+
 ## Where to go from here
 
 - [`OPERATING-MANUAL.md`](OPERATING-MANUAL.md) — how the seven properties compose into operating discipline.

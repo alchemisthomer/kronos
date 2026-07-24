@@ -187,7 +187,40 @@ The runtime is deliberately simple. There is no distributed orchestration, no me
 
 `<REVIEW:` reviewers should evaluate whether the runtime's simplicity is a liability at scale. Consider: what happens when an engagement needs to coordinate attacks across dozens of endpoints in parallel? What happens when evidence collection requires running collectors that are not accessible from the operator's laptop (e.g., CloudWatch metrics from a customer's AWS account)? The simple runtime may need extension points for these cases without losing the "operable from a laptop" property. `>`
 
-## 10. Authorization, dual-use, and the legal-liability boundary
+## 10. Tool binding — how the framework delegates attack execution
+
+Kronos is not itself a security scanner. It does not natively know how to send an HTTP request, run Burp Suite against an endpoint, execute sqlmap, scan with Nuclei, drive a browser, or generate load with k6. It knows how to describe an attack abstractly (§7 attack matrix) and delegates execution to tools that know how to perform the described work.
+
+The **tool binding contract** governs the delegation. It answers: how does the framework invoke a tool? How does a tool return evidence? How does the framework know what a tool can do? How does the framework decide which tool to use for which attack? How does a tool declare its authorization requirements? How does the framework prevent a tool from exceeding those requirements?
+
+The full specification is in [`methodology/TOOL-BINDING.md`](methodology/TOOL-BINDING.md). The design commitments are:
+
+**Four binding layers.** Every tool binds at the highest layer it can support; the framework accepts all four:
+
+- **Layer 0 — Bare shell.** Any tool that can be scripted from bash. Framework invokes via `bash -c "..."`, captures stdout/stderr/exit-code as raw evidence. Zero barrier to entry.
+- **Layer 1 — Structured adapter.** Tool has a YAML manifest declaring capabilities and an adapter script that translates framework attack-spec ↔ tool CLI ↔ framework evidence schema. The pragmatic default for established security tools (Burp Suite, sqlmap, Nuclei, ZAP, k6, Artillery, chaos-mesh).
+- **Layer 2 — Model Context Protocol.** Tool exposes an MCP server; framework speaks MCP directly. Capability discovery via `tools/list`; attack execution via MCP tool calls. Every MCP-compatible tool becomes a kronos tool with zero framework-side integration cost. This is the alignment vehicle with the emerging AI-tool ecosystem.
+- **Layer 3 — Native kronos tool.** Tool implements the framework's internal tool SDK directly. Reserved for reference-implementation primitives (bare HTTP client, evidence hasher, oracle runner) that will live in a future `alchemisthomer/kronos-tools/` sibling repository.
+
+**Tool manifest schema.** Every tool (Layers 1, 2, 3) declares its identity, version, capabilities (attack classes + subclasses + evidence types produced), invocation binding layer, authorization requirements (network access, credentials, elevated privilege, max safety level), and sandbox recommendation via a `manifest.yaml` file. The framework reads the manifest to know what the tool can do without having any tool-specific code.
+
+**Binding resolution.** At attack execution time, the framework matches the attack's required capabilities against available tools' declared capabilities. Multiple tools may match; the engagement's §3 rules of engagement may specify preference; otherwise the framework picks deterministically. If no tools match, the engagement is blocked with a `no-tool-binding-available` finding — this is itself diagnostic information (the operator's toolset does not cover the attack surface the engagement declared).
+
+**Structural authorization enforcement.** A tool's declared `safety_level_max` must be at least the engagement's declared safety level, or the tool is refused. Network scope, credential handoff, and sandbox posture are all authorization-gated at invocation time. These are structural refusals, not policy warnings.
+
+**Custom tooling.** An adopter writing a target-specific tool creates `<target-repo>/kronos/tools/<tool-id>/` with a manifest + adapter + README. The framework treats it identically to a distributed tool. Barrier to entry: one YAML + one script.
+
+**First-tier reference tools** kronos will ship or bind: bare HTTP client (native), AWS CLI wrapper (native), Salesforce API wrapper (native), GitHub REST client (native), Burp Suite Professional (Layer 1), OWASP ZAP (Layer 1), sqlmap (Layer 1), Nuclei (Layer 1), Nmap (Layer 0), k6 / Artillery (Layer 1), chaos-mesh (Layer 1), any MCP-compliant security tool (Layer 2 with capability discovery).
+
+The tool binding contract is what makes kronos a framework rather than a tool. Every specific security tool that exists today, every tool that will exist tomorrow, is a candidate kronos tool — provided it can bind at some layer.
+
+`<REVIEW:` reviewers should evaluate whether the four-layer model is the right decomposition. Consider: is Layer 2 (MCP) mature enough to commit to as first-class? Is Layer 3 (native SDK) worth the maintenance cost of a stable internal API contract? Should there be a Layer -1 for "kronos-refused capabilities" (single-use offensive tools we will not integrate under any circumstances)? `>`
+
+`<REVIEW:` reviewers should also evaluate the manifest schema. Are the required fields the right set? Is the capabilities taxonomy expressive enough for real security tools whose capabilities may be highly parameterized (Burp can do many things depending on which extensions are loaded)? How does the manifest handle tool version drift when the underlying tool ships weekly? `>`
+
+See ADR-0005 for the architectural rationale.
+
+## 11. Authorization, dual-use, and the legal-liability boundary
 
 Kronos is dual-use. Any tool capable of testing the defenses of a system on behalf of that system's owner is equally capable of attacking that system on behalf of an adversary. This is a permanent property of adversarial-testing frameworks; it cannot be engineered away. Prior industry-standard tools (Metasploit, Burp Suite, sqlmap, Nmap, Nuclei) operate under the same principle: the tool is legal; the use of the tool is the user's responsibility.
 
@@ -207,7 +240,7 @@ The structural coupling of dual-use tooling with a first-class authorization art
 
 `<REVIEW:` reviewers should also evaluate the "refused capabilities" boundary. Is the line between dual-use and single-use offensive coherent in practice? How does the framework prevent a contributor from proposing a capability that seems dual-use but is actually single-use offensive? Is there a review process for proposed capability additions? `>`
 
-## 11. Reference engagement — olympus-616 HUD-v2.3 L14
+## 12. Reference engagement — olympus-616 HUD-v2.3 L14
 
 The first kronos engagement against a real target is designed to validate the framework's full loop end-to-end. It is intentionally scope-tiny (one attack) and framework-total (every primitive exercised).
 
@@ -240,7 +273,7 @@ The engagement will produce, as artifacts committed to `olympus-616/foundation/k
 - One scorecard update: the target's `SCORECARD.md` reflecting the new Perimeter Defense level
 - Zero or one findings: `06_shipped/olympus-grid.kronos-1.finding-1.md` if the defense failed
 
-## 12. Roadmap and MVP prototype architecture
+## 13. Roadmap and MVP prototype architecture
 
 The design converges through cross-LLM review before any framework code is written (Phase 0). Once the design is stable, the MVP prototype is built (Phase 1). Once the MVP validates the framework loop against the reference engagement (Phase 2), production capabilities are incrementally added (Phases 3+).
 
@@ -296,7 +329,7 @@ The LLM watcher goes live, monitoring security industry sources and proposing ca
 
 The runtime multi-persona evaluation pattern (LLMs playing red / blue / synth roles per engagement) is implemented. Engagements can request LLM-assisted attack generation, LLM-assisted finding interpretation, or LLM-assisted remediation suggestions. All LLM outputs remain proposals; deterministic oracles remain authoritative.
 
-## 13. What kronos is not, and boundaries with adjacent disciplines
+## 14. What kronos is not, and boundaries with adjacent disciplines
 
 Kronos is not a penetration test in the traditional consulting sense. Traditional pen tests engage a target with an unbounded scope and hunt for undiscovered flaws, producing a PDF report at the end of the engagement window. Kronos verifies specific claims against a growing catalog of specific attacks, producing a scorecard that evolves over time. The two disciplines are complementary; a mature target will use both.
 
@@ -310,7 +343,7 @@ Kronos is not a chaos-engineering framework. Chaos-engineering frameworks inject
 
 Kronos is not a specific security-scanning product ecosystem's competitor (Snyk, Wiz, Prisma, Qualys, Rapid7, Tenable). It is a methodology within which those products can operate as tools when the operator chooses to integrate them. The methodology's value is orthogonal to any specific tool's value; a mature target may use kronos as its methodological backbone and integrate multiple commercial scanners as attack executors within kronos engagements.
 
-## 14. Updates to eos that fall out of this design
+## 15. Updates to eos that fall out of this design
 
 Kronos operates independently of eos. However, the following optional updates to the eos methodology would strengthen the bidirectional integration when both frameworks are co-installed. These are proposed for consideration by the eos maintainer; they are not prerequisites for kronos to ship.
 
@@ -324,7 +357,38 @@ Kronos operates independently of eos. However, the following optional updates to
 
 These changes are proposed as future eos cycles, sequenced at the eos maintainer's discretion.
 
-## 15. Patent claim scaffold
+## 16. Industry standards alignment
+
+Enterprise adopters do not encounter kronos in a vacuum. They already operate under one or more compliance regimes (SOC 2, ISO 27001, PCI DSS, HIPAA, FedRAMP), consult one or more maturity models (BSIMM, OWASP SAMM, CIS Controls, NIST CSF), architect against one or more cloud-vendor frameworks (AWS Well-Architected, Azure, GCP), and — increasingly — pursue one or more AI-specific risk frameworks (NIST AI RMF, AIUC-1, ISO 42001, EU AI Act conformance). The framework's silence on how it relates to this landscape would be both a marketing gap and a legitimate structural gap.
+
+The full alignment analysis is in [`methodology/INDUSTRY-ALIGNMENT.md`](methodology/INDUSTRY-ALIGNMENT.md). The design commitments are:
+
+**Positioning claim.** Kronos is the adversarial verification layer beneath every industry certification claim. Certifications describe controls that ought to be in place. Kronos runs the attacks that would succeed if the controls were not actually in place. A certification with kronos evidence behind it is a stronger claim than a certification without. Kronos does not compete with certification bodies; it produces the evidence they can consume.
+
+**Six categorizations of the landscape.** The complete taxonomy is in INDUSTRY-ALIGNMENT.md. In summary:
+
+- **Foundational** — MITRE ATT&CK, MITRE ATLAS (AI), CAPEC, CWE, CVE. Kronos catalog entries carry tags for these identifiers; findings reference CWE class and CVE ID where applicable. Structural alignment; kronos uses their vocabulary.
+- **Complementary — attainment-based** — SOC 2 Type II, ISO/IEC 27001, PCI DSS, HIPAA/HITECH, FedRAMP, HITRUST CSF. Kronos produces per-standard mapping documents showing which scorecard dimensions and catalog entries help verify which controls.
+- **Complementary — maturity-based** — OWASP SAMM, BSIMM, NIST CSF 2.0, CIS Controls v8. Kronos scorecard is orthogonal peer measuring adversarial-proof maturity while these measure process-presence maturity.
+- **Complementary — architectural** — AWS Well-Architected, Azure Well-Architected, GCP Architecture Framework. Kronos scorecard pillars map to Well-Architected pillars.
+- **Mapping targets** — OWASP ASVS L1/L2/L3, NIST AI Risk Management Framework 1.0. Scorecard cells cite these standards' control IDs directly.
+- **Emerging AI-specific** — NIST AI RMF, AIUC-1, ISO/IEC 42001, EU AI Act conformance regimes. Kronos is highly relevant; alignment work tracked as standards stabilize.
+
+**Mapping artifact convention.** Per-standard mapping documents live in `docs/alignment/` following a common template. Each mapping is versioned; when a standard revises, the mapping is updated in place. Priority order for initial mappings: OWASP ASVS 4.0.3 → NIST CSF 2.0 → NIST AI RMF 1.0 → SOC 2 TSC 2017 → AWS Well-Architected → OWASP SAMM 2.0 → CIS Controls v8. Remaining standards produce mappings on customer demand.
+
+**The consulting narrative.** eos + kronos becomes "SOC 2 helper + adversarial verifier" — the combined offering moves customers toward certification. eos closes the documentation requirements; kronos closes the actual-defense-works verification. Certification bodies see documented controls; kronos evidence shows those controls survive attack.
+
+**Explicit non-goals.** Kronos does not issue certifications. Kronos does not act as an authorized certification body. Kronos does not substitute for third-party audits. Kronos does not guarantee certification attainment. The line is clear: kronos produces evidence; certification bodies consume evidence (among other inputs) and issue certifications.
+
+**Potential eighth claim for patent structure.** The positioning of kronos as "the adversarial verification layer beneath every industry certification" may constitute a novel property beyond the seven claims already articulated. Prior work in the certification-preparation tool space includes vulnerability scanners (which produce technical evidence without certification-mapping structure), governance/risk/compliance platforms (which produce documentation without adversarial evidence), and consulting practices (which produce narrative reports without reproducible evidence). None combine adversarial-proof evidence with structural mapping to multiple industry-standard frameworks with explicit positioning as verification-layer-beneath-certification. Whether this constitutes an eighth claim or is subsumed within existing claims is a question for the design review cycle.
+
+`<REVIEW:` reviewers should evaluate whether the mapping-maintenance burden is sustainable. Each mapping is a versioned artifact that must be revised when the underlying standard revises. For long-lived kronos, this becomes real ongoing work. Consider: should per-standard mapping maintenance be community-contributed (a per-standard maintainer per mapping) or contracted (partnership with an audit firm)? What is the failure mode when a mapping goes stale? `>`
+
+`<REVIEW:` reviewers should also evaluate the AI-specific alignment work. NIST AI RMF, EU AI Act, ISO 42001, AIUC-1 are all evolving rapidly. Alignment work on emerging standards is expensive and may need substantial revision. Is the strategic bet on early AI-standard alignment worth the risk of needing to redo the work as standards stabilize? Or should kronos wait for AI standards to stabilize before publishing mappings? `>`
+
+See ADR-0006 for the architectural rationale.
+
+## 17. Patent claim scaffold
 
 Kronos claims seven novel properties, described conceptually in [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md). A detailed patent disclosure paralleling `foundation/eos/PATENT-DISCLOSURE-DRAFT.md` will be authored after this design converges through the cross-LLM review process.
 
@@ -348,7 +412,7 @@ The **conjunction** of all seven, applied to software assurance, is the inventiv
 
 `<REVIEW:` reviewers should perform prior-art analysis on each of the seven claims. Are there methodologies, tools, or academic papers this design has missed that already embody one or more of these properties? Are there specific instantiations of any of these properties that are well-established prior art (e.g., presumption-of-failure has philosophical analogues in Popperian falsifiability; are there operational instantiations in adjacent industries that predate kronos)? `>`
 
-## 16. Open questions for the design review
+## 18. Open questions for the design review
 
 Beyond the inline `<REVIEW:...>` markers, several higher-level questions are open for the review process:
 
@@ -368,7 +432,7 @@ Beyond the inline `<REVIEW:...>` markers, several higher-level questions are ope
 
 **Q8. What is the versioning strategy for the framework across breaking methodology changes?** Adopters pin catalog versions. Do they also pin methodology versions? What happens when the scorecard model changes (e.g., a thirteenth dimension is added)? Are legacy scorecards recomputed against the new model, or held at the old model?
 
-## 17. Companion documents and next steps
+## 19. Companion documents and next steps
 
 This document is v0 of the kronos design. It exists to be reviewed. Companion documents (all in this repository):
 
@@ -376,10 +440,14 @@ This document is v0 of the kronos design. It exists to be reviewed. Companion do
 - [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md) — the novel-property claims for design review and eventual patent disclosure
 - [`methodology/SCORECARD.md`](methodology/SCORECARD.md) — the maturity scorecard model
 - [`methodology/TEMPLATE.md`](methodology/TEMPLATE.md) — the engagement document template
+- [`methodology/TOOL-BINDING.md`](methodology/TOOL-BINDING.md) — the four-layer tool binding contract and manifest schema
+- [`methodology/INDUSTRY-ALIGNMENT.md`](methodology/INDUSTRY-ALIGNMENT.md) — kronos's positioning against the compliance landscape and per-standard mapping strategy
 - [`docs/adr/ADR-0001-three-layer-identity.md`](docs/adr/ADR-0001-three-layer-identity.md)
 - [`docs/adr/ADR-0002-productization-alignment-with-eos.md`](docs/adr/ADR-0002-productization-alignment-with-eos.md)
 - [`docs/adr/ADR-0003-scorecard-as-north-star.md`](docs/adr/ADR-0003-scorecard-as-north-star.md)
 - [`docs/adr/ADR-0004-eos-dialectic.md`](docs/adr/ADR-0004-eos-dialectic.md)
+- [`docs/adr/ADR-0005-layered-tool-binding.md`](docs/adr/ADR-0005-layered-tool-binding.md)
+- [`docs/adr/ADR-0006-industry-standards-alignment.md`](docs/adr/ADR-0006-industry-standards-alignment.md)
 - [`docs/inception/00-founding-incident.md`](docs/inception/00-founding-incident.md) — the founding case study
 - [`docs/examples/olympus-616.md`](docs/examples/olympus-616.md) — the flagship reference implementation
 
@@ -388,6 +456,7 @@ To be authored after this design converges:
 - `PATENT-DISCLOSURE-DRAFT.md` — the detailed inventive-claim structure for IP counsel
 - `WHITE-PAPER.md` — the theory-and-practice narrative with empirical record from the first engagements
 - `SOC2-CONTROL-MAPPING.md` — the mapping of scorecard dimensions to SOC 2 control categories
+- `docs/alignment/<standard>.md` — per-industry-standard mapping documents; first-priority set: OWASP ASVS 4.0.3, NIST CSF 2.0, NIST AI RMF 1.0, SOC 2 TSC 2017, AWS Well-Architected
 
 **Next step after this document is committed:** the cross-LLM review round-robin begins. The scribe will produce v0.1, v0.2, v0.3, v0.4 as reviewer feedback arrives, and continue iterating until convergence. Then the patent disclosure draft is authored, then the MVP prototype scaffold begins.
 

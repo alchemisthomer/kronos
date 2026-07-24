@@ -41,7 +41,7 @@ Both frameworks operate independently. When co-installed in the same target, the
 
 | Path | Contents |
 |---|---|
-| [`methodology/`](methodology/) | The operating manual, the seven novel claims, the engagement document template, and the maturity scorecard model |
+| [`methodology/`](methodology/) | The operating manual, the seven novel claims, the engagement document template, the maturity scorecard model, the tool binding contract, and the industry-standards alignment |
 | [`runner/`](runner/) | (Pending scaffold) A React/TypeScript reference viewer that reads any GitHub repository's `kronos/engagement/**` folder tree via the GitHub REST API and renders the kanban plus the scorecard in the browser. Edits land as pull requests. Independent of the technology of the project under evaluation |
 | [`oauth-server/`](oauth-server/) | (Pending scaffold) A small standalone Node/Express service that completes the GitHub App user-to-server OAuth code-for-token exchange on behalf of the browser viewer. Required only when the viewer is deployed with GitHub App OAuth enabled (viewer works PAT-only without it) |
 | [`actions/`](actions/) | (Pending scaffold) Reusable GitHub Actions: kanban structure validator, authorization artifact validator, evidence hash verifier, scorecard consistency check, first-signal-stop enforcer, production authorization guard, eos backlog auto-file |
@@ -93,7 +93,9 @@ The kronos engagement methodology is the conjunction of seven properties that, t
 6. Per-engagement production-safety mode as commercial primitive
 7. Dual-use with explicit authorization discipline and legal-liability boundary
 
-See [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md) for the conceptual-level description. A more detailed disclosure will be maintained in `PATENT-DISCLOSURE-DRAFT.md` (to be authored after design review converges) for eventual review by IP counsel. Contributions to this repository are subject to the AGPL-3.0 patent grant (§11).
+See [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md) for the conceptual-level description. A potential eighth claim — kronos's positioning as *the adversarial verification layer beneath every industry certification* — is flagged for consideration during cross-LLM design review; see [`methodology/INDUSTRY-ALIGNMENT.md`](methodology/INDUSTRY-ALIGNMENT.md).
+
+A more detailed disclosure will be maintained in `PATENT-DISCLOSURE-DRAFT.md` (to be authored after design review converges) for eventual review by IP counsel. Contributions to this repository are subject to the AGPL-3.0 patent grant (§11).
 
 ## License
 
