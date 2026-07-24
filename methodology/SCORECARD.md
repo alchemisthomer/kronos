@@ -1,14 +1,144 @@
 # The kronos scorecard
 
-> A rendering of a target system's assurance posture across twelve dimensions of software delivery, scored on a six-level maturity scale, computed from the target's kronos engagement history.
+> A rendering of a target system's assurance posture across twelve dimensions of software delivery. Each dimension carries a multidimensional state — maturity, effectiveness, coverage, confidence, freshness, environment fidelity — rather than a single level. Computed from the target's kronos engagement history, continuous-plane findings, capacity model, and (optionally) co-installed eos attestations.
 
 ## Purpose
 
-The kronos scorecard is the primary artifact that an executive, a board, a customer, or an auditor reads to understand the state of a system without reading any of the underlying findings. It renders the target's assurance posture as a matrix of software-lifecycle dimensions against maturity levels.
+The kronos scorecard is a primary consumer-facing artifact — the answer to "which assurance claims currently hold, against which scenarios, with what coverage and confidence?" — rendered in a form an executive, a board, a customer, or an auditor can read at a glance.
 
-The scorecard is a **derived document**. It is computed from the target repository's `kronos/engagement/06_shipped/` folder, the target's capacity model, and (when co-installed) the target's eos cycle folder. Every kronos engagement that closes contributes a scorecard delta atomically with its findings. Every plausibility-monitor observation that exceeds bounds contributes a finding that may shift a dimension's state. The scorecard is not stored separately; it is re-rendered from source truth on every read.
+**The scorecard does not certify that software is safe.** It reports, in structured form, what was evaluated, what survived, what was falsified, what remains untested, in which environment, with which evidence age, at which catalog version. Per ChatGPT's cross-LLM review, the framework's positioning explicitly does not include a universal "is my software safe" answer; the scorecard is the framework's answer to a narrower and more defensible question.
 
-Two scorecards are rendered for every target: a **pinned scorecard** (computed against the catalog version the target has explicitly pinned) and a **latest scorecard** (computed against the current head-of-catalog). This dual-number rendering is not optional — the framework does not permit rendering only one of the two in an executive-facing view. See §Dual-number rendering below.
+The scorecard is a **derived document**. It is computed from the target's engagement history, its continuous-plane findings, its capacity model, and (when co-installed) its eos cycle folder. Every state transition on any of these inputs re-renders the scorecard. The scorecard is not stored separately; it is projected from source truth on every read.
+
+## Multidimensional cell state
+
+The v0.1 scorecard used a single maturity level per cell. ChatGPT's cross-LLM review flagged in P0-3 that a single number conflates too many properties — process maturity, control effectiveness, adversarial coverage, evidence quality, evidence freshness, environment fidelity — and produces false transitions (one passing test moves an entire dimension from L3 to L4; one failure drops a mature control program to L1).
+
+Under v0.2, each cell carries the following fields:
+
+```yaml
+maturity: 0..5                          # process/capability maturity axis (CMMI-derived; see §Maturity axis)
+effectiveness:                          # separate axis for control effectiveness
+  state: untested | survived | partial | falsified
+  as_of: 2026-07-24T15:30:00Z
+  source: engagement:<id>:run:<id> | continuous-plane:<evaluation-id>
+coverage:
+  weighted_claims_percent: 78           # weighted-claims coverage 0-100
+  evaluated_claims: 18
+  applicable_claims: 23
+  unevaluated_claims: [C-alpha, C-beta, C-gamma]
+confidence: low | medium | high
+freshness:
+  last_evaluated_at: 2026-07-24T15:30:00Z
+  expires_at: 2026-08-24T15:30:00Z
+  is_stale: false
+environment_fidelity: lab | staging | production-equivalent | production
+open_findings:
+  count: 2
+  ids: [F-2026-07-24-001, F-2026-07-24-004]
+  max_severity: high
+applicable_catalog_gap:
+  pinned_catalog: kronos-catalog-2026.06
+  latest_catalog: kronos-catalog-2026.07
+  entries_added: 4
+  entries_applicable_to_target: 2
+  entries_unevaluated: 2
+```
+
+A dimension's rendering combines these fields into a legible summary. Example executive line for Perimeter Defense:
+
+> **Perimeter Defense** — maturity L3; effectiveness survived; 78% weighted coverage; 18 of 23 applicable claims current; 2 open findings (max severity high); high-confidence evidence; staging fidelity; oldest critical evidence 12 days; catalog delta: 2 unevaluated new entries.
+
+That is materially stronger than a "green L4 cell" and more honest about what the framework has and hasn't verified.
+
+## What each field means
+
+### Maturity axis
+
+The process/capability maturity axis, drawn from CMMI. Measures whether the organization has a defined and repeatable practice for defending this dimension:
+
+- **L0 Absent** — no defense exists.
+- **L1 Ad Hoc** — some defense exists but is undocumented and unverified.
+- **L2 Managed** — the defense is documented and has a runbook; verification is manual and sporadic.
+- **L3 Defined** — framework-integrated with automated diagnostic challenge defined and passing in the most recent shipped engagement (per ADR-0008; attainable natively).
+- **L4 Quantitatively Managed** — L3 plus metric-instrumented SLOs, regression detection, and the diagnostic challenge fires under adversarial pressure with expected metric signatures within the declared SLO envelope.
+- **L5 Optimizing** — L4 plus an actual improvement loop (per ChatGPT P0-3): challenges execute on a defined cadence, catalog changes trigger reassessment, findings generate remediation work, remediation is independently re-challenged, trends demonstrate reduced exposure or faster detection/recovery, stale evidence automatically expires, the organization can show assurance is improving, not merely recurring.
+
+**A failed challenge does not lower maturity.** Maturity measures process presence; effectiveness measures whether the process's outputs currently hold. A mature process with a failing output has `maturity: 4` and `effectiveness.state: falsified` — both true simultaneously. This resolves the v0/v0.1 pattern where a single failure would erase all documented process maturity.
+
+### Effectiveness axis
+
+Whether the dimension's controls currently hold under challenge:
+
+- **untested** — no diagnostic challenge has been evaluated recently enough to determine effectiveness. The dimension may have high maturity and still be untested.
+- **survived** — the most recent applicable challenges returned `CLAIM_SURVIVED`.
+- **partial** — most recent applicable challenges returned mixed verdicts, or one or more returned `PARTIAL_OR_DEGRADED`.
+- **falsified** — one or more recent applicable challenges returned `CLAIM_FALSIFIED` and the finding is not yet resolved.
+
+Effectiveness is what a challenge can change. A finding closure moves effectiveness from `falsified` back toward `survived` after re-verification. Effectiveness is orthogonal to maturity.
+
+### Coverage
+
+The fraction of applicable claims currently evaluated by shipped engagements or active continuous-plane findings. `weighted_claims_percent` is the primary summary; the underlying `evaluated_claims`, `applicable_claims`, and `unevaluated_claims` lists provide the drill-down.
+
+Coverage decreases when new catalog entries add applicable claims that the target has not yet evaluated. Coverage increases when the target ships engagements evaluating previously-unevaluated claims.
+
+### Confidence
+
+The framework's confidence in the current effectiveness determination. Low confidence indicates evidence is stale, evidence sources are single-source, or oracle results included `PARTIAL_OR_DEGRADED` or `OBSERVABILITY_GAP` outcomes. High confidence indicates evidence is fresh, multi-source, and oracles returned `CLAIM_SURVIVED` unambiguously.
+
+### Freshness
+
+`last_evaluated_at` records the most recent challenge or continuous-plane evaluation for the dimension. `expires_at` is the point at which evidence is considered stale (default: 30 days after evaluation for high-confidence evidence, 7 days for medium, 24 hours for low). `is_stale: true` indicates the current effectiveness determination is based on expired evidence and the dimension should be re-evaluated.
+
+Stale evidence degrades confidence but does NOT change effectiveness state — a `survived` dimension with stale evidence is still `survived`, just less confidently so, and the dimension's re-evaluation is prioritized in scheduling.
+
+### Environment fidelity
+
+Whether the challenges that produced the effectiveness determination ran in an environment representative of production:
+
+- **lab** — synthetic or highly isolated test environment.
+- **staging** — dedicated pre-production environment.
+- **production-equivalent** — environment configured identically to production including data volume, load profile, and integrations.
+- **production** — actual production.
+
+L5 maturity requires `production-equivalent` or `production` fidelity per ADR-0007's plausibility-monitor semantics.
+
+### Open findings
+
+Findings whose lifecycle state is `open`, `accepted`, `remediation-in-progress`, or `awaiting-reverification` for challenges scoped to this dimension. `max_severity` surfaces the worst open finding for executive-visibility triage.
+
+### Applicable catalog gap
+
+Per ADR-0010's dual-number rendering: the delta between the pinned catalog version and the latest, filtered to entries whose applicability predicates match the target and that the target has not yet evaluated. This makes catalog-driven coverage decay visible without automatically penalizing the target.
+
+## The four pillars and twelve dimensions
+
+Unchanged from v0.1. Five dimensions remain critical (cannot be disabled): Identity & Access Control, Perimeter Defense, Secret Management, Data Integrity, Incident Response.
+
+### Pillar A — Perimeter & Access
+
+1. **Identity & Access Control** — authentication mechanisms, authorization models, session hygiene, credential lifecycle, administrative access discipline. **(Critical dimension — cannot be disabled.)**
+2. **Perimeter Defense** — web application firewall, ingress rate control, geographic and anonymity-network controls, distributed-denial-of-service mitigation. **(Critical dimension — cannot be disabled.)**
+3. **Secret Management** — key rotation, vault architecture, zero-leak discipline, reference-not-value patterns. **(Critical dimension — cannot be disabled.)**
+
+### Pillar B — Runtime Integrity
+
+4. **Data Integrity** — input validation, deduplication, transactional guarantees, no-silent-loss patterns, ordering invariants. **(Critical dimension — cannot be disabled.)**
+5. **Availability & Resilience** — circuit breakers, retry queues with TTL, graceful degradation, kill-switch discipline, dependency-outage tolerance.
+6. **Observability** — telemetry emission, alerting SLOs, forensic evidence retention, audit chain preservation, drift detection.
+
+### Pillar C — Operational Discipline
+
+7. **Cost Integrity** — blast-radius bounds, plausibility-monitor coverage, cost-anomaly alerting SLOs, per-tenant cost attribution. Fed primarily by the plausibility monitor and cost-reconciliation continuous evaluations.
+8. **Change Discipline** — deploy safety, rollback capability, infrastructure-as-code coverage, configuration drift detection, atomic multi-repo promotion.
+9. **Supply Chain** — dependency scanning, signed artifacts, software-bill-of-materials, container image provenance, CI credential hygiene.
+
+### Pillar D — Response Readiness
+
+10. **Incident Response** — runbook maturity, drill cadence, panic-mode operator safety, false-positive discipline. **(Critical dimension — cannot be disabled.)**
+11. **Recovery & Continuity** — recovery-time objective evidence, recovery-point objective evidence, backup verification, disaster-recovery drills.
+12. **Compliance Posture** — declared vs actual compliance, regulatory alignment, audit-trail preservation.
 
 ## The four pillars
 
@@ -123,14 +253,25 @@ Both renderings are always available. Executive summaries default to traffic-lig
 
 ## Dual-number headline rendering
 
-Every target's scorecard renders two headline numbers alongside the pillar/dimension grid:
+Every target's scorecard renders two headline **status summaries** alongside the pillar/dimension grid. Per ChatGPT's cross-LLM review (P0-3), a single weighted average is deliberately avoided because it lets strong low-risk dimensions conceal a failed critical claim. The headline summary reports each of the following load-bearing signals separately:
 
-- **Pinned headline.** The scorecard's headline number computed against the target's currently-pinned catalog version. This is the score the target "paid for" or authored their engagements against.
-- **Latest headline.** The scorecard's headline number computed against the current head-of-catalog. This is the score under the framework's most recent adversarial understanding.
+- **Falsified critical claims** — count of open findings on critical dimensions with severity high or critical.
+- **Untested critical claims** — count of claims on critical dimensions with `effectiveness.state: untested`.
+- **Weighted coverage** — fraction of applicable claims across all enabled dimensions currently evaluated by fresh evidence.
+- **Minimum critical maturity** — lowest maturity level across the five critical dimensions.
+- **Minimum critical effectiveness** — worst effectiveness state across the five critical dimensions.
+- **Evidence freshness** — count of dimensions with stale evidence.
+- **Catalog gap** — number of applicable unevaluated catalog entries (pinned vs latest).
+- **Overall status** — one of: `current` / `degraded` / `stale` / `materially-incomplete`, computed from the above signals per a fixed rubric.
 
-The headline formula is fixed: **minimum-across the five critical dimensions** (Identity & Access Control, Perimeter Defense, Secret Management, Data Integrity, Incident Response). The five cannot be disabled; the formula cannot be reconfigured. This makes the headline number comparable across all kronos-scored targets.
+Two headline reports are rendered:
 
-The framework does not permit rendering only the pinned score in the executive-facing view. Both numbers are always shown. When `latest < pinned`, the target has adversarial exposure that catalog updates would have surfaced but that the target has not yet incorporated.
+- **Pinned headline** — computed against the target's currently-pinned catalog version.
+- **Latest headline** — computed against the current head-of-catalog.
+
+The framework does not permit rendering only the pinned headline in the executive-facing view. Both are always shown.
+
+**A weighted average is not used as the primary safety summary.** A weighted average lets an L1 Identity cell hide behind a wall of L4s, which is dangerous because an attacker picks the weakest point, not the average. If a customer requests a single-number summary for a specific downstream integration (a slide deck, a board report), the framework can render one, but only with the explicit note "weighted average across enabled dimensions; not a safety guarantee; see per-dimension breakdown for critical exposure."
 
 ### Catalog-bump governance
 

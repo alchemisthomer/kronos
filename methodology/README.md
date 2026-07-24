@@ -6,25 +6,35 @@ The methodology folder contains the intellectual core of the kronos framework �
 
 | File | Contents |
 |---|---|
-| [`OPERATING-MANUAL.md`](OPERATING-MANUAL.md) | The engagement discipline: kanban structure, document sections, attack modes, environment discipline, operating principles, growth mechanism |
-| [`SEVEN-CLAIMS.md`](SEVEN-CLAIMS.md) | The seven novel properties of the kronos methodology, described at conceptual level for design review and eventual patent disclosure |
-| [`SCORECARD.md`](SCORECARD.md) | The maturity scorecard model — four pillars, twelve dimensions, six levels — including the load-bearing property that L4 and L5 are only reachable via adversarial proof |
-| [`TEMPLATE.md`](TEMPLATE.md) | The engagement document scaffold that adopters instantiate for each engagement |
-| [`TOOL-BINDING.md`](TOOL-BINDING.md) | The four-layer tool binding contract: how the framework delegates attack execution to bare-shell tools, structured adapters, MCP-compliant tools, and native kronos tools |
-| [`INDUSTRY-ALIGNMENT.md`](INDUSTRY-ALIGNMENT.md) | Kronos's positioning against the compliance landscape (SOC 2, ISO 27001, PCI DSS, OWASP ASVS, NIST CSF, NIST AI RMF, AWS Well-Architected, MITRE ATT&CK / ATLAS / CAPEC / CWE / CVE, and more), plus the per-standard mapping strategy |
-| [`PLAUSIBILITY-MONITOR.md`](PLAUSIBILITY-MONITOR.md) | The capacity-model and plausibility-monitor primitives — continuous evaluation of observed values against declared physical bounds. Distinct from the per-attack oracle. This is the primitive that would have caught the founding incident within hours. (Added in v0.1 per Claude review P1-1.) |
+| [`OPERATING-MANUAL.md`](OPERATING-MANUAL.md) | The engagement discipline: kanban structure, document sections, challenge modes, environment discipline, operating principles, growth mechanism |
+| [`INVENTIVE-CONCEPT-CANDIDATES.md`](INVENTIVE-CONCEPT-CANDIDATES.md) | Candidate differentiators / potential inventive concepts, with explicit prior-art acknowledgment. Renamed from SEVEN-CLAIMS.md in v0.2 per ChatGPT review to avoid unqualified novelty claims |
+| [`SCORECARD.md`](SCORECARD.md) | The multidimensional scorecard model — four pillars, twelve dimensions, per-cell state (maturity + effectiveness + coverage + confidence + freshness + fidelity). L4/L5 require adversarial proof |
+| [`TEMPLATE.md`](TEMPLATE.md) | The engagement document scaffold with three-axis authorization + impact budgets (v0.2) |
+| [`TOOL-BINDING.md`](TOOL-BINDING.md) | The four-layer tool binding contract with typed argv (no shell default), MCP-as-transport, mandatory sandbox by impact class, and policy-driven binding resolution |
+| [`INDUSTRY-ALIGNMENT.md`](INDUSTRY-ALIGNMENT.md) | Kronos's positioning as evidence-producing companion for selected technical and operational control objectives. Maps to OSCAL / OpenCRE / ASVS 5.0 / AISVS 1.0 / LLMSVS 2.0 / NIST CSF / NIST AI RMF / MITRE ATT&CK / ATLAS / CAPEC / CWE / CVE |
+| [`PLAUSIBILITY-MONITOR.md`](PLAUSIBILITY-MONITOR.md) | The capacity-model and plausibility-monitor primitives. In v0.2 this is one component of the continuous assurance plane |
+| [`CONTINUOUS-ASSURANCE.md`](CONTINUOUS-ASSURANCE.md) | The continuous assurance plane (Kronos Sentinel / Reconciler) — first-class peer to the engagement plane. Runs passive and low-impact evaluations on schedule or event trigger. Introduces "challenge" as parent abstraction with attack as one subtype. (New in v0.2 per ChatGPT P0-1.) |
+| [`DOMAIN-MODEL.md`](DOMAIN-MODEL.md) | The canonical typed domain model — engagement, plan, run, observation, oracle result, finding, evidence manifest, score snapshot as separately versioned objects. Markdown is the human projection; typed schemas are the source of truth. (New in v0.2 per ChatGPT P0-5.) |
+| [`EVIDENCE.md`](EVIDENCE.md) | Two-tier evidence storage (sanitized repository tier + protected raw tier), SLSA-aligned provenance signing, opt-in disclosure model, chain of custody. (New in v0.2 per ChatGPT P0-6.) |
+| [`ORACLE.md`](ORACLE.md) | Expanded oracle state machine — 10 claim-oriented outcomes replacing v0.1's PASS/FAIL/INCONCLUSIVE. Required per-challenge scaffolding (baseline + positive/negative controls + correlation ID + cleanup oracle). (New in v0.2 per ChatGPT P0-9.) |
+| [`CATALOG.md`](CATALOG.md) | Threat catalog lifecycle governance — six states, applicability predicates, LLM watcher quarantine, community contribution flow. (New in v0.2 per ChatGPT P0-10.) |
 
 ## Read order
 
 For a first-time reader, the recommended order is:
 
 1. `OPERATING-MANUAL.md` — how the framework runs day-to-day.
-2. `SCORECARD.md` — what the framework produces as its primary consumer artifact.
-3. `SEVEN-CLAIMS.md` — why the framework is novel (with a deferred-decision block on patent-vs-open-source strategy).
-4. `TEMPLATE.md` — the concrete artifact operators author.
-5. `PLAUSIBILITY-MONITOR.md` — the continuous impossibility-check primitive that runs outside the engagement lifecycle.
-6. `TOOL-BINDING.md` — how tools plug into the framework.
-7. `INDUSTRY-ALIGNMENT.md` — where kronos sits in the compliance landscape.
+2. `CONTINUOUS-ASSURANCE.md` — the plane that runs when no engagement is open. Read early because it changes what "kronos" means.
+3. `DOMAIN-MODEL.md` — the objects the framework operates over and their signature envelopes.
+4. `SCORECARD.md` — what the framework produces as its primary consumer artifact.
+5. `INVENTIVE-CONCEPT-CANDIDATES.md` — candidate differentiators with explicit prior-art acknowledgment and patent-strategy deferred-decision block.
+6. `TEMPLATE.md` — the concrete artifact operators author.
+7. `ORACLE.md` — how deterministic verdicts are established.
+8. `EVIDENCE.md` — how evidence is stored, provenance-signed, and disclosed.
+9. `CATALOG.md` — how the threat catalog is governed and grows.
+10. `PLAUSIBILITY-MONITOR.md` — the specific continuous-plane primitive that would have caught the founding incident.
+11. `TOOL-BINDING.md` — how tools plug into the framework.
+12. `INDUSTRY-ALIGNMENT.md` — where kronos sits in the compliance landscape.
 
 ## Companion documents (repo root)
 

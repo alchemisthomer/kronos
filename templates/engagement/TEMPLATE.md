@@ -49,17 +49,59 @@ target:
   environments:
     - {environment}
 permissions:
-  authorizationCeiling: {0-4}         # 0=static, 1=passive, 2=controlled, 3=destructive, 4=catastrophic-simulation
+  # Three-axis authorization model (v0.2 per ADR-0016 and ChatGPT P0-7).
+  # The v0.1 single-axis authorizationCeiling is decomposed into three
+  # orthogonal axes so that a "destructive test in staging with a hardened
+  # executor" is distinguishable from "passive test in production with a
+  # local process executor" — the two are different risk shapes.
+  impactClass: {I0-I4}                  # I0=passive, I1=non-mutating active, I2=bounded reversible mutation,
+                                         # I3=disruptive/destructive, I4=irreversible or human-impacting
+  environmentClass: {E0-E4}             # E0=synthetic, E1=isolated lab, E2=staging,
+                                         # E3=production-equivalent, E4=production
+  executorAssuranceClass: {X0-X4}       # X0=local process, X1=restricted container, X2=hardened isolated worker,
+                                         # X3=dedicated VM/account, X4=independently controlled execution environment
+  # Legacy alias for tool-binding compatibility; derived from impactClass.
+  authorizationCeiling: {0-4}
+  # Explicit flags for legacy semantics; must be consistent with impactClass.
   destructiveTesting: {true|false}
   productionTesting: {true|false}
-limits:
+
+impactBudget:
+  # Impact budget (v0.2 per ADR-0014 and ChatGPT P0-4). Bounds impact
+  # rather than only finding count. Enforced structurally by the runtime
+  # watchdog; breach automatically halts the engagement.
+  maxRequests: {N}
   maxRequestsPerSecond: {N}
   maxConcurrentActions: {N}
-  maxRunDurationMinutes: {N}
+  maxStateMutations: {N}                # zero for I0/I1 engagements
   maxEstimatedCostUsd: {N}
+  maxAffectedPrincipals: {N}
+  maxAffectedRecords: {N}
+  maxDurationSeconds: {N}
+  maxErrorRateDelta: {float}            # e.g., 0.5 = target error rate may not rise by 50 percentage points
+  maxLatencyDeltaMs: {N}
+
 emergency:
   contact: {contact of record}
   stopChannel: {stop mechanism URL or process}
+  revocationChannel: {URL or process for the approver to revoke authorization mid-engagement}
+  revocationIdentifier: {stable identifier for this authorization used in revocation systems}
+
+roles:
+  # Separation-of-duty roles (v0.2 per ADR-0016 and ChatGPT P0-7).
+  # A single individual may hold multiple roles for small engagements;
+  # for larger engagements, distinct individuals are required.
+  targetOwner: {identity}                # party accountable for the target system
+  legalOrBusinessAuthorizer: {identity}  # party with authority to bind the target's organization
+  safetyOfficer: {identity}              # party with authority to halt the engagement
+  operator: {identity}                   # party executing the engagement
+  evidenceCustodian: {identity}          # party responsible for evidence retention and chain of custody
+  reviewer: {identity}                   # party that reviews findings before disclosure
+
+precedent:
+  # Explicit alignment with NIST SP 800-115 ROE templates.
+  nistSp800115Section: "3.4 Rules of Engagement"
+  additionalStandards: []
 
 # Incident-state block (per ADR-0009). Governs framework behavior when the
 # authorization is issued under declared incident conditions.

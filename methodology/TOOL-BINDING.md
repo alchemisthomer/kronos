@@ -14,24 +14,40 @@ This document specifies the binding contract at four layers of integration depth
 
 A tool binds at the highest layer it can support. The framework accepts all four; the layer determines the depth of structural integration but not whether the tool is usable.
 
-### Layer 0 — Bare shell invocation
+### Layer 0 — Typed argv invocation
 
-The minimum viable binding. Any tool that can be scripted from a shell — `curl`, `nmap`, `dig`, `openssl s_client`, `aws ec2 describe-instances`, any Bash script — is a Layer 0 tool.
+The minimum viable binding. Any tool that accepts arguments on its command line — `curl`, `nmap`, `dig`, `openssl s_client`, `aws ec2 describe-instances`, any executable — is a Layer 0 tool.
 
-**Contract:**
-- The framework invokes the tool via `bash -c "..."` with the attack's parameters substituted into a command template.
-- `stdout` is captured as the primary evidence artifact.
-- `stderr` is captured as secondary evidence.
-- The exit code is captured as a coarse pass/fail signal (0 = normal completion; non-zero = tool-reported error).
-- The captured output is hashed via SHA-256 and committed to the engagement's evidence folder.
-- Oracle authors write assertions against the raw output using regex, JSON path (if output is JSON), or similar text-matching primitives.
+**Contract (updated in v0.2 per ChatGPT P0-8 to remove shell-interpolation as the default):**
+
+The framework invokes the tool via typed argv — an executable path and an array of arguments — using `execve`, `spawn`, or equivalent, **without invoking a shell**. Attack parameters are substituted as discrete argv entries, not interpolated into a shell command string. This eliminates command-injection as a boundary condition inside the assurance engine itself.
+
+```json
+{
+  "executable": "/usr/bin/curl",
+  "argv": [
+    "--request", "GET",
+    "--url", "${target.endpoint}",
+    "--header", "X-Kronos-Correlation-ID: ${correlation_id}"
+  ]
+}
+```
+
+The framework substitutes `${target.endpoint}` and `${correlation_id}` as discrete argv values; shell metacharacters in the substituted values do not trigger shell interpretation because no shell is invoked.
+
+- `stdout` and `stderr` are captured as evidence artifacts.
+- The exit code is captured as a coarse pass/fail signal.
+- The captured output is hashed via SHA-256 and stored per the two-tier evidence model (see EVIDENCE.md).
+- Oracle authors write assertions against the raw output using regex, JSON path, or structured extraction primitives.
+
+**Shell execution requires explicit high-risk capability.** If a tool genuinely requires shell interpretation (pipelines, redirections, environment expansion within a single invocation), the tool's manifest must declare `invocation.type: shell` and `authorization.requires_shell: true`. Shell-invocation tools face stricter review, higher sandbox requirements, and lower default `authorization_ceiling_max`. The framework will refuse to invoke a shell-based tool at authorization ceiling above 1 (passive) without explicit engagement-level authorization to escalate.
 
 **When to bind at Layer 0:**
 - The tool has no structured output format worth mapping.
-- The attack is one-shot and the oracle logic is simple.
-- Rapid prototyping — get the attack running now, upgrade the binding later.
+- The challenge is one-shot and oracle logic is simple.
+- Rapid prototyping — get the challenge running now, upgrade the binding later.
 
-**Barrier to entry:** zero. A Layer 0 tool binding is a shell command template committed to the engagement.
+**Barrier to entry:** low. A Layer 0 tool binding is a manifest naming the executable and an argv template.
 
 ### Layer 1 — Structured adapter
 
@@ -68,7 +84,22 @@ The emerging standard for AI-native tool invocation. Tool exposes a Model Contex
 
 **Barrier to entry:** the tool must implement an MCP server. For tools not designed with MCP in mind, this may require a wrapper adapter — effectively making it a Layer 1 binding to a Layer 2 wrapper.
 
-**Why MCP as first-class in kronos.** Model Context Protocol has emerged as an actual standard for exposing tools to AI agents. Kronos's LLM-assisted attack generation, runtime multi-persona evaluation (LLMs playing red/blue/synth roles), and future AI-driven catalog growth all naturally speak MCP. Aligning the tool binding contract with MCP puts kronos inside the emerging AI-tool ecosystem rather than inventing a parallel protocol. Every MCP-compatible tool becomes a kronos tool with zero framework-side integration cost.
+**MCP as transport compatibility, not automatic trust** (v0.2 correction per ChatGPT P0-8). MCP is a supported binding transport, but "every MCP-compatible tool becomes a kronos tool with zero integration cost" — the v0/v0.1 framing — is not defensible. The MCP specification itself notes that authorization is optional, that the protocol cannot enforce all security principles, and that implementers must build their own consent, access-control, validation, and privacy protections around MCP.
+
+An MCP-compatible tool binding in kronos still requires:
+
+- **Capability normalization.** The tool's MCP-declared capabilities must be mapped to kronos's attack-class taxonomy.
+- **Schema validation.** Tool call parameters and results are validated against typed schemas at both invocation and result-reception time.
+- **Authorization-policy mapping.** The tool's declared authorization requirements are mapped to kronos's authorization-ceiling model.
+- **Trust classification.** The tool receives a trust tier based on manifest signing, provenance, and golden-target conformance — the same tiering applied to Layer 1 tools.
+- **Output validation.** MCP tool results are treated as untrusted data (a malicious or buggy MCP tool can return anything) and sanitized before oracle evaluation.
+- **Evidence normalization.** Results are converted to the framework's evidence schema, including provenance signing (see EVIDENCE.md).
+- **Tool/version pinning.** MCP tools declare their version and content digest; the framework refuses to invoke a tool whose actual version does not match the declared version.
+- **Rate and impact enforcement.** MCP tool calls count against the engagement's impact budget the same as Layer 0/1 tool calls.
+- **Egress restrictions.** MCP tools running as subprocesses receive the same network-scope restrictions as Layer 0/1 tools; if the tool is a remote MCP server, its endpoint is subject to authorization scope.
+- **Human or deterministic approval for active operations.** MCP tools that declare active-mutation capabilities require explicit engagement-plane authorization; the framework does not auto-invoke.
+
+MCP is therefore described as **Layer 2 transport compatibility** — the wire protocol between framework and tool — rather than automatic native assurance compatibility. The framework's MCP client wraps every MCP tool in the same trust-and-authorization envelope as Layer 1 adapter tools.
 
 ### Layer 3 — Native kronos tool
 
@@ -267,15 +298,63 @@ The attestation is written to `<target-repo>/kronos/evidence/<engagement-slug>/p
 
 ## Sandbox and isolation
 
-The manifest's `sandbox.recommended` field is the tool's declaration of its preferred isolation posture. The framework respects the declaration and may enforce it:
+Per ChatGPT P0-8, sandbox posture is **derived by policy from impact class, not recommended by the tool**. The manifest's `sandbox.recommended` field is a starting point; the framework's policy engine computes the minimum required isolation for the specific engagement based on impact class, credentials required, tool trust tier, and target environment.
 
-- **`sandbox.recommended: process`** — no additional isolation beyond OS process boundaries. Suitable for stateless tools that only make outbound requests.
-- **`sandbox.recommended: container`** — the framework invokes the tool inside a Docker (or equivalent) container using the declared `container_image`. Network restrictions and resource limits are enforced by the container runtime.
-- **`sandbox.recommended: vm`** — for tools that need kernel-level isolation. Framework invokes the tool inside a lightweight VM (Firecracker or equivalent). Suitable for tools known to be exploitable (running untrusted plug-ins, etc.).
+Minimum required isolation by impact class (may be raised further by tool trust tier or credential class):
 
-For the MVP, kronos supports `process` and `container` sandbox modes. `vm` mode is deferred to a later phase.
+| Impact class | Minimum required isolation |
+|---|---|
+| I0 (passive) | `process` acceptable if tool has no persistent state; otherwise `container` |
+| I1 (non-mutating active) | `container` required with declared image digest |
+| I2 (bounded reversible mutation) | `container` required with declared image digest, network policy restrictions |
+| I3 (disruptive/destructive) | `vm` required with dedicated network namespace |
+| I4 (irreversible or human-impacting) | Dedicated ephemeral VM or dedicated cloud account; independent execution environment |
 
-Sandbox choice is a security posture; adopters who cannot run containers (air-gapped environments, restricted policy) may run all tools at `process` mode with the operator's explicit acknowledgment that isolation is reduced.
+The framework refuses to invoke a tool whose runtime-available isolation is below the required minimum for the engagement's declared impact class. Adopters who cannot meet the required isolation (air-gapped environments, restricted policy) must lower their engagement's impact class or use a different tool.
+
+**Tool manifests are claims, not enforcement.** Per ChatGPT P0-8, manifest declarations require validation:
+
+- Manifests must be signed by an authorized publisher; unsigned manifests may only bind at trust tier 0 and cannot run at impact class ≥ I1.
+- Tool images/binaries must have immutable content digests referenced in the manifest.
+- Where SBOM data is available, it is captured in the manifest for supply-chain analysis.
+- Tools must pass golden-target conformance tests before promotion to the framework's approved toolset (see §Tool conformance verification below).
+- Runtime version-check validates the invoked tool's actual version matches the manifest's declared version.
+
+**Credential handoff is not via environment variables by default.** Environment variables can propagate into child processes, logs, crash dumps, and diagnostic output. The v0.2 default is one of:
+
+- **Ephemeral scoped credentials.** The framework mints time-limited, scoped credentials at invocation time and passes them via a secure channel (file descriptor, Unix domain socket, kernel keyring) that is not inherited by child processes.
+- **Secret-broker reference.** The manifest declares a secret reference (e.g., a KMS ARN); the framework mounts the secret into the tool's isolation environment via the container runtime's secret-mount facility, which does not persist to disk.
+- **Assumed workload identity.** The framework grants the tool an ephemeral workload identity (e.g., IRSA on AWS EKS, Workload Identity on GKE) that the tool uses to authenticate to target APIs without holding a credential.
+
+Environment-variable credentials are permitted only for tools whose manifest explicitly declares `credentials.env_variables_permitted: true` and only when running at trust tier 3+ with signed manifest. This preserves compatibility for tools that cannot accept other credential channels while defaulting new tools to more secure mechanisms.
+
+## Tool conformance verification
+
+Before a tool is promoted to the framework's approved toolset, it must pass golden-target conformance tests:
+
+- The tool is invoked against a known-vulnerable golden target that should produce a specific expected finding.
+- The tool is invoked against a known-hardened golden target that should produce no finding.
+- The tool's outputs are compared against a golden result set.
+
+A tool that fails conformance is not promoted. This is the framework's defense against manifest-declared-but-not-actually-present capabilities. Conformance is re-verified when the tool version bumps.
+
+## Binding resolution — policy-driven, not lexicographic
+
+Per ChatGPT P0-8, tool selection when multiple candidates match is by policy, not by lexicographic tool ID:
+
+1. **Approved trust tier** — prefer tools at higher trust tier.
+2. **Signed manifest** — prefer signed manifests over unsigned.
+3. **Pinned version** — prefer exact-version-match declarations over version-range declarations.
+4. **Evidence fidelity** — prefer tools that produce structured evidence over raw output.
+5. **Safety compatibility** — prefer tools whose declared safety envelope most tightly matches the engagement's ceiling.
+6. **Target/environment compatibility** — prefer tools whose target-type matches the engagement's target most specifically.
+7. **Proven conformance** — prefer tools with recent golden-target conformance pass over stale conformance.
+8. **Cost and performance** — prefer tools with lower declared runtime cost.
+9. **Explicit engagement preference** — the engagement's ROE may name a preferred tool ID; this overrides other criteria.
+
+When equal candidates remain after all criteria evaluate, the framework requires an explicit selection in the engagement plan rather than picking arbitrarily.
+
+**`no-tool-binding-available` is a framework coverage gap, not a target finding.** Per ChatGPT P0-8, when the framework has no tool capable of executing a challenge for a target, this indicates the operator's toolset does not cover the challenge — it is diagnostic about the framework's readiness, not about the target's posture. The framework must not lower the target's scorecard as a consequence of its own coverage gap.
 
 ## Custom tooling
 

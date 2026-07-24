@@ -1,8 +1,10 @@
 # kronos
 
-> Adversarial assurance for AI-built systems — a governance-gated, filesystem-native methodology for proving that software is safe to run.
+> A claim-centric assurance control plane that continuously reconciles system claims against observed reality and executes bounded, authorized challenges to determine which claims survive — under what conditions, with what coverage, confidence, and freshness.
 
-**Status:** pre-alpha. Design in cross-LLM review (v0.1 post-Claude review). Runner, oauth-server, actions, and templates all pending scaffold once the design review completes.
+**Status:** pre-alpha. Design in cross-LLM review (v0.2 post-Claude and post-ChatGPT reviews). Runner, oauth-server, actions, and templates all pending scaffold once the design review completes.
+
+**Kronos does not certify that software is safe. It makes assurance claims testable, challengeable, and auditable.**
 
 ---
 

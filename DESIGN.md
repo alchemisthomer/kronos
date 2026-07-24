@@ -1,11 +1,12 @@
-# Kronos — Design (v0.1, post-Claude review)
+# Kronos — Design (v0.2, post-Claude and post-ChatGPT reviews)
 
-**Document state:** Draft — v0.1 (folds in Claude cross-LLM review of v0; next reviewer ChatGPT-5)
+**Document state:** Draft — v0.2 (folds in Claude cross-LLM review of v0 and ChatGPT cross-LLM review of v0; next reviewer: Grok)
 **Purpose:** wide-net vision document for the cross-LLM design review process. This document exists to be critiqued, refined, and hardened through iterative review by Claude, ChatGPT, Grok, and Gemini before any production code is written. The subsequent v0.N revisions are produced by the scribe based on synthesized review feedback.
 **Author:** the operator and the kronos scribe
-**Origin:** the founding incident of 2026-07-17; the productization pattern of alchemisthomer/eos; the design conversations of 2026-07-24 and Claude's cross-LLM review of the same date
-**Changes from v0:** plausibility monitor + capacity model added as first-class primitives (ADR-0007); L3 redefined to be attainable natively without external attestation (ADR-0008); authorization schema extended with incident-state and chain-of-authorization blocks (ADR-0009); scorecard headline made non-configurable over five critical dimensions with dual-number rendering (ADR-0010); first-signal-stop redefined as severity-thresholded with severity-ordered matrix; execution-provenance signing added to evidence contract; enumeration reconciliation added to tool-binding manifest schema; second reference engagement (expected FAIL) added; unfalsifiable "greatest platform ever" claim replaced with bounded operational claims; patent-strategy tension flagged with deferred-decision block in SEVEN-CLAIMS; register partially cleaned. See §16 for the review-cycle log.
-**Companion documents:** [`methodology/OPERATING-MANUAL.md`](methodology/OPERATING-MANUAL.md), [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md), [`methodology/SCORECARD.md`](methodology/SCORECARD.md), [`methodology/TEMPLATE.md`](methodology/TEMPLATE.md), [`methodology/TOOL-BINDING.md`](methodology/TOOL-BINDING.md), [`methodology/PLAUSIBILITY-MONITOR.md`](methodology/PLAUSIBILITY-MONITOR.md), [`methodology/INDUSTRY-ALIGNMENT.md`](methodology/INDUSTRY-ALIGNMENT.md), [`docs/inception/00-founding-incident.md`](docs/inception/00-founding-incident.md)
+**Origin:** the founding incident of 2026-07-17; the productization pattern of alchemisthomer/eos; the design conversations of 2026-07-24; two cross-LLM reviews of v0 (Claude and ChatGPT).
+**Changes from v0 (via Claude review, landed in v0.1):** plausibility monitor + capacity model added as first-class primitives (ADR-0007); L3 redefined to be attainable natively without external attestation (ADR-0008); authorization schema extended with incident-state and chain-of-authorization blocks (ADR-0009); scorecard headline made non-configurable over five critical dimensions with dual-number rendering (ADR-0010); first-signal-stop redefined as severity-thresholded with severity-ordered matrix; execution-provenance signing added to evidence contract; enumeration reconciliation added to tool-binding manifest schema; second reference engagement (expected FAIL) added; unfalsifiable claims replaced with bounded operational claims; patent-strategy tension flagged; register partially cleaned.
+**Changes from v0.1 (via ChatGPT review, landed in v0.2):** **continuous assurance plane** added as first-class runtime peer to the engagement plane, with "challenge" as the parent abstraction (attack becomes one subtype); **canonical typed domain model** separates engagement, plan, run, observation, oracle result, finding, evidence manifest, and score snapshot into individually-versioned objects; **multidimensional scorecard state** per cell (maturity + effectiveness + coverage + confidence + freshness + fidelity + open findings + catalog gap) replaces single-level rendering; **impact-budgeted execution** replaces first-signal-stop as the primary safety envelope; **two-tier evidence storage** separates sanitized repository-tier records from raw protected-tier artifacts; **three-axis authorization** (impact × environment × executor-assurance) replaces single ceiling; **tool-binding hardened** (typed argv default, shell requires explicit high-risk capability, MCP is transport not trust tier, sandbox mandatory by impact class, credentials not via env vars by default); **expanded oracle state machine** (10 claim-oriented outcomes including CLAIM_SURVIVED, CLAIM_FALSIFIED, PARTIAL_OR_DEGRADED, INCONCLUSIVE, OBSERVABILITY_GAP, INVALID_TEST, EXECUTION_ERROR, BLOCKED, HALTED_SAFETY, NOT_RUN); **catalog governance** (six lifecycle states, applicability predicates, LLM watcher quarantine, no fully-automatic promotion); **standards baseline updated** to ASVS 5.0.0, AISVS 1.0, LLMSVS 2.0, OSCAL import/export, OpenCRE cross-references; **certification positioning narrowed** to "companion for selected technical and operational controls"; **mission language corrected** to remove "is my software safe" claim; **AGPL language corrected**; **SEVEN-CLAIMS.md renamed to INVENTIVE-CONCEPT-CANDIDATES.md** with explicit prior-art acknowledgment (NIST SP 800-115, MITRE CALDERA, Atomic Red Team, BAS platforms, ATT&CK scoring, OSCAL, SLSA); **reference engagement changed** to update one claim rather than a whole dimension. See ADRs 0011-0019 for the architectural decisions.
+**Companion documents:** [`methodology/OPERATING-MANUAL.md`](methodology/OPERATING-MANUAL.md), [`methodology/INVENTIVE-CONCEPT-CANDIDATES.md`](methodology/INVENTIVE-CONCEPT-CANDIDATES.md), [`methodology/SCORECARD.md`](methodology/SCORECARD.md), [`methodology/TEMPLATE.md`](methodology/TEMPLATE.md), [`methodology/TOOL-BINDING.md`](methodology/TOOL-BINDING.md), [`methodology/PLAUSIBILITY-MONITOR.md`](methodology/PLAUSIBILITY-MONITOR.md), [`methodology/CONTINUOUS-ASSURANCE.md`](methodology/CONTINUOUS-ASSURANCE.md), [`methodology/DOMAIN-MODEL.md`](methodology/DOMAIN-MODEL.md), [`methodology/EVIDENCE.md`](methodology/EVIDENCE.md), [`methodology/ORACLE.md`](methodology/ORACLE.md), [`methodology/CATALOG.md`](methodology/CATALOG.md), [`methodology/INDUSTRY-ALIGNMENT.md`](methodology/INDUSTRY-ALIGNMENT.md), [`docs/inception/00-founding-incident.md`](docs/inception/00-founding-incident.md)
 
 ---
 
@@ -27,17 +28,40 @@ This design document exists because kronos is being designed backward from a con
 
 The document is written before any framework code has been committed. This ordering is deliberate. The scribe has learned, from the operator's experience with the prior eos design cycles, that hardening a design across four independent LLM reviewers before writing production code produces a substantially better first-shipped framework than iteratively refactoring code that was written against a partially-formed vision. The cost of the review cycles is measured in days; the cost of refactoring a shipped framework is measured in weeks and lost credibility.
 
-## 2. Mission — what kronos exists to prove
+## 2. Mission — what kronos exists to produce
 
-Kronos exists to make the answer to *"is my software safe to run?"* a reproducible artifact rather than a hopeful assertion.
+**Mission statement (v0.2, corrected per ChatGPT P0-2):**
 
-The claim that a system is safe is, in prior software assurance regimes, a claim that has been confirmed through positive evidence — a checklist has been completed, an auditor has signed off, a certification body has endorsed. Kronos rejects this frame. It observes that positive-confirmation regimes carry structural confirmation bias: the auditor who is paid to certify has professional incentive to certify; the checklist that lists controls in place cannot list the controls that were not thought to be relevant; the certification body that endorses is one falsifying counterexample away from having endorsed nothing.
+> **Kronos produces reproducible, time-bounded evidence about whether declared system claims survive authorized challenge and continuous reconciliation.**
 
-Kronos instead operates from the presumption that every claim a system makes about itself is FALSE until adversarial pressure has been applied and the claim has survived. A system is not "safe" in the kronos sense; it is "not yet broken by the current threat catalog against which adversarial engagement was attempted." This is a fundamentally different epistemic position from the certification model — a negative claim is falsifiable by a single counterexample; the positive claim is unfalsifiable except by an audit that has the same confirmation bias that produced it.
+The v0/v0.1 formulation ("make the answer to 'is my software safe to run?' a reproducible artifact") was rhetorically strong but epistemically incoherent — no framework can answer that question universally, and the surrounding text acknowledged as much (per the "not yet broken by the current catalog" framing). The v0.2 formulation names what kronos actually does.
 
-The framework's operational purpose is to produce, for every target it engages, a **maturity scorecard** rendering the target's assurance posture across twelve dimensions of software delivery, with the load-bearing property that maturity above Level 3 (out of 5) is only reachable through kronos falsification attempts. The scorecard is the executive-consumable artifact — the answer to "is my software safe" rendered as a matrix of colored cells with drill-down to the underlying evidence. It doubles as a commercial primitive: a fixed-scope engagement produces a scorecard delta, moving specific dimensions from red to green, as its deliverable.
+**Executive-facing question:**
 
-The framework's philosophical purpose is to make software assurance falsifiable, in the Popperian sense. A system whose defenses have been challenged by kronos and whose kronos scorecard is public has committed to a claim that any observer can attempt to disprove. That commitment is a fundamentally stronger position than any positive certification.
+> *"What assurance claims currently hold, against which scenarios, with what coverage and confidence?"*
+
+**Short positioning:**
+
+> **Kronos does not certify safety. It makes assurance claims testable, challengeable, and auditable.**
+
+Kronos operates from the presumption that every claim a system makes about itself is unverified until either (a) an authorized adversarial challenge has been executed against it and returned `CLAIM_SURVIVED`, or (b) a continuous-plane reconciliation has confirmed the claim holds against observed reality. Claims for which neither has occurred are `untested`. Claims falsified by challenge are `falsified` until re-verified after remediation. The framework does not produce a universal "is my software safe" answer; it produces a per-claim ledger of what was tested, what survived, what was falsified, in which environment, with what evidence age, at which catalog version.
+
+The framework's operational output is a **multidimensional scorecard** (see [`methodology/SCORECARD.md`](methodology/SCORECARD.md)) rendering per-dimension state across maturity, effectiveness, coverage, confidence, freshness, and environment fidelity. The scorecard is the executive-consumable projection of the underlying claim ledger. The scorecard does not, by itself, answer "is my software safe" — it reports what has been evaluated, what has survived, and what remains untested. This is materially more defensible than any single-number certification claim.
+
+The framework can answer, precisely and reproducibly:
+
+- Which claims were evaluated?
+- Which challenges were executed?
+- Which claims survived, which were falsified, which returned partial, inconclusive, or observability-gap?
+- What remained untested in the current catalog?
+- What environment was used?
+- How representative was that environment of production?
+- How recent is the evidence?
+- Which catalog and methodology versions applied?
+- How strong was the evidence?
+- What open findings remain?
+
+The framework cannot produce a universal answer that software is safe.
 
 ## 3. The founding incident
 
