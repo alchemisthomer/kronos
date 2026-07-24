@@ -215,6 +215,29 @@ External contributors may propose catalog entries via pull request. The contribu
 
 Contribution requires acceptance of the framework's contributor agreement (which addresses IP assignment for patent-strategy purposes).
 
+### Naming convention guidelines (v0.4 per Gemini review)
+
+The kronos framework operates within the Olympus-616 mythological universe (kronos, eos, Athena, Ares, Plutus, Iris, Hermes, and so on). Core framework artifacts adhere to this taxonomy for brand cohesion. Community-contributed catalog entries and tool manifests may or may not adhere to it; both patterns are acceptable, but the framework encourages consistency within each contribution.
+
+**For contributions that adhere to the mythological taxonomy:**
+
+- New abstractions may be named for classical figures (Greek, Roman, or related) whose domain conceptually matches the abstraction's function.
+- Contributors are encouraged (not required) to check the existing name registry to avoid collision with core framework components.
+- The core mythological taxonomy is documented in the Olympus-616 root architecture materials; contributors reference these when selecting names.
+
+**For contributions that cleanly separate from the mythological taxonomy:**
+
+- Names use descriptive functional terms (e.g., `http-injection-scanner`, `cost-plausibility-monitor-aws`, `salesforce-governor-limit-checker`).
+- Descriptive names must not incidentally collide with mythological names in the framework's registry.
+- Descriptive naming is particularly encouraged for adopter-specific tools and per-target contributions that would not benefit from thematic consistency.
+
+**What contributors should not do:**
+
+- Introduce new mythologies (Norse, Egyptian, Chinese, etc.) into core framework artifacts. Adopter-specific tools may use whatever naming their operators prefer, but core framework additions stay within the Olympus-616 taxonomy for cohesion.
+- Rename existing components (breaking established references) as part of catalog contributions. Renames are governed by the framework maintainer.
+
+**The naming registry is versioned in the catalog repository** and updated as core framework components are added. Contributors can query it before choosing a name; the framework's schema validator warns on likely collisions during PR review.
+
 ## What this replaces
 
 - The v0 assertion that the catalog grows "strictly stronger over time." Growth is non-monotonic; entries can be deprecated, superseded, withdrawn.

@@ -345,6 +345,39 @@ When a catalog update lowers a target's latest headline, the update is not immed
 
 **Field-falsification exception.** When a catalog update is prompted by a real-world incident (a published breach, an observed exploit, a critical CVE that maps to a new attack class), the notice window is compressed to **72 hours** and the incident is cited in the announcement. This preserves rapid response to threat-landscape changes.
 
+## Hysteresis and damping for continuous-plane findings (v0.4 per Gemini review)
+
+The continuous plane can generate transient findings — a plausibility-monitor observation that briefly exceeds bounds due to metric-pipeline lag, an observability-gap finding during a target's own scheduled maintenance window, a control-drift finding during a legitimate mid-flight deploy. Without damping, these transient signals would produce rapid scorecard oscillation ("executive panic" per Gemini) that undermines the scorecard's usefulness as a stable decision artifact.
+
+The v0.4 scorecard rendering applies hysteresis and damping to continuous-plane-sourced dimension transitions:
+
+**Effectiveness state — degradation requires sustained evidence.** A `survived` → `partial` or `partial` → `falsified` transition triggered by continuous-plane findings requires the finding to persist for a declared window before the transition renders. Default windows:
+
+- `survived` → `partial`: continuous finding present for at least **30 minutes** (or two consecutive evaluation cycles, whichever is longer).
+- `survived` → `falsified`: continuous finding present for at least **1 hour** (or three consecutive evaluation cycles).
+- `partial` → `falsified`: continuous finding present for at least **30 minutes**.
+
+**Effectiveness state — recovery renders faster.** A `partial` → `survived` or `falsified` → `survived` transition renders within one evaluation cycle. Recovery is not damped; the scorecard should reflect improvements promptly.
+
+**Attack-oracle findings are not damped.** A `CLAIM_FALSIFIED` verdict from an engagement-plane attack oracle transitions the dimension immediately. Attack-oracle findings are point-in-time authoritative determinations; damping them would obscure real defense failures.
+
+**Damping applies only to the executive-facing rendering.** The underlying finding record is written immediately when the continuous plane emits it. Operators and engineers see the raw finding in the engineering-facing views; only the executive-facing traffic-light and dual-number headline apply damping. This preserves diagnostic timeliness for operators while preventing executive-facing volatility.
+
+**Damping windows are configurable per target** in the SCORECARD.md YAML frontmatter:
+
+```yaml
+scoring:
+  hysteresis:
+    survived_to_partial_minutes: 30       # or set to 0 to disable damping
+    survived_to_falsified_minutes: 60
+    partial_to_falsified_minutes: 30
+    apply_to_engagement_findings: false   # engagement findings render immediately regardless
+```
+
+Damping is not intended to hide real degradation. If a continuous finding persists across the damping window, the scorecard reflects it. Damping only smooths transient signals whose underlying cause resolves quickly.
+
+**Explicit note:** Damping is a rendering concern, not a truth concern. An auditor inspecting the target at any moment can query the raw finding stream and see continuous-plane findings as they were emitted, regardless of whether the executive-rendering had transitioned yet. The damped rendering is a legibility optimization; the underlying data is not smoothed.
+
 ## Configuration
 
 Each target's scorecard is configured by a `SCORECARD.md` file in the target's `kronos/engagement/` folder. The file's YAML frontmatter declares:

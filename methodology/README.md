@@ -17,7 +17,8 @@ The methodology folder contains the intellectual core of the kronos framework �
 | [`DOMAIN-MODEL.md`](DOMAIN-MODEL.md) | The canonical typed domain model — engagement, plan, run, observation, oracle result, finding, evidence manifest, score snapshot as separately versioned objects. Markdown is the human projection; typed schemas are the source of truth. (New in v0.2 per ChatGPT P0-5.) |
 | [`EVIDENCE.md`](EVIDENCE.md) | Two-tier evidence storage (sanitized repository tier + protected raw tier), SLSA-aligned provenance signing, opt-in disclosure model, chain of custody. (New in v0.2 per ChatGPT P0-6.) |
 | [`ORACLE.md`](ORACLE.md) | Expanded oracle state machine — 10 claim-oriented outcomes replacing v0.1's PASS/FAIL/INCONCLUSIVE. Required per-challenge scaffolding (baseline + positive/negative controls + correlation ID + cleanup oracle). (New in v0.2 per ChatGPT P0-9.) |
-| [`CATALOG.md`](CATALOG.md) | Threat catalog lifecycle governance — six states, applicability predicates, LLM watcher quarantine, community contribution flow. (New in v0.2 per ChatGPT P0-10.) |
+| [`CATALOG.md`](CATALOG.md) | Threat catalog lifecycle governance — six states, applicability predicates, LLM watcher quarantine, community contribution flow, naming conventions. (New in v0.2 per ChatGPT P0-10; naming conventions added in v0.4 per Gemini review #4.) |
+| [`AUTONOMOUS-AUTHORIZATION.md`](AUTONOMOUS-AUTHORIZATION.md) | Two-tier authorization model — human-signed StandingAuthorization establishes the envelope, hardware-backed machine identities issue per-invocation MachineIssuedAuthorization within it. Preserves legal-consent semantics while enabling autonomous continuous-plane operation. (New in v0.4 per Gemini review #1 and direct question on cryptographic workload identities.) |
 
 ## Read order
 

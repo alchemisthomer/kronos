@@ -57,6 +57,28 @@ The following continuous evaluations are recognized as first-class:
 
 The above is not exhaustive. Additional continuous evaluations are added over time as the framework matures and as adopters contribute domain-specific reconciliations.
 
+### Backbone-resilience reconciliations (v0.4 per Gemini review)
+
+For targets whose backbone depends on a shared platform (Salesforce, cloud vendor APIs with tenant-wide limits, third-party SaaS with account-wide quotas), the continuous plane's own load must be structurally bounded to avoid degrading the primary application it is evaluating. Reconciliations specifically designed for backbone resilience:
+
+- **API concurrency reconciliation.** Observe API concurrency headroom on the target backbone (e.g., Salesforce API concurrent-request limit vs. currently-in-flight kronos-generated requests). Emit a finding if the framework's own consumption exceeds a declared fraction (default 10%) of the target's API concurrency budget.
+- **Utility-bar and integration-boundary reconciliation.** For Salesforce targets where user-facing Lightning components share API bandwidth with backend integrations, observe utility-bar responsiveness during continuous-plane activity. Finding if p95 latency for user-facing components rises above declared SLO during kronos observation windows.
+- **Daily execution quota reconciliation.** Observe daily API call counts against tenant-wide daily limits (Salesforce daily API limit, cloud vendor rate quotas). Emit a finding when kronos-generated consumption is on trajectory to exceed a declared fraction (default 5%) of the daily budget.
+- **Governor-limit reconciliation.** For Salesforce and similar platforms with governor limits (SOQL rows queried per transaction, DML statements per transaction, callouts per transaction, heap size), observe governor-limit consumption from kronos-invoked Apex against per-transaction budgets.
+- **Cost budget reconciliation.** Beyond the general plausibility-monitor cost check, specifically reconcile kronos's own AWS/cloud cost consumption against a declared kronos budget line item. Findings when kronos itself becomes a material cost driver.
+
+### Framework self-throttling
+
+Continuous plane implementations MUST support self-throttling. The framework's coordinator observes:
+
+- **Target-side latency signals** — target endpoint p50/p95/p99 during kronos activity windows.
+- **Backbone quota consumption** — as declared in the target's capacity model.
+- **Cost velocity** — kronos's own cost accumulation per hour.
+
+When any of these approach declared safety thresholds, the coordinator throttles its own request rate proportionally. Under sustained pressure, the coordinator pauses continuous-plane activity entirely and emits a `framework-self-throttled` observation. Human operators are alerted per the target's alerting configuration.
+
+The framework structurally guarantees that continuous plausibility monitoring and reconciliation checks do not degrade primary application performance. If the framework cannot maintain this guarantee for a given target's declared capacity, the framework refuses to run the continuous plane against that target and requires the operator to either (a) raise the target's declared capacity, (b) reduce kronos's declared budget within it, or (c) run kronos in engagement-only mode without the continuous plane.
+
 ## Lifecycle
 
 The continuous plane operates in one of three cadences per evaluation:

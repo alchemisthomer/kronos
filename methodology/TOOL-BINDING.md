@@ -117,6 +117,21 @@ For a Layer 2 (MCP) tool, the sequence per attack invocation is:
 
 The framework never treats an MCP tool's "success" response as authoritative for whether a challenge succeeded. The MCP result is evidence; the oracle is verdict.
 
+### Runtime graph validation for MCP tool chaining (v0.4 per Gemini review)
+
+MCP tools can invoke other MCP tools during their own execution. Without runtime graph validation, an MCP tool with narrow declared capabilities could autonomously chain to another MCP tool with broader capabilities and effectively escalate the engagement's impact class without the framework's knowledge.
+
+The v0.4 policy engine enforces a **runtime tool-invocation graph** validated at every MCP tool call:
+
+- **Whitelist of transitively-permitted MCP tools per engagement.** The engagement's plan enumerates every MCP tool that may be invoked, whether directly by the framework or transitively by another MCP tool during its execution. Transitive invocations outside this whitelist are refused at the transport layer.
+- **Impact-class inheritance and clamping.** When an MCP tool invokes another MCP tool, the invoked tool's impact class is clamped to the invoking tool's authorized ceiling. A tool authorized at I1 cannot chain to a tool that would execute at I2 even if that tool's manifest permits I2.
+- **Budget debit at every hop.** Impact-budget accounting debits at every hop in the tool-invocation graph, not only at the framework-to-tool boundary. A chained invocation counts against the engagement's budget the same as a direct invocation.
+- **Cycle detection.** The framework refuses tool-invocation graphs that contain cycles (A invokes B invokes A). Cycles indicate a policy bug or a compromised tool attempting to exhaust budget through loops.
+- **Depth ceiling.** Default maximum tool-invocation depth per engagement is 3. Deeper chains require explicit engagement-level authorization.
+- **Complete provenance.** The full tool-invocation graph is captured in the engagement's evidence manifest. Auditors can reconstruct every hop, its authorization derivation, and its impact accounting.
+
+These constraints defend against the specific MCP risk classes Gemini flagged: dynamic tool invocation, unverified task propagation, and implicit trust relationships between agents. The framework does not assume MCP tools are honest about their chaining behavior; it enforces graph constraints at the transport layer regardless of what the tools declare.
+
 ## Tool-verify golden-target mandate (v0.3 per Grok review)
 
 Per Grok's cross-LLM review, every tool at Layer 1 or above in the reference toolset MUST pass a `tool-verify` golden-target action before promotion to the framework's approved toolset. This addresses the "adversarial tool authors" open question by mandating that manifest declarations be validated empirically, not just accepted on trust.
