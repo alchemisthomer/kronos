@@ -64,7 +64,14 @@ Each engagement is one kronos document, one attack matrix, one set of findings, 
 
 The olympus-616 repository is (or is planned to be) public. Every kronos engagement, every finding, every scorecard state is therefore public by default. This is the operationalization of the framework's public-by-default evidence property (SEVEN-CLAIMS §4) — any observer can independently verify that the scorecard's claimed maturity is supported by the underlying engagement evidence.
 
-This public posture is also the operational form of the framework's foundational claim: "olympus-grid is the greatest software platform that will ever be built, and can run continuously on a solar-powered Raspberry Pi." That claim is refutable — any observer can attempt to falsify it by running kronos against olympus-grid and producing findings that lower the scorecard. The framework's authors invite this attempt.
+This public posture is also the operational form of a specific set of bounded, falsifiable operational claims. Illustrative examples (specific numbers subject to attestation before commit):
+
+- **Availability.** Olympus-grid sustains ≥ 100 requests per second sustained load with p99 latency ≤ 500ms against a defined chat-request corpus on a target ECS deployment of two vCPU and eight GB memory per pantheon task.
+- **Cost bound.** Olympus-grid's cost per user-session remains within a bounded envelope of $X for the median session under declared usage patterns; observed cost exceeding the envelope by an order of magnitude constitutes a plausibility finding.
+- **Solar-powered raspberry-pi mode.** Olympus-grid runs continuously on a specified single-board computer (Raspberry Pi model 5, 8 GB) drawing average power ≤ 8 watts, supporting a defined single-user workload without external network for ≥ 24 hours.
+- **Perimeter.** Olympus-grid's Ares perimeter cascade returns 403 to every request lacking a valid CloudFront origin-secret header within 60 seconds, with corresponding `cfSecretGuard` telemetry, under attack volumes up to the deployment's declared rate ceiling.
+
+Each of these is a specific claim any observer can attempt to falsify by running kronos against olympus-grid and demonstrating an observation that exceeds bound. The framework's authors invite the attempt. Unbounded superlative claims ("greatest software platform ever built") are excluded from the operational-claim set because they are not falsifiable and their inclusion would contradict the framework's own presumption-of-failure discipline (per Claude review P2-8).
 
 ## Integration with eos
 

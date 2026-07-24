@@ -32,7 +32,7 @@ Which system is under evaluation, which surfaces are in scope, which credentials
 
 ## §2 Authorization artifact
 
-The signed record that unlocks execution. This section is either an inline authorization block or a reference to an external artifact hash.
+The signed record that unlocks execution. This section is either an inline authorization block or a reference to an external artifact hash. See ADR-0009 for the design rationale.
 
 ```yaml
 authorizationId: KRA-YYYY-NNNNNN
@@ -49,7 +49,7 @@ target:
   environments:
     - {environment}
 permissions:
-  maximumSafetyLevel: {0-4}
+  authorizationCeiling: {0-4}         # 0=static, 1=passive, 2=controlled, 3=destructive, 4=catastrophic-simulation
   destructiveTesting: {true|false}
   productionTesting: {true|false}
 limits:
@@ -60,6 +60,35 @@ limits:
 emergency:
   contact: {contact of record}
   stopChannel: {stop mechanism URL or process}
+
+# Incident-state block (per ADR-0009). Governs framework behavior when the
+# authorization is issued under declared incident conditions.
+incidentState:
+  declared: false                                 # true when engagement is authorized under declared incident conditions
+  signedSober: true                               # affirms authorization was signed outside duress
+  dataClassPreservation: enforced                 # enforced | waived (waived requires signedSober=true AND additional signature)
+  additionalSignatureForWaiver: {optional GPG signature required only when dataClassPreservation=waived}
+  dataClassResources:                             # framework refuses to modify these under declared incident
+    - persistent_storage                          # S3 buckets, EBS volumes, EBS snapshots, RDS databases, DynamoDB tables
+    - identity_records                            # IAM users, roles, groups (credential revocation is separate and permitted)
+    - dns_records                                 # Route 53 zones and records
+    - audit_logs                                  # CloudTrail trails, log archives, evidence bundles
+    - encryption_keys                             # KMS keys, secrets vault entries
+
+# Chain-of-authorization block (per ADR-0009). Required for engagements whose
+# attack matrix touches third-party platforms (cloud providers, SaaS services,
+# third-party APIs). Each third party requires its own acknowledgment.
+chainOfAuthorization:
+  thirdParties:
+    - party: aws
+      accountId: {redact-in-public-artifact}
+      resourceClassesAffected: [cloudfront_distribution, alb_target]
+      acknowledgment: |
+        Operator affirms that the actions authorized by this engagement fall
+        within AWS Acceptable Use Policy and AWS Customer Agreement. Operator
+        is the account holder or has written authorization from the account
+        holder to execute the described actions.
+      reference: aws-aup-2024-05
 ```
 
 ## §3 Rules of engagement
@@ -67,6 +96,8 @@ emergency:
 - **Modes enabled:** {list, matches header table}
 - **Environment posture:** {matches header table}
 - **Safety mode:** {first-signal-stop or go-to-town, matches header table}
+- **Severity threshold (for first-signal-stop):** {critical | high | medium | low} — the minimum severity at which a finding stops the engagement. Findings below this threshold are recorded but do not halt execution. (Per ADR-0010 and the severity-ordered matrix requirement.)
+- **INCONCLUSIVE handling:** {continue | halt-for-review} — behavior when an oracle returns INCONCLUSIVE. Default is `continue` (INCONCLUSIVE is not a finding); `halt-for-review` requires operator adjudication before the engagement proceeds.
 - **Retention policy:** {how long evidence is retained, where it is stored, who has access}
 - **Prohibited actions:** {actions explicitly refused even under this authorization — e.g., "no attacks that would trigger legal disclosure obligations to third parties"}
 - **Communication cadence:** {when the approver is briefed during the engagement, especially in `first-signal-stop` mode}
@@ -105,14 +136,16 @@ The architecture graph the engagement is executing against. Contains assets, act
 
 For each threat-class × claim pair, the specific diagnostic attack that will be executed. Each row is one attack.
 
-| Attack ID | Threat class | Claim under test | Diagnostic attack | Success would demonstrate |
-|---|---|---|---|---|
-| A-1 | KTC-NNN | {defense claims X} | {specific probe} | {what a successful attack would prove} |
-| A-2 | KTC-NNN | {claim} | {probe} | {proof} |
+**Matrix ordering.** For engagements in `first-signal-stop` mode, the attack matrix MUST be severity-ordered (highest-declared-severity attacks first). This ensures that "stop on the first finding at-or-above threshold" produces a finding that represents the target's worst reached exposure, not an artifact of matrix authoring order. Engagements in `go-to-town` mode may use any order.
 
-## §8 Oracles
+| Attack ID | Threat class | Claim under test | Diagnostic attack | Declared severity if finding | Success would demonstrate |
+|---|---|---|---|---|---|
+| A-1 | KTC-NNN | {defense claims X} | {specific probe} | critical / high / medium / low | {what a successful attack would prove} |
+| A-2 | KTC-NNN | {claim} | {probe} | {severity} | {proof} |
 
-For each attack, the deterministic assertion that determines pass or fail. Oracles reference observable signals only — metrics, log lines, response payloads, telemetry counters. AI-generated narrative may explain an oracle result but cannot replace it.
+## §8 Attack oracles
+
+For each attack, the deterministic assertion that determines pass or fail. Attack oracles reference observable signals only — metrics, log lines, response payloads, telemetry counters. AI-generated narrative may explain an oracle result but cannot replace it. (This section is for **attack oracles** specifically; plausibility-monitor findings from `<target>/kronos/findings/plausibility/` are aggregated separately at scorecard rendering time.)
 
 | Attack ID | Oracle name | Assertion | Data source |
 |---|---|---|---|
@@ -121,11 +154,13 @@ For each attack, the deterministic assertion that determines pass or fail. Oracl
 
 ## §9 Execution log
 
-Ordered record of attacks executed. Each entry captures timing, the request/response evidence hash, and the oracle evaluation.
+Ordered record of attacks executed. Each entry captures timing, the request/response evidence hash, the oracle evaluation, and the execution-provenance signature.
 
-| Timestamp (UTC) | Attack ID | Request evidence (sha256) | Response evidence (sha256) | Oracle evaluation | Notes |
-|---|---|---|---|---|---|
-| YYYY-MM-DDTHH:MM:SSZ | A-1 | {hash → path in evidence/} | {hash → path in evidence/} | PASS / FAIL / INCONCLUSIVE | {notes} |
+| Timestamp (UTC) | Attack ID | Request evidence (sha256) | Response evidence (sha256) | Oracle evaluation | Execution provenance (sha256) | Notes |
+|---|---|---|---|---|---|---|
+| YYYY-MM-DDTHH:MM:SSZ | A-1 | {hash → path in evidence/} | {hash → path in evidence/} | PASS / FAIL / INCONCLUSIVE | {hash → path in evidence/provenance/} | {notes} |
+
+**Execution provenance** (per Claude review P2-3): each attack invocation produces a signed execution-attestation containing timestamp, target identity, tool identity and version, operator identity and signing key. The attestation is hashed and referenced from this table. Evidence hashes prove the artifact was not altered after commit; execution provenance proves the artifact was produced by a real execution against the claimed target at the claimed time by the claimed operator. Both are required for public findings to be independently verifiable.
 
 Full evidence files (request bodies, response bodies, telemetry excerpts, screenshots) are committed as siblings to this document under `../evidence/<engagement-slug>/`.
 

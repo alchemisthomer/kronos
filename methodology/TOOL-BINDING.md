@@ -130,7 +130,24 @@ authorization:
   requires_credentials: false
   requires_elevated_privilege: false
   destructive_testing: false
-  safety_level_max: 2      # this tool may not run above safety level 2
+  authorization_ceiling_max: 2      # this tool may not run above authorization ceiling 2 (controlled)
+                                     # (renamed from safety_level_max per P3-2 to disambiguate from
+                                     # the maturity level scale used in SCORECARD.md)
+
+enumeration:
+  # Per Claude review P1-1: any tool that declares an enumeration capability must
+  # support paranoid unfiltered cross-check. The framework runs the query in both
+  # the declared filtered form and the unfiltered form and captures the delta.
+  # A nonzero delta on a filter that was supposed to return empty is itself a
+  # finding — this is the mechanism that would have caught the 2026-07-17
+  # incident's "filter silently returned 0 when the truth was 3" scanner bug.
+  reconcile: true
+  filter_variants:
+    - unfiltered           # required baseline
+    - {filter1}            # tool's normal filtered query
+    - {filter2}            # additional variants for validation
+  delta_threshold: 0       # any delta > threshold surfaces a finding of class "scanner-drift"
+  delta_finding_severity: high
 
 sandbox:
   recommended: container
@@ -200,13 +217,53 @@ attacks:
 
 The framework enforces authorization structurally at tool invocation time:
 
-1. **Safety level check.** Tool's `safety_level_max` must be >= engagement's declared safety level. If not, the tool is refused and the framework records the refusal in the execution log.
+1. **Authorization ceiling check.** Tool's `authorization_ceiling_max` must be >= engagement's declared authorization ceiling. If not, the tool is refused and the framework records the refusal in the execution log. (The ceiling scale runs 0-4: static / passive / controlled / destructive / catastrophic-simulation. It is distinct from the six-level maturity scale in SCORECARD.md.)
 2. **Network scope check.** Tool's `requires_network` list must be a subset of the engagement's authorized network scope. Tools requesting broader network access than the engagement authorizes are refused.
 3. **Destructive testing check.** If the tool's manifest declares `destructive_testing: true`, the engagement's authorization artifact must explicitly enable destructive testing. Otherwise the tool is refused.
 4. **Privilege check.** Tools declaring `requires_elevated_privilege: true` require the engagement's authorization to acknowledge elevated privilege in the ROE (§3).
 5. **Credential handoff.** If the tool requires credentials (`env_variables_expected` non-empty), the framework provides them from the authorization artifact's credential section. Credentials are passed via environment variables to the tool subprocess; the framework audits the tool's stdout/stderr for credential-substring leakage.
+6. **Incident-state check.** When the engagement's authorization declares `incidentState.declared: true` AND `dataClassPreservation: enforced`, the framework refuses any tool invocation whose declared `resource_classes_affected` intersects the engagement's declared `dataClassResources`. This is the founding-incident lesson made structural: under declared incident, data-class resources are structurally protected regardless of the tool's own capabilities.
+7. **Chain-of-authorization check.** When a tool's declared operations touch third-party platforms, the engagement's `chainOfAuthorization.thirdParties` block must enumerate the party with a matching `resourceClassesAffected` list. Tools operating against undeclared third parties are refused.
+8. **Duress-signed authorization limit.** When the authorization declares `incidentState.signedSober: false`, the framework refuses tools at `authorization_ceiling_max >= 3` (destructive testing) regardless of other authorization fields. Duress-signed authorizations do not unlock destructive modes.
 
 These are structural refusals, not warnings. A tool that fails any check is not invoked; the engagement records the reason and continues to the next attack.
+
+## Execution provenance signing
+
+Per Claude review finding P2-3, every tool invocation produces a signed **execution-attestation** alongside the evidence hash. Evidence hashes prove the artifact was not altered after commit; execution attestations prove the artifact was produced by a real execution against the claimed target at the claimed time by the claimed operator.
+
+Each execution attestation contains:
+
+```yaml
+kind: kronos-execution-attestation
+apiVersion: v1
+attestation:
+  attack_id: A-1
+  tool_id: burp-suite-professional
+  tool_version: 2024.6
+  target_slug: <target-slug>
+  target_endpoint: <endpoint invoked>
+  invoked_at: YYYY-MM-DDTHH:MM:SS.mmmZ
+  completed_at: YYYY-MM-DDTHH:MM:SS.mmmZ
+  operator_identity: <operator-signing-key-fingerprint>
+  runner_identity: <runner-signing-key-fingerprint>
+  evidence_refs:
+    - {sha256 of request artifact}
+    - {sha256 of response artifact}
+    - {sha256 of any telemetry artifact}
+signature:
+  algorithm: ed25519
+  signed_by: {operator-key OR runner-key OR both}
+  signature_value: {base64}
+```
+
+The attestation is written to `<target-repo>/kronos/evidence/<engagement-slug>/provenance/<attack-id>.yaml` and referenced by hash from the engagement's §9 execution log.
+
+**What the attestation proves.** That a specific tool at a specific version was invoked at a specific time against a specific target endpoint, produced specific evidence artifacts, and was signed by a specific operator or runner identity. A third-party verifier can check the signature against the operator's or runner's known public key, confirm the timestamps are consistent with the engagement's authorization window, and verify the evidence hashes match the referenced artifacts.
+
+**What the attestation does not prove.** That the tool itself is honest (a malicious tool can produce fabricated evidence and sign it). The tool honesty problem is addressed separately via manifest signing and `tool-verify` golden-target checks (see open Q4 below). Provenance and tool-honesty are complementary defenses.
+
+**Reproducibility caveat** (per Claude review P2-3). Evidence integrity (hash) and execution provenance (signature) are durable. **Reproducibility** of an attack against a live target is not durable in general — target state drifts, credentials rotate, attacker-owned resources are torn down. A finding can be valid and still fail to reproduce months later. The framework distinguishes evidence-of-what-happened (durable) from re-executability (often ephemeral) and does not promise the latter unconditionally.
 
 ## Sandbox and isolation
 

@@ -12,10 +12,13 @@ It intentionally knows nothing about the technology of the project under evaluat
 
 ## Primary views
 
-1. **Scorecard view** — the north-star artifact per [`../docs/adr/ADR-0003-scorecard-as-north-star.md`](../docs/adr/ADR-0003-scorecard-as-north-star.md). Renders the 4×3 pillar/dimension matrix with maturity levels colored by state. Click-through to underlying findings and evidence.
-2. **Engagement kanban view** — the eight stage folders (00_scope through 07_aborted) rendered as columns. Each engagement document is a card. Drill into any card for the full document.
-3. **Trajectory view** — historical view of the scorecard over time, computed from git history of the `06_shipped/` folder.
-4. **Evidence view** — the raw evidence artifacts (request/response chains, telemetry excerpts, screenshots) as rendered by their content type.
+1. **Scorecard view** — the north-star artifact per ADR-0003. Renders the 4×3 pillar/dimension matrix in two modes: a **six-level detail view** for engineering consumption (L0–L5 with distinct colors) and an **executive traffic-light view** derived from the detail (L0–L2 red, L3 yellow, L4–L5 green). The **dual-number headline** (pinned score + latest score computed against head-of-catalog) is always rendered per ADR-0010. Click-through to underlying findings and evidence.
+2. **Plausibility findings view** (added in v0.1) — the running list of findings from the plausibility monitor, sourced from `<target>/kronos/findings/plausibility/`. Distinct from engagement findings; renders the capacity-model bound alongside the observed value that exceeded it.
+3. **Engagement kanban view** — the eight stage folders (00_scope through 07_aborted) rendered as columns. Each engagement document is a card. Drill into any card for the full document.
+4. **Trajectory view** — historical view of the scorecard over time, computed from git history of the `06_shipped/` folder. Recomputes the scorecard at each historical HEAD.
+5. **Delta view** — the difference between the current scorecard and a specific prior state. Answers "what changed since we last engaged?"
+6. **Evidence view** — the raw evidence artifacts (request/response chains, telemetry excerpts, screenshots) as rendered by their content type. Includes the execution-provenance attestation viewer so an observer can inspect the signature binding an evidence artifact to a specific tool invocation.
+7. **Industry-alignment view** (planned) — per-scorecard-cell mapping to the industry-standard control IDs the cell's evidence supports (SOC 2, ISO 27001, OWASP ASVS, NIST CSF, NIST AI RMF, etc.).
 
 ## Relationship to the eos runner
 

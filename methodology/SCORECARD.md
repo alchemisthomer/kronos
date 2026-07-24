@@ -1,12 +1,14 @@
 # The kronos scorecard
 
-> The single executive-consumable answer to "is my software safe?"
+> A rendering of a target system's assurance posture across twelve dimensions of software delivery, scored on a six-level maturity scale, computed from the target's kronos engagement history.
 
 ## Purpose
 
-The kronos scorecard is a rendering of a target system's assurance posture as a matrix of software-lifecycle dimensions against maturity levels. It is the primary artifact that an executive, a board, a customer, or an auditor reads to understand the state of a system without reading any of the underlying findings.
+The kronos scorecard is the primary artifact that an executive, a board, a customer, or an auditor reads to understand the state of a system without reading any of the underlying findings. It renders the target's assurance posture as a matrix of software-lifecycle dimensions against maturity levels.
 
-The scorecard is not a report. It is a **live document**, rendered from the target repository's `kronos/engagement/06_shipped/` folder, that reflects the current assurance posture at any point in time. Every engagement that closes updates the scorecard atomically with its findings. The scorecard and the evidence chain are never allowed to drift apart.
+The scorecard is a **derived document**. It is computed from the target repository's `kronos/engagement/06_shipped/` folder, the target's capacity model, and (when co-installed) the target's eos cycle folder. Every kronos engagement that closes contributes a scorecard delta atomically with its findings. Every plausibility-monitor observation that exceeds bounds contributes a finding that may shift a dimension's state. The scorecard is not stored separately; it is re-rendered from source truth on every read.
+
+Two scorecards are rendered for every target: a **pinned scorecard** (computed against the catalog version the target has explicitly pinned) and a **latest scorecard** (computed against the current head-of-catalog). This dual-number rendering is not optional — the framework does not permit rendering only one of the two in an executive-facing view. See §Dual-number rendering below.
 
 ## The four pillars
 
@@ -16,61 +18,67 @@ The scorecard organizes assurance across four pillars of the software delivery l
 
 The system's defenses at its trust boundaries. Who is allowed in, what they can do once in, and how their access is managed.
 
-1. **Identity & Access Control** — authentication mechanisms, authorization models, session hygiene, credential lifecycle, administrative access discipline
-2. **Perimeter Defense** — web application firewall, ingress rate control, geographic and anonymity-network controls, distributed-denial-of-service mitigation
-3. **Secret Management** — key rotation, vault architecture, zero-leak discipline, reference-not-value patterns (ARN-not-secret)
+1. **Identity & Access Control** — authentication mechanisms, authorization models, session hygiene, credential lifecycle, administrative access discipline. **(Critical dimension — cannot be disabled.)**
+2. **Perimeter Defense** — web application firewall, ingress rate control, geographic and anonymity-network controls, distributed-denial-of-service mitigation. **(Critical dimension — cannot be disabled.)**
+3. **Secret Management** — key rotation, vault architecture, zero-leak discipline, reference-not-value patterns. **(Critical dimension — cannot be disabled.)**
 
 ### Pillar B — Runtime Integrity
 
 The system's ability to maintain correctness under normal and adversarial load.
 
-4. **Data Integrity** — input validation, deduplication, transactional guarantees, no-silent-loss patterns, ordering invariants
-5. **Availability & Resilience** — circuit breakers, retry queues with TTL, graceful degradation, kill-switch discipline, dependency-outage tolerance
-6. **Observability** — telemetry emission, alerting SLOs, forensic evidence retention, audit chain preservation, drift detection
+4. **Data Integrity** — input validation, deduplication, transactional guarantees, no-silent-loss patterns, ordering invariants. **(Critical dimension — cannot be disabled.)**
+5. **Availability & Resilience** — circuit breakers, retry queues with TTL, graceful degradation, kill-switch discipline, dependency-outage tolerance.
+6. **Observability** — telemetry emission, alerting SLOs, forensic evidence retention, audit chain preservation, drift detection.
 
 ### Pillar C — Operational Discipline
 
 The system's process maturity around change, cost, and supply chain.
 
-7. **Cost Integrity** — blast-radius bounds, physical-plausibility oracles, cost-anomaly alerting SLOs, per-tenant cost attribution
-8. **Change Discipline** — deploy safety, rollback capability, infrastructure-as-code coverage, configuration drift detection, atomic multi-repo promotion
-9. **Supply Chain** — dependency scanning, signed artifacts, software-bill-of-materials, container image provenance, CI credential hygiene
+7. **Cost Integrity** — blast-radius bounds, plausibility-monitor coverage, cost-anomaly alerting SLOs, per-tenant cost attribution. This dimension is fed primarily by the plausibility monitor's findings (see PLAUSIBILITY-MONITOR.md).
+8. **Change Discipline** — deploy safety, rollback capability, infrastructure-as-code coverage, configuration drift detection, atomic multi-repo promotion.
+9. **Supply Chain** — dependency scanning, signed artifacts, software-bill-of-materials, container image provenance, CI credential hygiene.
 
 ### Pillar D — Response Readiness
 
 The system's ability to detect, respond to, and recover from incidents.
 
-10. **Incident Response** — runbook maturity, drill cadence, panic-mode operator safety, false-positive discipline
-11. **Recovery & Continuity** — recovery-time objective evidence, recovery-point objective evidence, backup verification, disaster-recovery drills
-12. **Compliance Posture** — declared vs actual compliance, regulatory alignment (SOC 2, ISO 27001, HIPAA, PCI DSS as applicable), audit-trail preservation
+10. **Incident Response** — runbook maturity, drill cadence, panic-mode operator safety, false-positive discipline. **(Critical dimension — cannot be disabled.)**
+11. **Recovery & Continuity** — recovery-time objective evidence, recovery-point objective evidence, backup verification, disaster-recovery drills.
+12. **Compliance Posture** — declared vs actual compliance, regulatory alignment, audit-trail preservation.
+
+### The five critical dimensions
+
+Five of the twelve dimensions are designated **critical** and cannot be disabled by target configuration: Identity & Access Control, Perimeter Defense, Secret Management, Data Integrity, and Incident Response. The rationale is that these five are the dimensions whose compromise creates cascading exposure across the target's other defenses. See ADR-0010 for the full argument.
+
+The remaining seven dimensions may be disabled if a target's operator argues they are not applicable, and are configurable in secondary-view weighting. Their state is rendered on the scorecard grid, but they do not contribute to the headline number.
 
 ## The six maturity levels
 
-Each dimension is scored on a six-level maturity scale drawn from the Capability Maturity Model Integration (CMMI) tradition, adapted for adversarial-proof requirements.
+Each dimension is scored on a six-level maturity scale drawn from the Capability Maturity Model Integration (CMMI) tradition and adapted for adversarial-proof requirements.
 
 ### L0 — Absent
 
-No defense exists in this dimension. No attestation, no evidence, no process. The system is exposed on this dimension.
-
-**Kronos does not certify L0.** L0 is the state prior to any assessment; a target scored L0 in any dimension has not been meaningfully engaged with the framework in that dimension.
+No defense exists in this dimension. No documentation, no evidence, no process. **Kronos does not certify L0.** L0 is the state prior to any assessment; a target scored L0 in any dimension has not been meaningfully engaged with the framework in that dimension.
 
 ### L1 — Ad Hoc
 
-Some defense exists but is undocumented, unverified, and not repeatable. A developer knows the story but there is no written record; a control fires but no one has proven it fires under attack.
+Some defense exists but is undocumented, unverified, and not repeatable. A developer knows the story but there is no written record; a control fires but no one has confirmed it fires under attack.
 
 **Reachable through:** any engagement that surfaces the existence of some defense in the dimension, even if the defense is not verified.
 
 ### L2 — Managed
 
-The defense is documented, has a human-runbook, and is occasionally tested. The organization knows what the defense is supposed to do and how to check it, but the checks are manual, sporadic, and not tied to specific claims.
+The defense is documented and has a human-runbook. The organization knows what the defense is supposed to do and how to check it, but the checks are manual, sporadic, and not tied to specific claims.
 
 **Reachable through:** documentation of the defense plus at least one manual verification event recorded in the engagement record.
 
 ### L3 — Defined
 
-The defense is framework-integrated, has automated tests, and is attested by an attestation framework (specifically eos, though the pattern generalizes). Every claim about the defense is stated as a testable assertion; every assertion has an associated automated check; the checks run at a defined cadence.
+The defense is framework-integrated. An automated diagnostic attack for the dimension is defined in a shipped kronos engagement, and the most recent execution produced a PASS oracle verdict.
 
-**Reachable through:** an eos attestation cycle that closes with §9 telemetry assertions covering the dimension, or an equivalent attestation record.
+**Reachable through:** a shipped kronos engagement whose §7 attack matrix includes at least one attack targeting the dimension, whose §9 execution log records the attack as run, and whose §11 scorecard delta cites the attack's PASS verdict as the basis for the L3 determination.
+
+**Note on independence from eos.** Per ADR-0008, L3 attainment does not require an external attestation framework. When eos is co-installed in the target, the scorecard renders the corresponding eos cycle reference alongside the engagement reference for traceability. When eos is not installed, only the engagement reference is rendered. Neither is a prerequisite for the other. This change from the v0 SCORECARD resolves the contradiction Claude's cross-LLM review flagged in P1-2.
 
 ### L4 — Quantitatively Managed
 
@@ -86,17 +94,15 @@ The defense has been proven under adversarial pressure in the production environ
 
 ## The load-bearing property
 
-**Levels 4 and 5 are unreachable without kronos.** This is by design.
+**Levels 4 and 5 are unreachable without kronos.** Levels 0-3 are reachable through documentation, process, automated tests, and diagnostic attacks that pass. Levels 4 and 5 are defined in terms of adversarial survival under measurement — the defense must have fired against a specific diagnostic attack with expected metric signatures, and (for L5) that firing must have been observed in production with a scheduled re-verification cadence.
 
-Prior maturity models (BSIMM, OWASP SAMM, CMMI, NIST CSF, ISO 27001 Maturity Assessment) treat the upper levels as a function of process presence — the organization has documented practices, measured practices, continuously-improving practices. The measurement is process-internal. An organization can reach the top level of these models without ever having its defenses actually broken.
-
-Kronos defines Levels 4 and 5 in terms of adversarial survival. Level 4 requires the defense to have fired against the specific diagnostic attack whose success would have compromised the dimension. Level 5 requires that firing to have been observed in production or production-equivalent environment with a scheduled cadence of re-verification. No amount of documentation, attestation, or process maturity reaches Level 4 or Level 5.
-
-This is the specific inversion that makes kronos a peer discipline to attestation rather than a subordinate technique within it. Attestation gets a system to Level 3. Adversarial proof is the only path from Level 3 to Level 5.
+Prior maturity models (BSIMM, OWASP SAMM, CMMI, NIST CSF, ISO 27001 Maturity Assessment) treat the upper levels as a function of process maturity — the organization has documented practices, measured practices, continuously-improving practices. Kronos defines Levels 4 and 5 in terms of adversarial survival, not process presence. This is the specific inversion that makes kronos a peer discipline to attestation rather than a subordinate technique within it: attestation and framework-integration get a system to L3; adversarial proof is the only path from L3 to L5.
 
 ## Rendering
 
-The scorecard is rendered by the kronos runner (the React/TypeScript reference viewer) as a 4×3 grid, one cell per dimension, colored by maturity level:
+The scorecard is rendered by the kronos runner as a 4×3 grid, one cell per dimension, colored by maturity level. Each cell displays the numeric level and is click-through to the underlying findings and attestations that produced the score.
+
+### Six-level detail rendering (engineering-facing)
 
 - **L0** — dark gray
 - **L1** — red
@@ -105,33 +111,55 @@ The scorecard is rendered by the kronos runner (the React/TypeScript reference v
 - **L4** — green
 - **L5** — dark green
 
-Each cell displays the numeric level and is click-through to the underlying findings and attestations that produced the score. A top-line summary is also rendered — commonly the minimum-across-dimensions or the weighted-average-across-pillars; the specific summary formula is a target-scoped configuration in the scorecard's YAML frontmatter.
+### Traffic-light rendering (executive-facing)
 
-The rendering also supports historical view — the scorecard's state at any prior point in time can be reconstructed by walking the git history of the `kronos/engagement/06_shipped/` folder and re-computing the maturity levels as of the desired timestamp.
+Derived from the six-level detail:
 
-## Consulting engagement primitive
+- **Red** — L0, L1, L2 (not-yet-defensible)
+- **Yellow** — L3 (defensible in principle; unverified under adversarial pressure)
+- **Green** — L4, L5 (adversarially proven)
 
-The scorecard doubles as a commercial artifact. A typical engagement flow:
+Both renderings are always available. Executive summaries default to traffic-light; engineering detail views default to six-level. The runner renders both from the same underlying data.
 
-1. **Free assessment** — kronos runs against a prospective customer's target in `first-signal-stop` mode. The first attack that surfaces a finding produces the initial scorecard, showing where the target sits on each of twelve dimensions. This scorecard is the sales artifact.
-2. **Scoped engagement proposal** — the operator proposes a fixed-scope engagement to move specific dimensions from their current level to a target level. Example: "your Perimeter Defense sits at L2; a 90-day engagement will take it to L4 by shipping the specific attestations and running the specific kronos verifications required to unlock L3 and L4."
-3. **Engagement execution** — the operator runs eos cycles to reach L3 in the targeted dimensions, then kronos engagements to reach L4. The scorecard delta is the deliverable.
-4. **Continuous coverage** — after the engagement closes, a scheduled cadence of kronos re-verifications maintains L4 and works toward L5 in the remaining dimensions.
+## Dual-number headline rendering
 
-The scorecard is what the customer sees. The scorecard delta is what the customer pays for. The scorecard's continuous coverage is what the customer subscribes to.
+Every target's scorecard renders two headline numbers alongside the pillar/dimension grid:
+
+- **Pinned headline.** The scorecard's headline number computed against the target's currently-pinned catalog version. This is the score the target "paid for" or authored their engagements against.
+- **Latest headline.** The scorecard's headline number computed against the current head-of-catalog. This is the score under the framework's most recent adversarial understanding.
+
+The headline formula is fixed: **minimum-across the five critical dimensions** (Identity & Access Control, Perimeter Defense, Secret Management, Data Integrity, Incident Response). The five cannot be disabled; the formula cannot be reconfigured. This makes the headline number comparable across all kronos-scored targets.
+
+The framework does not permit rendering only the pinned score in the executive-facing view. Both numbers are always shown. When `latest < pinned`, the target has adversarial exposure that catalog updates would have surfaced but that the target has not yet incorporated.
+
+### Catalog-bump governance
+
+When a catalog update lowers a target's latest headline, the update is not immediately visible as a public scorecard change. Governance:
+
+1. Kronos announces the catalog update at least **90 days** before it takes effect for scorecard rendering.
+2. During the 90-day window, targets receive advance notice with the specific catalog entries and the specific dimensions affected.
+3. Targets may adopt the update immediately (re-pin) or defer.
+4. At window expiration, targets that have not re-pinned show `latest < pinned` in the dual-number rendering.
+
+**Field-falsification exception.** When a catalog update is prompted by a real-world incident (a published breach, an observed exploit, a critical CVE that maps to a new attack class), the notice window is compressed to **72 hours** and the incident is cited in the announcement. This preserves rapid response to threat-landscape changes.
 
 ## Configuration
 
 Each target's scorecard is configured by a `SCORECARD.md` file in the target's `kronos/engagement/` folder. The file's YAML frontmatter declares:
 
 - Target identifier and slug
-- Pillar and dimension configuration (a target may choose to disable dimensions that are not applicable — e.g., a system with no supply-chain exposure may disable Supply Chain)
-- Weighting for the top-line summary (uniform, pillar-weighted, or custom)
-- Catalog version pin (which version of the kronos threat catalog is applicable to this target's scoring)
+- Non-critical dimension enablement (critical dimensions cannot be disabled)
+- Catalog version pin
+- Weighting for secondary-view summaries (headline is fixed at minimum-across-critical)
+- Integration paths (eos folder if co-installed; capacity model file for plausibility monitor)
 
-Changing the catalog version pin is a governance event; targets may hold at a specific catalog version and defer scorecard recomputation until they explicitly re-pin.
+Changing the catalog version pin is a governance event; targets hold at a specific catalog version until they explicitly re-pin. Changing a non-critical dimension's enablement is a lower-friction operator decision.
 
-## Scorecard state versus scorecard trajectory
+## Deprecated catalog entries freeze historical scores
+
+When a catalog entry is deprecated (because the underlying attack technique is obsolete or the underlying vulnerability is no longer relevant), the deprecation freezes historical scores at the catalog version in effect when they were computed. Deprecation does not retroactively rescore past engagements. A target scored L4 in a dimension based on an engagement that ran a now-deprecated attack remains L4 in the historical record; the dimension's current state is recomputed against the current catalog on the next engagement or re-pinning event.
+
+## State versus trajectory
 
 The scorecard reflects the target's *current state*. Two additional views are important:
 
@@ -144,18 +172,17 @@ Both are computed from git history without requiring separate persistence. The r
 
 When eos is co-installed in the target:
 
-- Levels 0-3 are shared with the eos attestation model. Reaching L3 in a dimension requires a closed eos attestation covering that dimension. The scorecard reads the eos cycle folder to determine L3 eligibility.
-- Levels 4-5 remain kronos-exclusive. No eos attestation reaches L4 without a corresponding kronos engagement.
+- The scorecard renders the corresponding eos cycle reference alongside the shipped-engagement reference for every L3+ dimension. This is a traceability convenience, not a gate.
 - When a kronos finding falsifies a prior eos attestation, the affected dimension drops from L3 (or higher) to L1 until the attestation is re-closed AND the kronos verification is re-run. This is the automatic feedback loop.
+- Kronos findings that falsify eos attestations auto-file backlog cycles in the target's `foundation/eos/cycle/00_backlog/`.
 
 When eos is NOT co-installed:
 
-- Levels 0-2 are reachable via documentation and manual verification recorded in the engagement record.
-- Reaching L3 in a dimension requires either an equivalent attestation record from another framework (documented in the engagement) or a kronos engagement that includes an explicit L3 attestation step.
-- Levels 4-5 remain kronos-exclusive as always.
+- Reaching L3 in a dimension requires a shipped kronos engagement with a passing diagnostic attack (per ADR-0008). No external attestation is required.
+- Levels 4-5 progression follows the same rules as when eos is co-installed.
 
 ## Non-scored dimensions
 
 Some target concerns fall outside the twelve dimensions in this scorecard. Examples: business continuity beyond disaster recovery, contract-management maturity, customer-support responsiveness, product-market-fit indicators. These are legitimate concerns; they are simply not what this scorecard measures.
 
-Extension pillars may be defined by targets that require them (an extended `Pillar E — Business Continuity`, for example), but the four canonical pillars are the ones this scorecard commits to across all targets. Extension pillars are additive and do not affect the twelve canonical dimensions' scoring.
+Extension pillars may be defined by targets that require them, but the four canonical pillars are the ones this scorecard commits to across all targets. Extension pillars are additive and do not affect the twelve canonical dimensions' scoring, and cannot alter the five critical dimensions that define the headline.

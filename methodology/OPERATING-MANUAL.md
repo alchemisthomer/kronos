@@ -68,10 +68,25 @@ A common assumption in adversarial testing is that production is off-limits. Kro
 
 Two engagement modes govern production testing:
 
-- **`first-signal-stop`** — the engagement proceeds until it produces the first evidence that a defense has failed, at which point the engagement immediately stops, writes the finding, alerts the designated contact of record, and closes. The engagement does not proceed to exhaust the finding surface. This is the correct posture for prod evaluation of unfamiliar targets, external customer engagements, and any situation where the operator does not have full visibility into the blast radius of continued attack.
+- **`first-signal-stop`** — the engagement proceeds until it produces the first finding at-or-above the engagement's declared severity threshold, at which point the engagement immediately stops, writes the finding, alerts the designated contact of record, and closes. Findings below threshold are recorded but do not halt execution. INCONCLUSIVE oracle verdicts do not halt (they are not findings). Attack matrices in this mode must be severity-ordered so that "stop early" means "stop on the worst thing reached," not "stop on the first thing tried." (This definition supersedes the v0 semantics per ADR-0010 and Claude review P2-1.)
 - **`go-to-town`** — the engagement continues attacking until either the planned scenario matrix is exhausted, the rate ceilings are hit, or the authorization time window closes. This is the correct posture for isolated test environments where continued attack surfaces more findings without operational risk.
 
-The default for production engagements is `first-signal-stop`. Any escalation to `go-to-town` in a production environment requires a signed authorization artifact that explicitly enables destructive testing and names the operator of record as accountable for the operational consequences.
+The default for production engagements is `first-signal-stop` with a severity threshold of `critical` (highest reasonable threshold, guaranteeing that the engagement stops only when a critical exposure has been demonstrated). Any escalation to `go-to-town` in a production environment requires a signed authorization artifact that explicitly enables destructive testing and names the operator of record as accountable for the operational consequences.
+
+### Incident-state authorization
+
+Per ADR-0009, the authorization artifact recognizes a distinct incident-state that changes the framework's tool-invocation gate behavior. When `incidentState.declared: true`:
+
+- **`dataClassPreservation: enforced`** — the framework structurally refuses to invoke any tool whose declared `resource_classes_affected` intersects the engagement's enumerated `dataClassResources` (persistent storage, identity records, DNS records, audit logs, encryption keys by default). This is the founding-incident lesson made structural: under declared incident, data-class resources are protected regardless of the operator's authorization or the tool's declared capabilities.
+- **`signedSober: false`** — the framework refuses tools at authorization ceiling ≥ 3 (destructive testing). Duress-signed authorizations do not unlock destructive modes.
+
+The `dataClassPreservation: waived` mode requires an additional signature beyond the standard approver signature — designed to make the "sign it in the middle of a panic to waive the preservation" path expensive enough to prevent operator error under duress.
+
+### Prospect-scope free assessment
+
+Per ADR-0009, "point kronos at a prospective customer's production system" without prior authorization is not supported. The commercial free-assessment flow is onboarding-gated: the prospect enrolls their target, signs a single-scope authorization artifact (safety ceiling 1, first-signal-stop with critical or high threshold, 24-hour duration), and only after signature does the assessment run. The barrier is a single-page authorization signed during enrollment — lower friction than a traditional pen-testing contract, but structurally an authorization.
+
+The framework's `production-authorization-guard` action refuses any engagement targeting a third-party production environment without a valid prospect-scope authorization artifact.
 
 Passive modes (compliance drift, read-only observation) may run in production without either mode declaration, subject to rate ceilings.
 
@@ -190,14 +205,25 @@ The kronos threat catalog is expected to grow monotonically over time from three
 
 Every catalog addition is a versioned entry with a stable identifier; targets pin their scorecard against a specific catalog version so that "score improved" and "score got worse because new attacks were added" are distinguishable.
 
-## Ceremony parity with eos
+## Runtime primitives referenced
 
-Kronos adopts the same commit ceremony as eos:
+The framework's core runtime primitives, described in DESIGN.md §9 and specified in adjacent methodology documents:
+
+- **Attack** — the specific probe executed against a target (formerly "oracle input"; the attack is what the tool does).
+- **Attack oracle** — the deterministic assertion evaluating whether the attack succeeded (PASS/FAIL/INCONCLUSIVE). The word "oracle" alone is deprecated in favor of "attack oracle" to disambiguate from the plausibility monitor (per ADR-0007).
+- **Plausibility monitor** — continuous or scheduled evaluation of observed values against a declared capacity model. Emits findings when observations physically exceed bounds. See [PLAUSIBILITY-MONITOR.md](PLAUSIBILITY-MONITOR.md). Runs outside the engagement lifecycle.
+- **Capacity model** — the operator-authored (or observed-inferred) mapping from declared infrastructure to physical bounds per resource class. Committed to `<target>/kronos/capacity.yaml`.
+- **Evidence** — the persistent record of an attack and its oracle evaluation, hashed by SHA-256, committed to git.
+- **Execution provenance** — signed attestation binding an evidence artifact to a specific tool invocation at a specific time by a specific operator. Distinguishes evidence-integrity from execution-authenticity (per Claude review P2-3).
+- **Finding** — an assertion of a specific defense failure or plausibility violation, backed by specific evidence, with reproduction instructions and suggested remediation.
+
+## Commit ceremony
+
+Kronos adopts the following commit ceremony:
 
 - All commits GPG-signed.
 - All pushes via SSH.
-- Neural-pathway branches (`@<username>/neuralpathway/<base>-<current>-<timestamp>-<slug>`) for scratch work.
-- Cycle branches (`engagement/kronos-<target>-<N>`) for shared multi-agent engagements.
+- Feature branches use the `@<username>/neuralpathway/<base>-<current>-<timestamp>-<slug>` convention for scratch work; shared engagement branches use `engagement/kronos-<target>-<N>` for multi-agent engagements.
 - Squash-merge to the deployment-pointer branch on engagement close.
 
-The framework does not enforce these — they are the operator's discipline. But kronos's own runner and actions assume this ceremony when validating engagement documents.
+The framework does not enforce these — they are the operator's discipline. Kronos's own runner and actions assume this ceremony when validating engagement documents.

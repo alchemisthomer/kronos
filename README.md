@@ -2,7 +2,7 @@
 
 > Adversarial assurance for AI-built systems — a governance-gated, filesystem-native methodology for proving that software is safe to run.
 
-**Status:** pre-alpha. Design converging. Runner, oauth-server, actions, and templates all pending scaffold once the design review completes.
+**Status:** pre-alpha. Design in cross-LLM review (v0.1 post-Claude review). Runner, oauth-server, actions, and templates all pending scaffold once the design review completes.
 
 ---
 
@@ -41,7 +41,7 @@ Both frameworks operate independently. When co-installed in the same target, the
 
 | Path | Contents |
 |---|---|
-| [`methodology/`](methodology/) | The operating manual, the seven novel claims, the engagement document template, the maturity scorecard model, the tool binding contract, and the industry-standards alignment |
+| [`methodology/`](methodology/) | The operating manual, the seven novel claims, the engagement document template, the maturity scorecard model, the tool binding contract, the plausibility monitor and capacity model, and the industry-standards alignment |
 | [`runner/`](runner/) | (Pending scaffold) A React/TypeScript reference viewer that reads any GitHub repository's `kronos/engagement/**` folder tree via the GitHub REST API and renders the kanban plus the scorecard in the browser. Edits land as pull requests. Independent of the technology of the project under evaluation |
 | [`oauth-server/`](oauth-server/) | (Pending scaffold) A small standalone Node/Express service that completes the GitHub App user-to-server OAuth code-for-token exchange on behalf of the browser viewer. Required only when the viewer is deployed with GitHub App OAuth enabled (viewer works PAT-only without it) |
 | [`actions/`](actions/) | (Pending scaffold) Reusable GitHub Actions: kanban structure validator, authorization artifact validator, evidence hash verifier, scorecard consistency check, first-signal-stop enforcer, production authorization guard, eos backlog auto-file |

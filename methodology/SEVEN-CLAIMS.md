@@ -2,6 +2,18 @@
 
 The kronos engagement methodology is the conjunction of seven properties that, taken together, are not present in any prior software assurance methodology known to the author. Each is described at the conceptual level below. A more detailed disclosure — with prior-art analysis, embodiments, and inventive-claim structure — will be maintained in `../PATENT-DISCLOSURE-DRAFT.md` (to be authored after design review converges) for eventual review by IP counsel.
 
+## Deferred decision — patent strategy vs open-source moat strategy
+
+The Claude cross-LLM design review of v0 flagged (finding P3-1) a real tension in the current framing. Several of the seven properties describe methodology, process, or business method; in the US these face steep subject-matter-eligibility headwinds under the Alice/§101 framework. The technically-defensible mechanisms — enumeration reconciliation, execution-provenance signing, git-history scorecard recomputation — are stronger candidates for patent claims but are not what the current numbered claim structure emphasizes. Separately, the framework is designed in public, open-sourced under AGPL, and publishes findings by default; each is arguably a public disclosure that starts US patent-clock windows and can foreclose non-US absolute-novelty patentability.
+
+The operator has elected to preserve both framings for now and defer the strategic decision until IP counsel review. This document therefore continues to describe the properties as claim scaffolding while acknowledging the tension. Downstream consequences of the deferred decision:
+
+- If the strategy resolves toward patent play, this document will be revised to narrow the claims to technical mechanisms, a US provisional will be filed before further public disclosure, and the repository visibility may be adjusted during the provisional-filing window.
+- If the strategy resolves toward open-source moat play, this document will be revised to drop patent framing entirely, retaining the properties as descriptive novelty claims rather than patent claims. AGPL, brand, ecosystem, and consulting practice become the primary defensive moat.
+- If the strategy resolves toward hybrid (narrow patent scope on technical mechanisms + open-source moat on methodology), this document will be revised to distinguish the two categories explicitly.
+
+The reader should treat this document's use of the word "claim" as provisional pending the strategy decision.
+
 ---
 
 ## 1. Presumption-of-failure as governance discipline

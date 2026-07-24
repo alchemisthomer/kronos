@@ -12,6 +12,7 @@ The methodology folder contains the intellectual core of the kronos framework �
 | [`TEMPLATE.md`](TEMPLATE.md) | The engagement document scaffold that adopters instantiate for each engagement |
 | [`TOOL-BINDING.md`](TOOL-BINDING.md) | The four-layer tool binding contract: how the framework delegates attack execution to bare-shell tools, structured adapters, MCP-compliant tools, and native kronos tools |
 | [`INDUSTRY-ALIGNMENT.md`](INDUSTRY-ALIGNMENT.md) | Kronos's positioning against the compliance landscape (SOC 2, ISO 27001, PCI DSS, OWASP ASVS, NIST CSF, NIST AI RMF, AWS Well-Architected, MITRE ATT&CK / ATLAS / CAPEC / CWE / CVE, and more), plus the per-standard mapping strategy |
+| [`PLAUSIBILITY-MONITOR.md`](PLAUSIBILITY-MONITOR.md) | The capacity-model and plausibility-monitor primitives — continuous evaluation of observed values against declared physical bounds. Distinct from the per-attack oracle. This is the primitive that would have caught the founding incident within hours. (Added in v0.1 per Claude review P1-1.) |
 
 ## Read order
 
@@ -19,10 +20,11 @@ For a first-time reader, the recommended order is:
 
 1. `OPERATING-MANUAL.md` — how the framework runs day-to-day.
 2. `SCORECARD.md` — what the framework produces as its primary consumer artifact.
-3. `SEVEN-CLAIMS.md` — why the framework is novel.
+3. `SEVEN-CLAIMS.md` — why the framework is novel (with a deferred-decision block on patent-vs-open-source strategy).
 4. `TEMPLATE.md` — the concrete artifact operators author.
-5. `TOOL-BINDING.md` — how tools plug into the framework.
-6. `INDUSTRY-ALIGNMENT.md` — where kronos sits in the compliance landscape.
+5. `PLAUSIBILITY-MONITOR.md` — the continuous impossibility-check primitive that runs outside the engagement lifecycle.
+6. `TOOL-BINDING.md` — how tools plug into the framework.
+7. `INDUSTRY-ALIGNMENT.md` — where kronos sits in the compliance landscape.
 
 ## Companion documents (repo root)
 
