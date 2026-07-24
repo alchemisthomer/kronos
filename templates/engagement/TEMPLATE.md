@@ -12,7 +12,8 @@
 | **Prior engagement** | `<target-slug>.kronos-<N-1>` (`—` if first against this target) |
 | **Mode** | `red-team` / `black-box` / `gray-box` / `assertion-harness` / `destructive-load` / `data-pollution` / `backend-flooding` / `social-engineering` / `supply-chain` / `insider-simulation` / `cost-adversarial` / `compliance-drift` / `recovery-adversarial` (comma-separated if multiple) |
 | **Environment** | `production` / `staging` / `isolated-test` |
-| **Safety mode** | `first-signal-stop` / `go-to-town` |
+| **Execution policy** | `passive` / `impact-bounded` / `campaign-complete` (per ADR-0014) |
+| **Stop condition (if impact-bounded)** | `first-signal-stop` / `matrix-complete` / `impact-budget-exhausted` |
 | **Catalog version** | `kronos-catalog-YYYY.MM.DD` (the threat catalog version this engagement is pinned against) |
 | **Theme** | one-line summary (e.g., "verify origin-secret zero-leak against attacker-owned CloudFront") |
 | **Estimated effort** | Nh |
@@ -117,10 +118,12 @@ incidentState:
     - audit_logs                                  # CloudTrail trails, log archives, evidence bundles
     - encryption_keys                             # KMS keys, secrets vault entries
 
-# Chain-of-authorization block (per ADR-0009). Required for engagements whose
-# attack matrix touches third-party platforms (cloud providers, SaaS services,
-# third-party APIs). Each third party requires its own acknowledgment.
+# Chain-of-authorization block (per ADR-0009; MANDATORY in v0.3 per Grok review
+# when any attack references third-party resources). The
+# authorization-artifact-validator action FAILS the engagement if any attack
+# in §7 references a resource class from a party not enumerated here.
 chainOfAuthorization:
+  required: true                                # v0.3: framework enforces
   thirdParties:
     - party: aws
       accountId: {redact-in-public-artifact}
@@ -131,13 +134,33 @@ chainOfAuthorization:
         is the account holder or has written authorization from the account
         holder to execute the described actions.
       reference: aws-aup-2024-05
+      signature: {signed by operator}           # v0.3: per-third-party ack signed
+
+# Example: waived incident-state flow (v0.3 per Grok review §4)
+# When incidentState.declared: true AND dataClassPreservation: waived,
+# the following additional signature is required beyond the standard
+# approver signature. This makes the "sign in the middle of a panic" path
+# expensive enough to prevent operator error under duress.
+#
+# incidentState:
+#   declared: true
+#   signedSober: false               # duress-signed authorization
+#   dataClassPreservation: waived    # requires additional signature
+#   additionalSignatureForWaiver:
+#     signer: {second approver identity}
+#     signature: {signed by second approver}
+#     signedAt: {timestamp}
+#     rationale: |
+#       {explicit rationale for why data-class preservation must be waived;
+#        recorded in permanent engagement history for post-incident review}
 ```
 
 ## §3 Rules of engagement
 
 - **Modes enabled:** {list, matches header table}
 - **Environment posture:** {matches header table}
-- **Safety mode:** {first-signal-stop or go-to-town, matches header table}
+- **Execution policy:** {passive / impact-bounded / campaign-complete, matches header table — per ADR-0014}
+- **Stop condition:** {first-signal-stop / matrix-complete / impact-budget-exhausted — only meaningful for impact-bounded}
 - **Severity threshold (for first-signal-stop):** {critical | high | medium | low} — the minimum severity at which a finding stops the engagement. Findings below this threshold are recorded but do not halt execution. (Per ADR-0010 and the severity-ordered matrix requirement.)
 - **INCONCLUSIVE handling:** {continue | halt-for-review} — behavior when an oracle returns INCONCLUSIVE. Default is `continue` (INCONCLUSIVE is not a finding); `halt-for-review` requires operator adjudication before the engagement proceeds.
 - **Retention policy:** {how long evidence is retained, where it is stored, who has access}

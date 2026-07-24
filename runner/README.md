@@ -30,6 +30,17 @@ When both frameworks are installed in the same target, the runner presents both 
 
 The runner works PAT-only for read access to public repositories and for write access when the operator provides a personal access token. For deployments requiring GitHub App user-to-server OAuth (an installed GitHub App with fine-grained permissions), the runner delegates the code-for-token exchange to the standalone [`../oauth-server/`](../oauth-server/) service. The oauth-server is optional; the runner is fully functional without it.
 
+## Batch-commit guidance for evidence-heavy engagements (v0.3 per Grok review)
+
+Individual per-artifact PR writes work for lightweight engagements (a handful of evidence artifacts per run). For evidence-heavy engagements — dozens of artifacts per run, or continuous-plane engagements producing findings at scheduled cadence — per-artifact PR writes are operationally slow and produce noisy PR history.
+
+The v0.3 runner supports two additional write modes for these cases:
+
+- **Batch commit mode.** The runner accumulates evidence artifacts and manifest updates locally, then commits them as a single atomic batch at engagement close (or at a checkpoint declared by the operator). A single PR carries the entire evidence bundle; reviewers see the coherent artifact set rather than N incremental commits.
+- **Direct push mode (authorized operators only).** For operators who have write authority to the target repository and prefer to skip the PR-review step for their own kronos activity, the runner may push directly to the target's designated engagement branch. Direct push requires explicit configuration per-target and is not the default. All commits remain signed; the PR-review step is skipped, not the signature.
+
+The PR-write default is preserved for engagements where an external reviewer is expected to approve findings before they land in the target's history. Batch and direct modes are opt-in based on operator role and engagement type.
+
 ## Deferred to a later revision
 
 - Real-time push notifications for engagement state changes (webhook consumer)

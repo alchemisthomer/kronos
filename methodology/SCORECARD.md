@@ -51,6 +51,67 @@ A dimension's rendering combines these fields into a legible summary. Example ex
 
 That is materially stronger than a "green L4 cell" and more honest about what the framework has and hasn't verified.
 
+### ASCII rendering examples (v0.3 per Grok review)
+
+**Six-level detail grid** (engineering-facing):
+
+```
+                              PILLAR A         PILLAR B          PILLAR C            PILLAR D
+                              Perimeter        Runtime           Operational         Response
+                              & Access         Integrity         Discipline          Readiness
+────────────────────────────────────────────────────────────────────────────────────────────────
+   1  Identity & Access [!]   L4 survived      L3 survived       L4 survived         L2 partial
+   2  Perimeter Defense [!]   L3 survived      —                 —                   —
+   3  Secret Management [!]   L4 survived      —                 —                   —
+   4  Data Integrity    [!]   —                L3 falsified      —                   —
+   5  Availability            —                L3 survived       —                   —
+   6  Observability           —                L2 untested       —                   —
+   7  Cost Integrity          —                —                 L3 survived (PM)    —
+   8  Change Discipline       —                —                 L2 survived         —
+   9  Supply Chain            —                —                 L1 untested         —
+   10 Incident Response [!]   —                —                 —                   L3 survived
+   11 Recovery & Continuity   —                —                 —                   L2 partial
+   12 Compliance Posture      —                —                 —                   L2 survived
+
+  [!] = critical dimension (cannot be disabled from headline)
+  (PM) = fed primarily by plausibility monitor rather than attack oracle
+```
+
+**Executive traffic-light** (derived from six-level):
+
+```
+       PERIMETER & ACCESS       RUNTIME INTEGRITY        OPS DISCIPLINE          RESPONSE READINESS
+       ┌─────────┬─────────┐    ┌─────────┬─────────┐    ┌─────────┬─────────┐   ┌─────────┬─────────┐
+       │ Identity│ green   │    │  Data   │  red    │    │  Cost   │ yellow  │   │Incident │ yellow  │
+       │ & Access│  (L4)   │    │Integrity│ (L1,    │    │Integrity│  (L3)   │   │Response │  (L3)   │
+       │  [!]    │         │    │  [!]    │  fals-  │    │         │         │   │  [!]    │         │
+       ├─────────┼─────────┤    │         │ ified)  │    ├─────────┼─────────┤   ├─────────┼─────────┤
+       │Perimeter│ yellow  │    ├─────────┼─────────┤    │ Change  │ red     │   │Recovery │ red     │
+       │ Defense │  (L3)   │    │Availa-  │ yellow  │    │ Disc.   │  (L2)   │   │& Cont.  │  (L2)   │
+       │  [!]    │         │    │bility   │  (L3)   │    │         │         │   │         │         │
+       ├─────────┼─────────┤    ├─────────┼─────────┤    ├─────────┼─────────┤   ├─────────┼─────────┤
+       │ Secret  │ green   │    │Observ-  │ red     │    │ Supply  │ red     │   │Compl-   │ red     │
+       │  Mgmt   │  (L4)   │    │ability  │  (L2)   │    │ Chain   │  (L1)   │   │iance    │  (L2)   │
+       │  [!]    │         │    │         │         │    │         │         │   │         │         │
+       └─────────┴─────────┘    └─────────┴─────────┘    └─────────┴─────────┘   └─────────┴─────────┘
+       
+       HEADLINE (dual-number, per ADR-0010):
+         PINNED   (kronos-catalog-2026.06): status DEGRADED — 1 falsified critical (Data Integrity)
+         LATEST   (kronos-catalog-2026.07): status DEGRADED — same +2 unevaluated new entries in Perimeter
+```
+
+Both renderings are always available. Executive views default to traffic-light; engineering detail views default to the six-level. The runner supports both from the same underlying data.
+
+### Plausibility monitor vs attack oracle — double-counting clarification (v0.3 per Grok review)
+
+The plausibility monitor and attack oracles can both produce findings that affect the same scorecard dimension (particularly Cost Integrity, which is fed by both). Double-counting is avoided as follows:
+
+- **Findings are deduplicated by claim.** Both a plausibility-monitor observation and an attack-oracle verdict may reference the same claim (e.g., `CLAIM-cost-integrity-nat-throughput-bound`). If both produce findings against the same claim within a short correlation window, they are aggregated as a single finding with two evidence sources rather than two separate findings.
+- **Effectiveness state is monotonic per claim.** A claim's effectiveness state is the aggregate of all recent findings against it. Two independent falsifications don't compound (the claim doesn't become "double-falsified"); one is sufficient.
+- **Coverage counts a claim once.** A claim evaluated by both a plausibility monitor and an attack oracle counts once in the coverage denominator, not twice.
+- **Cost Integrity is primarily fed by the plausibility monitor** — most cost-related claims have their effectiveness determined by continuous reconciliation, not by adversarial attacks. Attack oracles for cost-adversarial engagements (destructive-load with cost blast radius) feed the dimension but as a secondary source.
+- **Source attribution is preserved** in the finding record (`source: continuous-plane:<eval-id>` vs `source: engagement:<id>:run:<id>:attack:<id>`) so an operator drilling into a dimension can see which findings came from which pathway.
+
 ## What each field means
 
 ### Maturity axis

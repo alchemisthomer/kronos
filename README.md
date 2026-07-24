@@ -99,9 +99,15 @@ See [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md) for the concept
 
 A more detailed disclosure will be maintained in `PATENT-DISCLOSURE-DRAFT.md` (to be authored after design review converges) for eventual review by IP counsel. Contributions to this repository are subject to the AGPL-3.0 patent grant (§11).
 
+## IP posture (deferred hybrid — see `methodology/INVENTIVE-CONCEPT-CANDIDATES.md`)
+
+Kronos is licensed under GNU AGPL v3 today, published in public, and its findings are opt-in-disclosable per finding. The strategic question of whether specific technical mechanisms (enumeration reconciliation, execution-provenance signing, git-history scorecard recomputation, capacity-model bounds derivation, dual-plane execution model) warrant patent protection is **deferred pending IP counsel review**. The operator has elected hybrid framing — the framework is described using both patent-claim and open-source-moat language in parallel; downstream resolution will narrow one direction, both, or neither.
+
+The framework's structural properties (git-native governance, AGPL license, open catalog, community contribution flow) remain in place regardless of the IP resolution. Contributors to the repository accept the AGPL-3.0 patent grant (§11) as part of the contribution agreement.
+
 ## License
 
-[GNU Affero General Public License v3.0](LICENSE). Deployments that expose modified versions of this code over a network must make the modified source available under the same license.
+[GNU Affero General Public License v3.0](LICENSE). Deployments that expose modified versions of this code over a network must offer corresponding source to those network users. The license does not restrict use, does not detect forks, and does not shield operators from liability for unauthorized activity — it is a copyleft license, not an authorization control.
 
 ## Reference implementation
 

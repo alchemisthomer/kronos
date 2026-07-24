@@ -1,10 +1,12 @@
-# Kronos — Design (v0.2, post-Claude and post-ChatGPT reviews)
+# Kronos — Design (v0.3, post-Claude, post-ChatGPT, and post-Grok reviews)
 
-**Document state:** Draft — v0.2 (folds in Claude cross-LLM review of v0 and ChatGPT cross-LLM review of v0; next reviewer: Grok)
+**Document state:** Draft — v0.3 (folds in Claude cross-LLM review of v0, ChatGPT cross-LLM review of v0, and Grok cross-LLM review of v0.1; next reviewer: Gemini)
 **Purpose:** wide-net vision document for the cross-LLM design review process. This document exists to be critiqued, refined, and hardened through iterative review by Claude, ChatGPT, Grok, and Gemini before any production code is written. The subsequent v0.N revisions are produced by the scribe based on synthesized review feedback.
 **Author:** the operator and the kronos scribe
 **Origin:** the founding incident of 2026-07-17; the productization pattern of alchemisthomer/eos; the design conversations of 2026-07-24; two cross-LLM reviews of v0 (Claude and ChatGPT).
 **Changes from v0 (via Claude review, landed in v0.1):** plausibility monitor + capacity model added as first-class primitives (ADR-0007); L3 redefined to be attainable natively without external attestation (ADR-0008); authorization schema extended with incident-state and chain-of-authorization blocks (ADR-0009); scorecard headline made non-configurable over five critical dimensions with dual-number rendering (ADR-0010); first-signal-stop redefined as severity-thresholded with severity-ordered matrix; execution-provenance signing added to evidence contract; enumeration reconciliation added to tool-binding manifest schema; second reference engagement (expected FAIL) added; unfalsifiable claims replaced with bounded operational claims; patent-strategy tension flagged; register partially cleaned.
+**Changes from v0.2 (via Grok review, landed in v0.3):** prominent **IP posture** section added to README + DESIGN §17 (respecting operator's deferred hybrid choice; naming the strongest technical-mechanism patent-claim candidates vs the methodology-framing candidates that face Alice/§101 headwinds); **rendering examples** (ASCII grids for both six-level detail view and executive traffic-light view) added to SCORECARD; **plausibility-monitor vs attack-oracle double-counting** clarification added to SCORECARD; **first-signal-stop vestiges** cleaned across DESIGN and TEMPLATE (execution policy is now `passive` / `impact-bounded` / `campaign-complete` per ADR-0014, with `first-signal-stop` as one stop condition within `impact-bounded`); **MCP invocation sequence** concrete example added to TOOL-BINDING (nine-step flow: capability discovery → attack binding → pre-invocation gate → invocation → result reception → evidence mapping → provenance signing → oracle handoff → impact-budget accounting); **tool-verify golden-target mandate** added to TOOL-BINDING for all Layer 1+ tools; **multi-persona LLM evaluation** subsection added to OPERATING-MANUAL with explicit guardrails (LLMs as proposers only; deterministic oracles remain authoritative; per-persona provenance tags); **chainOfAuthorization made structurally required** in TEMPLATE §2 with framework-enforced validator (not just declared); **waived incident-state flow sample** added to TEMPLATE showing additional-signature requirement for panic-mode data-class preservation waiver; **MVP sequencing tension** between ChatGPT (engine-first) and Grok (runner-first) explicitly noted in DESIGN §13 and deferred to Gemini/operator; **batch-commit and direct-push modes** documented in runner/README for evidence-heavy engagements.
+
 **Changes from v0.1 (via ChatGPT review, landed in v0.2):** **continuous assurance plane** added as first-class runtime peer to the engagement plane, with "challenge" as the parent abstraction (attack becomes one subtype); **canonical typed domain model** separates engagement, plan, run, observation, oracle result, finding, evidence manifest, and score snapshot into individually-versioned objects; **multidimensional scorecard state** per cell (maturity + effectiveness + coverage + confidence + freshness + fidelity + open findings + catalog gap) replaces single-level rendering; **impact-budgeted execution** replaces first-signal-stop as the primary safety envelope; **two-tier evidence storage** separates sanitized repository-tier records from raw protected-tier artifacts; **three-axis authorization** (impact × environment × executor-assurance) replaces single ceiling; **tool-binding hardened** (typed argv default, shell requires explicit high-risk capability, MCP is transport not trust tier, sandbox mandatory by impact class, credentials not via env vars by default); **expanded oracle state machine** (10 claim-oriented outcomes including CLAIM_SURVIVED, CLAIM_FALSIFIED, PARTIAL_OR_DEGRADED, INCONCLUSIVE, OBSERVABILITY_GAP, INVALID_TEST, EXECUTION_ERROR, BLOCKED, HALTED_SAFETY, NOT_RUN); **catalog governance** (six lifecycle states, applicability predicates, LLM watcher quarantine, no fully-automatic promotion); **standards baseline updated** to ASVS 5.0.0, AISVS 1.0, LLMSVS 2.0, OSCAL import/export, OpenCRE cross-references; **certification positioning narrowed** to "companion for selected technical and operational controls"; **mission language corrected** to remove "is my software safe" claim; **AGPL language corrected**; **SEVEN-CLAIMS.md renamed to INVENTIVE-CONCEPT-CANDIDATES.md** with explicit prior-art acknowledgment (NIST SP 800-115, MITRE CALDERA, Atomic Red Team, BAS platforms, ATT&CK scoring, OSCAL, SLSA); **reference engagement changed** to update one claim rather than a whole dimension. See ADRs 0011-0019 for the architectural decisions.
 **Companion documents:** [`methodology/OPERATING-MANUAL.md`](methodology/OPERATING-MANUAL.md), [`methodology/INVENTIVE-CONCEPT-CANDIDATES.md`](methodology/INVENTIVE-CONCEPT-CANDIDATES.md), [`methodology/SCORECARD.md`](methodology/SCORECARD.md), [`methodology/TEMPLATE.md`](methodology/TEMPLATE.md), [`methodology/TOOL-BINDING.md`](methodology/TOOL-BINDING.md), [`methodology/PLAUSIBILITY-MONITOR.md`](methodology/PLAUSIBILITY-MONITOR.md), [`methodology/CONTINUOUS-ASSURANCE.md`](methodology/CONTINUOUS-ASSURANCE.md), [`methodology/DOMAIN-MODEL.md`](methodology/DOMAIN-MODEL.md), [`methodology/EVIDENCE.md`](methodology/EVIDENCE.md), [`methodology/ORACLE.md`](methodology/ORACLE.md), [`methodology/CATALOG.md`](methodology/CATALOG.md), [`methodology/INDUSTRY-ALIGNMENT.md`](methodology/INDUSTRY-ALIGNMENT.md), [`docs/inception/00-founding-incident.md`](docs/inception/00-founding-incident.md)
 
@@ -135,13 +137,17 @@ Each dimension is scored on a six-level maturity scale drawn from the Capability
 
 The load-bearing property is that Levels 4 and 5 are structurally unreachable without kronos. Levels 0-3 are reachable through documentation, process, and attestation alone. Levels 4 and 5 are defined in terms of adversarial survival, not process presence. This is the specific inversion that makes kronos a peer discipline to attestation rather than a subordinate technique within it: attestation gets a system to Level 3; adversarial proof is the only path from Level 3 to Level 5.
 
-The scorecard is rendered by the kronos runner as a 4×3 grid, one cell per dimension, colored by level. Each cell is click-through to the underlying findings and attestations that produced the score. A top-line summary is also rendered — commonly the minimum-across-dimensions or the weighted-average-across-pillars.
+The scorecard is rendered by the kronos runner as a 4×3 grid, one cell per dimension. Each cell carries the multidimensional state defined in ADR-0013 (maturity + effectiveness + coverage + confidence + freshness + environment fidelity + open findings + catalog gap) — not a single level. Click-through to underlying findings, attestations, and evidence.
+
+The **headline** is the dual-number rendering per ADR-0010: a pinned headline (against the target's currently-pinned catalog version) and a latest headline (against head-of-catalog). Each headline is a **multi-signal status summary**, not a weighted average — reporting falsified critical claims, untested critical claims, weighted coverage, minimum critical maturity, minimum critical effectiveness, evidence freshness, catalog gap, and an overall status label (`current` / `degraded` / `stale` / `materially-incomplete`). Weighted-average summaries are available for narrow downstream integrations (slide decks, board reports) but are never the primary safety summary — they let strong low-risk dimensions conceal failed critical claims.
+
+Historical trajectory (how the scorecard has evolved over time) is computed by walking the git history of the target's `kronos/engagement/06_shipped/` folder and recomputing the scorecard at each historical HEAD.
 
 Historical trajectory (how the scorecard has evolved over time) is computed by walking the git history of the target's `kronos/engagement/06_shipped/` folder and recomputing the scorecard at each historical HEAD. The trajectory view answers "are we getting better or worse over time?" without requiring separate persistence infrastructure.
 
 The scorecard doubles as a commercial artifact. The engagement flow is:
 
-1. **Free assessment** — kronos runs against a prospective customer's target in `first-signal-stop` mode. The first attack that surfaces a finding produces the initial scorecard, showing where the target sits on each of twelve dimensions. This is the sales artifact.
+1. **Free assessment** — after the prospect enrolls their target and signs the single-scope authorization artifact per ADR-0009, kronos runs against the target in `impact-bounded` execution policy (per ADR-0014) with `first-signal-stop` as the stop condition and severity threshold `critical` or `high`. The first finding at-or-above threshold produces the initial scorecard. This is the sales artifact. Unsolicited-prospect testing without prior authorization is not supported.
 2. **Scoped engagement proposal** — the operator proposes a fixed-scope engagement to move specific dimensions from their current level to a target level. Example: "your Perimeter Defense sits at L2; a 90-day engagement will take it to L4 by shipping the specific attestations and running the specific kronos verifications required."
 3. **Engagement execution** — the operator runs eos cycles to reach L3 in the targeted dimensions, then kronos engagements to reach L4. The scorecard delta is the deliverable.
 4. **Continuous coverage** — after the engagement closes, a scheduled cadence of kronos re-verifications maintains L4 and works toward L5 in the remaining dimensions.
@@ -158,17 +164,20 @@ Kronos supports many modes of adversarial evaluation, each with its own authoriz
 
 The modes are not exclusive; an engagement may combine modes (e.g., red-team + cost-adversarial against the same target under one authorization) and its authorization ceiling is the max of the combined modes' ceilings. The rationale for enumerating modes explicitly is that each mode has genuinely different operational risk profiles — a `black-box pentest` in `first-signal-stop` mode against production is safe by default, whereas a `destructive-load` in `go-to-town` mode against production would be reckless without extraordinary authorization.
 
-Two environment-safety modes are first-class parameters of every engagement (revised in v0.1 per ADR-0010 and Claude review P2-1):
+**Execution policies (updated in v0.2 per ADR-0014).** The v0.1 two-mode model (`first-signal-stop` vs `go-to-town`) is superseded by a three-policy model where `first-signal-stop` is one stop condition within one policy, not a standalone safety guarantee:
 
-**`first-signal-stop`** — the engagement proceeds until it produces the first finding at-or-above the engagement's declared **severity threshold** (critical / high / medium / low). Findings below threshold are recorded but do not halt execution. INCONCLUSIVE oracle verdicts are not findings and do not halt. When a threshold-meeting finding lands, the engagement immediately halts, writes the finding, alerts the designated contact, and closes.
+- **`passive`** — no target-state-affecting actions. Impact class ≤ I1. May run on production without additional authorization above the standard scope.
+- **`impact-bounded`** — active challenges permitted within a declared impact budget (see ADR-0014 for the full budget schema). May include `first-signal-stop` as one stop condition. Blast radius is bounded by budget, not just by finding count.
+
+**`first-signal-stop`** (as a stop condition within `impact-bounded`) — the engagement proceeds until it produces the first finding at-or-above the engagement's declared **severity threshold** (critical / high / medium / low). Findings below threshold are recorded but do not halt execution. INCONCLUSIVE oracle verdicts are not findings and do not halt. When a threshold-meeting finding lands, the engagement immediately halts, writes the finding, alerts the designated contact, and closes.
 
 Two structural constraints ensure this mode produces a meaningful sales/decision artifact:
 - **Severity-ordered matrix.** In first-signal-stop mode, the attack matrix must be severity-ordered (highest-declared-severity attacks first). This ensures "stop early" means "stop on the worst thing reached," not "stop on the first thing tried."
 - **Explicit INCONCLUSIVE semantics.** INCONCLUSIVE oracle verdicts are logged but do not count as findings for the stop condition. Engagements may optionally set INCONCLUSIVE handling to `halt-for-review` if the operator wants human adjudication before continuing.
 
-**`go-to-town`** — the engagement continues until the planned attack matrix is exhausted, the rate ceilings are hit, or the authorization window closes. Blast radius is bounded only by the authorization envelope.
+- **`campaign-complete`** — the engagement continues until the planned attack matrix is exhausted, impact budget is exhausted, rate ceilings are hit, or the authorization window closes. Only permitted at impact class ≥ I2 in staging/lab; only permitted at impact class ≥ I3 in dedicated ephemeral environments per ADR-0014.
 
-The default for production engagements is `first-signal-stop` with severity threshold `critical` — the strictest threshold, guaranteeing the engagement stops only when a critical exposure has been demonstrated. Any escalation to `go-to-town` in production requires a signed authorization artifact that explicitly enables destructive testing.
+The default for production engagements is `impact-bounded` with `first-signal-stop` at severity threshold `critical` — the strictest threshold, guaranteeing the engagement stops only when a critical exposure has been demonstrated. `campaign-complete` in production is not supported; the framework refuses.
 
 The commercial implication is significant: because `first-signal-stop` bounds the risk of production attack, kronos supports an **onboarding-gated free assessment** model (revised in v0.1 per Claude review P1-3B and ADR-0009). The prospect enrolls their target explicitly, signs a single-scope authorization artifact (authorization ceiling 1, first-signal-stop with critical or high threshold, 24-hour duration), and only after signature does the assessment run. The barrier is a single-page authorization signed during enrollment — lower friction than a traditional pen-testing engagement, but structurally an authorization. The v0 design's implicit "point it at a prospect's prod without authorization" framing has been removed as legally indefensible under CFAA and equivalent computer-misuse regimes.
 
@@ -364,6 +373,14 @@ The design converges through cross-LLM review before any framework code is writt
 - Loop until two consecutive reviewers propose only cosmetic changes
 - Patent disclosure draft authored based on converged design
 
+### Tension between reviewers on MVP sequence (v0.3 note)
+
+Grok's cross-LLM review recommended prioritizing the runner scaffold (React/TS dual-number scorecard + kanban + evidence drill-down) and dogfooding immediately against the kronos repo itself. ChatGPT's review recommended engine-first (schemas → CLI → typed executor → oracle → evidence → watchdog → L14 reference engagement → static report → scorecard → React runner). These are directly opposite sequences.
+
+The v0.3 documents preserve ChatGPT's engine-first ordering below because engine-first ensures every UI rendering has real underlying primitives to render; UI-first risks producing a polished interface backed by an incomplete domain model. But Grok's argument for early dogfooding has merit for adopter validation. The subsequent reviewer (Gemini) is invited to weigh in explicitly on this sequencing question; if consensus doesn't emerge, the operator will decide.
+
+Regardless of sequence, both reviewers agree the runner and engine are both required for v1.0; the disagreement is only about which ships first as MVP.
+
 ### Phase 1 — MVP prototype scaffold
 
 Produce the minimum runnable framework that supports the reference engagement:
@@ -465,7 +482,23 @@ The full alignment analysis is in [`methodology/INDUSTRY-ALIGNMENT.md`](methodol
 
 See ADR-0006 for the architectural rationale.
 
-## 17. Patent claim scaffold
+## 17. IP posture and patent claim scaffold
+
+### IP posture (deferred hybrid)
+
+The strategic question of whether kronos pursues patent protection on specific technical mechanisms is **deferred pending IP counsel review**. The operator has elected hybrid framing: both patent-claim and open-source-moat language coexist in current documents; downstream resolution will narrow one direction, both, or neither. Contributors accept the AGPL-3.0 patent grant (§11) as part of the contribution agreement.
+
+**The strongest candidates for eventual patent claims** (per prior-art analysis in INVENTIVE-CONCEPT-CANDIDATES.md) are technical mechanisms rather than methodology framing:
+
+- **Enumeration reconciliation** as mandatory tool-binding contract with filtered/unfiltered delta as first-class finding class (ADR-0017 §Enumeration; the specific mechanism that would have caught the founding-incident scanner bug).
+- **Execution-provenance signing** binding evidence artifacts to specific tool invocation via SLSA-aligned signed attestation (ADR-0015).
+- **Git-history scorecard recomputation** producing time-series trajectory from the same source-of-truth without separate persistence (SCORECARD §State versus trajectory).
+- **Capacity-model bounds derivation** for physical-plausibility monitoring (ADR-0007, PLAUSIBILITY-MONITOR §Bounds derivation examples).
+- **Dual-plane execution model** with challenge-as-parent-abstraction and continuous-plane running outside engagement lifecycle (ADR-0011).
+
+Methodology-level framing (presumption-of-failure discipline, dialectic with attestation, scorecard-as-north-star, per-engagement production-safety mode) faces steeper Alice/§101 subject-matter-eligibility headwinds in the US and is more defensibly held as open-source-moat differentiation rather than patent claims.
+
+### Patent claim scaffold
 
 Kronos claims seven novel properties, described conceptually in [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md). A detailed patent disclosure paralleling `foundation/eos/PATENT-DISCLOSURE-DRAFT.md` will be authored after this design converges through the cross-LLM review process.
 

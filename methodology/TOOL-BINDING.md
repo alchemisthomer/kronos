@@ -101,6 +101,37 @@ An MCP-compatible tool binding in kronos still requires:
 
 MCP is therefore described as **Layer 2 transport compatibility** — the wire protocol between framework and tool — rather than automatic native assurance compatibility. The framework's MCP client wraps every MCP tool in the same trust-and-authorization envelope as Layer 1 adapter tools.
 
+### Concrete MCP invocation sequence (v0.3 per Grok review)
+
+For a Layer 2 (MCP) tool, the sequence per attack invocation is:
+
+1. **Capability discovery.** Framework connects to the MCP server and calls `tools/list`. Discovered tool definitions are validated against the tool's manifest declaration; discrepancy (tool declares X but MCP server exposes Y) rejects the tool at authorization-gate time.
+2. **Attack binding.** For each attack in the engagement's §7 matrix, framework resolves the attack's required capabilities against the discovered MCP tools per §Binding resolution rules. The chosen tool + call is captured in the plan (typed AuthorizedPlan object).
+3. **Pre-invocation authorization gate.** Framework validates: tool's declared `authorization_ceiling_max` ≥ engagement's declared `impactClass`; tool's `requires_network` ⊆ engagement's authorized network scope; incident-state gates (data-class-preservation, chain-of-authorization) do not refuse the operation; impact-budget has capacity for the invocation.
+4. **Invocation.** Framework calls the MCP tool's method with typed arguments (no shell interpolation). Framework wraps the invocation with the impact watchdog and telemetry monitor.
+5. **Result reception.** MCP tool result is received. Structured content (typed result payloads) is preferred over free-form text. Result is treated as untrusted data — a malicious or buggy MCP tool can return anything. Structured content is validated against the challenge's expected observables schema; unrecognized content is captured as raw evidence.
+6. **Evidence mapping.** Framework converts the MCP result to the framework's evidence schema. Timestamps, tool identity, correlation ID, and MCP session metadata are captured in the evidence manifest.
+7. **Execution provenance.** Framework produces the signed execution-attestation binding the evidence to this specific MCP tool invocation (per EVIDENCE.md).
+8. **Oracle handoff.** Evidence is passed to the deterministic oracle engine (per ORACLE.md) for verdict determination. MCP tool result content does NOT determine the verdict; the oracle does.
+9. **Impact-budget accounting.** The invocation is debited from the engagement's impact budget (requests, mutations, cost, etc.) regardless of MCP tool result.
+
+The framework never treats an MCP tool's "success" response as authoritative for whether a challenge succeeded. The MCP result is evidence; the oracle is verdict.
+
+## Tool-verify golden-target mandate (v0.3 per Grok review)
+
+Per Grok's cross-LLM review, every tool at Layer 1 or above in the reference toolset MUST pass a `tool-verify` golden-target action before promotion to the framework's approved toolset. This addresses the "adversarial tool authors" open question by mandating that manifest declarations be validated empirically, not just accepted on trust.
+
+The `tool-verify` action:
+
+1. Invokes the tool against a **known-vulnerable golden target** that should produce a specific expected finding.
+2. Invokes the tool against a **known-hardened golden target** that should produce no finding.
+3. Compares the tool's outputs against a golden result set.
+4. Fails promotion if either the vulnerable-target invocation missed the expected finding, or the hardened-target invocation produced a false positive, or the output format does not conform to the manifest declaration.
+
+Golden targets are maintained by the framework maintainer as sanitized, versioned test environments. They cover the primary attack classes each tool declares. Tool authors ship their tools with golden-target conformance certificates from a specific verification run; the framework validates the certificate against the golden-target catalog at tool-adoption time.
+
+Tools that fail conformance are not promoted. Version bumps require re-verification.
+
 ### Layer 3 — Native kronos tool
 
 The deepest integration. Tool is built specifically for kronos, lives in `alchemisthomer/kronos-tools/` (a future sibling repository), and implements the framework's internal tool interface directly.

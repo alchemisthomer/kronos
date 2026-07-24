@@ -205,6 +205,28 @@ The kronos threat catalog is expected to grow monotonically over time from three
 
 Every catalog addition is a versioned entry with a stable identifier; targets pin their scorecard against a specific catalog version so that "score improved" and "score got worse because new attacks were added" are distinguishable.
 
+## Multi-persona LLM evaluation (v0.3 per Grok review)
+
+Kronos supports LLM-assisted evaluation at three points in the engagement lifecycle: attack generation, finding interpretation, and remediation-suggestion drafting. The framework's core discipline (deterministic verdicts, oracle authority, plausibility-monitor bounds) is not delegated to LLMs; LLM outputs are always **proposals** that must be adopted, modified, or rejected by the operator before they take effect.
+
+The multi-persona pattern assigns distinct LLM instances (potentially different providers, different system prompts, different context) to three complementary roles per engagement:
+
+- **Red persona** — proposes novel challenges from the target's model and threat catalog. Generates candidate attack matrices, novel oracle scaffolding, and adversarial-simulation scripts. Its output feeds the plan (§7 attack matrix) as candidate entries.
+- **Blue persona** — proposes defensive interpretations of observations and challenges the red persona's assumptions. Generates candidate false-positive analyses, alternative explanations for observed signals, and remediation strategies. Its output feeds the finding narrative (§10) as candidate mitigations.
+- **Synth persona** — reconciles red and blue outputs, drafts operator-facing summaries, and proposes catalog-entry candidates from novel findings. Its output feeds the closeout (§13) and catalog-draft pipeline.
+
+**Guardrails (non-negotiable):**
+
+- LLM outputs are proposals only. They may draft any content in the engagement document, but their content becomes authoritative only after operator approval and signature.
+- LLMs may not issue deterministic verdicts. Attack-oracle results and plausibility-monitor outcomes come from the deterministic oracle engine, not from LLM narrative.
+- LLMs may not expand authorization scope. If a red-persona proposal requires broader authorization than the engagement holds, the proposal is refused (per ADR-0009 and ADR-0016).
+- LLMs may not choose high-impact actions autonomously. Any action at impact class ≥ I2 requires explicit operator selection from the proposed candidates.
+- LLMs may not promote catalog entries. The synth persona's catalog-draft proposals go to `catalog/drafts/`; human curator review is required for promotion (per ADR-0019).
+- LLM inputs are sandboxed. CVE descriptions, breach writeups, and third-party threat intel are treated as untrusted input (per CATALOG.md §LLM watcher). Deterministic parsers extract before LLMs see content.
+- LLM outputs are provenance-tagged. Every LLM-authored section carries a marker naming the LLM provider, model version, prompt template, and generation timestamp. A finding that includes LLM-drafted narrative shows this provenance in its evidence manifest.
+
+**Persona diversity by vendor is recommended.** Running red and blue personas on the same LLM model produces correlated failure modes (same training biases, same blind spots). At least two vendor LLM families should be used across the three roles when practical.
+
 ## Runtime primitives referenced
 
 The framework's core runtime primitives, described in DESIGN.md §9 and specified in adjacent methodology documents:
