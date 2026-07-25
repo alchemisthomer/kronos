@@ -7,31 +7,44 @@ catalog:
   version: kronos-catalog-2026.07.24
   pinned_at: 2026-07-24
 scoring:
-  summary_formula: minimum_across_dimensions   # or: weighted_average
+  # HEADLINE is not configurable. Per ADR-0010, the public headline is fixed as
+  # minimum-across the five critical dimensions listed below (which cannot be
+  # disabled). The pillar_weights and secondary_formula fields configure
+  # SECONDARY views only, not the headline.
+  headline_formula: minimum_across_critical_dimensions   # FIXED, do not change
+  secondary_formula: weighted_average                     # for non-critical secondary views
   pillar_weights:
     A: 1.0
     B: 1.0
     C: 1.0
     D: 1.0
 dimensions:
+  # CRITICAL DIMENSIONS (cannot be disabled — see SCORECARD.md §Critical dimensions):
   A_perimeter_and_access:
-    identity_and_access_control: { enabled: true }
-    perimeter_defense:           { enabled: true }
-    secret_management:           { enabled: true }
+    identity_and_access_control: { enabled: true, critical: true }
+    perimeter_defense:           { enabled: true, critical: true }
+    secret_management:           { enabled: true, critical: true }
   B_runtime_integrity:
-    data_integrity:              { enabled: true }
-    availability_and_resilience: { enabled: true }
-    observability:               { enabled: true }
+    data_integrity:              { enabled: true, critical: true }
+    availability_and_resilience: { enabled: true, critical: false }
+    observability:               { enabled: true, critical: false }
   C_operational_discipline:
-    cost_integrity:              { enabled: true }
-    change_discipline:           { enabled: true }
-    supply_chain:                { enabled: true }
+    cost_integrity:              { enabled: true, critical: false }
+    change_discipline:           { enabled: true, critical: false }
+    supply_chain:                { enabled: true, critical: false }
   D_response_readiness:
-    incident_response:           { enabled: true }
-    recovery_and_continuity:     { enabled: true }
-    compliance_posture:          { enabled: true }
+    incident_response:           { enabled: true, critical: true }
+    recovery_and_continuity:     { enabled: true, critical: false }
+    compliance_posture:          { enabled: true, critical: false }
 integration:
+  # Optional. If eos is co-installed in this target, points at its cycle folder.
+  # Kronos scorecard reads this folder for L3-eligibility traceability (not a
+  # gate — per ADR-0008, L3 is attainable natively without eos).
   eos_folder: foundation/eos/cycle
+  # Optional. If the plausibility monitor is enabled for this target, points
+  # at the capacity model file. Findings from the monitor feed the Cost
+  # Integrity dimension primarily.
+  capacity_model: foundation/kronos/capacity.yaml
 ---
 
 # Scorecard configuration for `<target-slug>`

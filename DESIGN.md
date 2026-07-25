@@ -1,10 +1,16 @@
-# Kronos — Design (v0, for cross-LLM review)
+# Kronos — Design (v0.4, post-Claude, post-ChatGPT, post-Grok, and post-Gemini reviews)
 
-**Document state:** Draft — v0
-**Purpose:** wide-net vision document for the cross-LLM design review process. This document exists to be critiqued, refined, and hardened through iterative review by Claude, ChatGPT, Grok, and Gemini before any production code is written. The subsequent v0.N revisions will be produced by the scribe (kronos-agent) based on synthesized review feedback.
-**Author:** the Steward and kronos-agent
-**Origin:** the founding incident of 2026-07-17; the productization pattern of alchemisthomer/eos; the design conversation of 2026-07-24
-**Companion documents:** [`methodology/OPERATING-MANUAL.md`](methodology/OPERATING-MANUAL.md), [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md), [`methodology/SCORECARD.md`](methodology/SCORECARD.md), [`methodology/TEMPLATE.md`](methodology/TEMPLATE.md), [`docs/inception/00-founding-incident.md`](docs/inception/00-founding-incident.md)
+**Document state:** Draft — v0.4 (folds in the four-LLM initial review round: Claude on v0, ChatGPT on v0, Grok on v0.1, Gemini on v0.3; convergence-check pass next)
+**Purpose:** wide-net vision document for the cross-LLM design review process. This document exists to be critiqued, refined, and hardened through iterative review by Claude, ChatGPT, Grok, and Gemini before any production code is written. The subsequent v0.N revisions are produced by the scribe based on synthesized review feedback.
+**Author:** the operator and the kronos scribe
+**Origin:** the founding incident of 2026-07-17; the productization pattern of alchemisthomer/eos; the design conversations of 2026-07-24; two cross-LLM reviews of v0 (Claude and ChatGPT).
+**Changes from v0 (via Claude review, landed in v0.1):** plausibility monitor + capacity model added as first-class primitives (ADR-0007); L3 redefined to be attainable natively without external attestation (ADR-0008); authorization schema extended with incident-state and chain-of-authorization blocks (ADR-0009); scorecard headline made non-configurable over five critical dimensions with dual-number rendering (ADR-0010); first-signal-stop redefined as severity-thresholded with severity-ordered matrix; execution-provenance signing added to evidence contract; enumeration reconciliation added to tool-binding manifest schema; second reference engagement (expected FAIL) added; unfalsifiable claims replaced with bounded operational claims; patent-strategy tension flagged; register partially cleaned.
+**Changes from v0.3 (via Gemini review, landed in v0.4):** **two-tier autonomous authorization model** added (ADR-0020): human-signed StandingAuthorization establishes the envelope; hardware-backed machine identities issue per-invocation MachineIssuedAuthorization within it; framework enforces escalating human-signature requirements by impact class (I0-I1 machine-issuable, I2 human co-sign, I3-I4 always human, incident-state waivers always human). `methodology/AUTONOMOUS-AUTHORIZATION.md` added. **Backbone-resilience reconciliations** added to CONTINUOUS-ASSURANCE (Salesforce API concurrency, utility-bar responsiveness, daily quota reconciliation, governor limits, cost budget); **framework self-throttling** made structural (coordinator observes target latency + backbone quota consumption + cost velocity and throttles proportionally; sustained pressure pauses continuous plane entirely). **Runtime graph validation for MCP tool chaining** added to TOOL-BINDING (whitelist of transitively-permitted tools, impact-class inheritance and clamping, budget debit at every hop, cycle detection, depth ceiling default 3, complete provenance). **Naming convention guidelines** added to CATALOG for community contributions. **Hysteresis and damping** added to SCORECARD for continuous-plane-sourced dimension transitions (30-60 minute persistence required before executive-facing transitions render for degradation; recovery renders immediately; attack-oracle findings not damped; damping is rendering only, not truth). Direct answer to Gemini's concluding question on cryptographic workload identities documented in AUTONOMOUS-AUTHORIZATION.md and ADR-0020.
+
+**Changes from v0.2 (via Grok review, landed in v0.3):** prominent **IP posture** section added to README + DESIGN §17 (respecting operator's deferred hybrid choice; naming the strongest technical-mechanism patent-claim candidates vs the methodology-framing candidates that face Alice/§101 headwinds); **rendering examples** (ASCII grids for both six-level detail view and executive traffic-light view) added to SCORECARD; **plausibility-monitor vs attack-oracle double-counting** clarification added to SCORECARD; **first-signal-stop vestiges** cleaned across DESIGN and TEMPLATE (execution policy is now `passive` / `impact-bounded` / `campaign-complete` per ADR-0014, with `first-signal-stop` as one stop condition within `impact-bounded`); **MCP invocation sequence** concrete example added to TOOL-BINDING (nine-step flow: capability discovery → attack binding → pre-invocation gate → invocation → result reception → evidence mapping → provenance signing → oracle handoff → impact-budget accounting); **tool-verify golden-target mandate** added to TOOL-BINDING for all Layer 1+ tools; **multi-persona LLM evaluation** subsection added to OPERATING-MANUAL with explicit guardrails (LLMs as proposers only; deterministic oracles remain authoritative; per-persona provenance tags); **chainOfAuthorization made structurally required** in TEMPLATE §2 with framework-enforced validator (not just declared); **waived incident-state flow sample** added to TEMPLATE showing additional-signature requirement for panic-mode data-class preservation waiver; **MVP sequencing tension** between ChatGPT (engine-first) and Grok (runner-first) explicitly noted in DESIGN §13 and deferred to Gemini/operator; **batch-commit and direct-push modes** documented in runner/README for evidence-heavy engagements.
+
+**Changes from v0.1 (via ChatGPT review, landed in v0.2):** **continuous assurance plane** added as first-class runtime peer to the engagement plane, with "challenge" as the parent abstraction (attack becomes one subtype); **canonical typed domain model** separates engagement, plan, run, observation, oracle result, finding, evidence manifest, and score snapshot into individually-versioned objects; **multidimensional scorecard state** per cell (maturity + effectiveness + coverage + confidence + freshness + fidelity + open findings + catalog gap) replaces single-level rendering; **impact-budgeted execution** replaces first-signal-stop as the primary safety envelope; **two-tier evidence storage** separates sanitized repository-tier records from raw protected-tier artifacts; **three-axis authorization** (impact × environment × executor-assurance) replaces single ceiling; **tool-binding hardened** (typed argv default, shell requires explicit high-risk capability, MCP is transport not trust tier, sandbox mandatory by impact class, credentials not via env vars by default); **expanded oracle state machine** (10 claim-oriented outcomes including CLAIM_SURVIVED, CLAIM_FALSIFIED, PARTIAL_OR_DEGRADED, INCONCLUSIVE, OBSERVABILITY_GAP, INVALID_TEST, EXECUTION_ERROR, BLOCKED, HALTED_SAFETY, NOT_RUN); **catalog governance** (six lifecycle states, applicability predicates, LLM watcher quarantine, no fully-automatic promotion); **standards baseline updated** to ASVS 5.0.0, AISVS 1.0, LLMSVS 2.0, OSCAL import/export, OpenCRE cross-references; **certification positioning narrowed** to "companion for selected technical and operational controls"; **mission language corrected** to remove "is my software safe" claim; **AGPL language corrected**; **SEVEN-CLAIMS.md renamed to INVENTIVE-CONCEPT-CANDIDATES.md** with explicit prior-art acknowledgment (NIST SP 800-115, MITRE CALDERA, Atomic Red Team, BAS platforms, ATT&CK scoring, OSCAL, SLSA); **reference engagement changed** to update one claim rather than a whole dimension. See ADRs 0011-0019 for the architectural decisions.
+**Companion documents:** [`methodology/OPERATING-MANUAL.md`](methodology/OPERATING-MANUAL.md), [`methodology/INVENTIVE-CONCEPT-CANDIDATES.md`](methodology/INVENTIVE-CONCEPT-CANDIDATES.md), [`methodology/SCORECARD.md`](methodology/SCORECARD.md), [`methodology/TEMPLATE.md`](methodology/TEMPLATE.md), [`methodology/TOOL-BINDING.md`](methodology/TOOL-BINDING.md), [`methodology/PLAUSIBILITY-MONITOR.md`](methodology/PLAUSIBILITY-MONITOR.md), [`methodology/CONTINUOUS-ASSURANCE.md`](methodology/CONTINUOUS-ASSURANCE.md), [`methodology/DOMAIN-MODEL.md`](methodology/DOMAIN-MODEL.md), [`methodology/EVIDENCE.md`](methodology/EVIDENCE.md), [`methodology/ORACLE.md`](methodology/ORACLE.md), [`methodology/CATALOG.md`](methodology/CATALOG.md), [`methodology/INDUSTRY-ALIGNMENT.md`](methodology/INDUSTRY-ALIGNMENT.md), [`docs/inception/00-founding-incident.md`](docs/inception/00-founding-incident.md)
 
 ---
 
@@ -26,17 +32,40 @@ This design document exists because kronos is being designed backward from a con
 
 The document is written before any framework code has been committed. This ordering is deliberate. The scribe has learned, from the operator's experience with the prior eos design cycles, that hardening a design across four independent LLM reviewers before writing production code produces a substantially better first-shipped framework than iteratively refactoring code that was written against a partially-formed vision. The cost of the review cycles is measured in days; the cost of refactoring a shipped framework is measured in weeks and lost credibility.
 
-## 2. Mission — what kronos exists to prove
+## 2. Mission — what kronos exists to produce
 
-Kronos exists to make the answer to *"is my software safe to run?"* a reproducible artifact rather than a hopeful assertion.
+**Mission statement (v0.2, corrected per ChatGPT P0-2):**
 
-The claim that a system is safe is, in prior software assurance regimes, a claim that has been confirmed through positive evidence — a checklist has been completed, an auditor has signed off, a certification body has endorsed. Kronos rejects this frame. It observes that positive-confirmation regimes carry structural confirmation bias: the auditor who is paid to certify has professional incentive to certify; the checklist that lists controls in place cannot list the controls that were not thought to be relevant; the certification body that endorses is one falsifying counterexample away from having endorsed nothing.
+> **Kronos produces reproducible, time-bounded evidence about whether declared system claims survive authorized challenge and continuous reconciliation.**
 
-Kronos instead operates from the presumption that every claim a system makes about itself is FALSE until adversarial pressure has been applied and the claim has survived. A system is not "safe" in the kronos sense; it is "not yet broken by the current threat catalog against which adversarial engagement was attempted." This is a fundamentally different epistemic position from the certification model — a negative claim is falsifiable by a single counterexample; the positive claim is unfalsifiable except by an audit that has the same confirmation bias that produced it.
+The v0/v0.1 formulation ("make the answer to 'is my software safe to run?' a reproducible artifact") was rhetorically strong but epistemically incoherent — no framework can answer that question universally, and the surrounding text acknowledged as much (per the "not yet broken by the current catalog" framing). The v0.2 formulation names what kronos actually does.
 
-The framework's operational purpose is to produce, for every target it engages, a **maturity scorecard** rendering the target's assurance posture across twelve dimensions of software delivery, with the load-bearing property that maturity above Level 3 (out of 5) is only reachable through kronos falsification attempts. The scorecard is the executive-consumable artifact — the answer to "is my software safe" rendered as a matrix of colored cells with drill-down to the underlying evidence. It doubles as a commercial primitive: a fixed-scope engagement produces a scorecard delta, moving specific dimensions from red to green, as its deliverable.
+**Executive-facing question:**
 
-The framework's philosophical purpose is to make software assurance falsifiable, in the Popperian sense. A system whose defenses have been challenged by kronos and whose kronos scorecard is public has committed to a claim that any observer can attempt to disprove. That commitment is a fundamentally stronger position than any positive certification.
+> *"What assurance claims currently hold, against which scenarios, with what coverage and confidence?"*
+
+**Short positioning:**
+
+> **Kronos does not certify safety. It makes assurance claims testable, challengeable, and auditable.**
+
+Kronos operates from the presumption that every claim a system makes about itself is unverified until either (a) an authorized adversarial challenge has been executed against it and returned `CLAIM_SURVIVED`, or (b) a continuous-plane reconciliation has confirmed the claim holds against observed reality. Claims for which neither has occurred are `untested`. Claims falsified by challenge are `falsified` until re-verified after remediation. The framework does not produce a universal "is my software safe" answer; it produces a per-claim ledger of what was tested, what survived, what was falsified, in which environment, with what evidence age, at which catalog version.
+
+The framework's operational output is a **multidimensional scorecard** (see [`methodology/SCORECARD.md`](methodology/SCORECARD.md)) rendering per-dimension state across maturity, effectiveness, coverage, confidence, freshness, and environment fidelity. The scorecard is the executive-consumable projection of the underlying claim ledger. The scorecard does not, by itself, answer "is my software safe" — it reports what has been evaluated, what has survived, and what remains untested. This is materially more defensible than any single-number certification claim.
+
+The framework can answer, precisely and reproducibly:
+
+- Which claims were evaluated?
+- Which challenges were executed?
+- Which claims survived, which were falsified, which returned partial, inconclusive, or observability-gap?
+- What remained untested in the current catalog?
+- What environment was used?
+- How representative was that environment of production?
+- How recent is the evidence?
+- Which catalog and methodology versions applied?
+- How strong was the evidence?
+- What open findings remain?
+
+The framework cannot produce a universal answer that software is safe.
 
 ## 3. The founding incident
 
@@ -74,7 +103,7 @@ The two frameworks operate independently — either can be adopted without the o
 
 The integration is one-way at the code level: kronos knows about eos, eos does not need to know kronos exists. This preserves eos's freedom to evolve independently. Optional updates to eos would strengthen the dialectic (an attestation-template section naming anticipated kronos scenarios, a `kronos_verified` frontmatter field on shipped cycles, a `10_falsified/` kanban folder) but are not prerequisites for the integration to function.
 
-The commercial implication is that the two frameworks form three distinct consulting offerings: eos alone (attestation practice), kronos alone (adversarial practice), or both (full readiness backbone with the scorecard as the artifact of record). The Steward's consulting practice is expected to sell all three, sized to the customer's maturity and risk posture.
+The commercial implication is that the two frameworks form three distinct consulting offerings: eos alone (attestation practice), kronos alone (adversarial practice), or both (full readiness backbone with the scorecard as the artifact of record). The framework's operator (CloudPremise LLC) expects to sell all three, sized to the customer's maturity and risk posture.
 
 ## 5. Framework identity — the three layers, materialized
 
@@ -110,22 +139,26 @@ Each dimension is scored on a six-level maturity scale drawn from the Capability
 
 The load-bearing property is that Levels 4 and 5 are structurally unreachable without kronos. Levels 0-3 are reachable through documentation, process, and attestation alone. Levels 4 and 5 are defined in terms of adversarial survival, not process presence. This is the specific inversion that makes kronos a peer discipline to attestation rather than a subordinate technique within it: attestation gets a system to Level 3; adversarial proof is the only path from Level 3 to Level 5.
 
-The scorecard is rendered by the kronos runner as a 4×3 grid, one cell per dimension, colored by level. Each cell is click-through to the underlying findings and attestations that produced the score. A top-line summary is also rendered — commonly the minimum-across-dimensions or the weighted-average-across-pillars.
+The scorecard is rendered by the kronos runner as a 4×3 grid, one cell per dimension. Each cell carries the multidimensional state defined in ADR-0013 (maturity + effectiveness + coverage + confidence + freshness + environment fidelity + open findings + catalog gap) — not a single level. Click-through to underlying findings, attestations, and evidence.
+
+The **headline** is the dual-number rendering per ADR-0010: a pinned headline (against the target's currently-pinned catalog version) and a latest headline (against head-of-catalog). Each headline is a **multi-signal status summary**, not a weighted average — reporting falsified critical claims, untested critical claims, weighted coverage, minimum critical maturity, minimum critical effectiveness, evidence freshness, catalog gap, and an overall status label (`current` / `degraded` / `stale` / `materially-incomplete`). Weighted-average summaries are available for narrow downstream integrations (slide decks, board reports) but are never the primary safety summary — they let strong low-risk dimensions conceal failed critical claims.
+
+Historical trajectory (how the scorecard has evolved over time) is computed by walking the git history of the target's `kronos/engagement/06_shipped/` folder and recomputing the scorecard at each historical HEAD.
 
 Historical trajectory (how the scorecard has evolved over time) is computed by walking the git history of the target's `kronos/engagement/06_shipped/` folder and recomputing the scorecard at each historical HEAD. The trajectory view answers "are we getting better or worse over time?" without requiring separate persistence infrastructure.
 
 The scorecard doubles as a commercial artifact. The engagement flow is:
 
-1. **Free assessment** — kronos runs against a prospective customer's target in `first-signal-stop` mode. The first attack that surfaces a finding produces the initial scorecard, showing where the target sits on each of twelve dimensions. This is the sales artifact.
+1. **Free assessment** — after the prospect enrolls their target and signs the single-scope authorization artifact per ADR-0009, kronos runs against the target in `impact-bounded` execution policy (per ADR-0014) with `first-signal-stop` as the stop condition and severity threshold `critical` or `high`. The first finding at-or-above threshold produces the initial scorecard. This is the sales artifact. Unsolicited-prospect testing without prior authorization is not supported.
 2. **Scoped engagement proposal** — the operator proposes a fixed-scope engagement to move specific dimensions from their current level to a target level. Example: "your Perimeter Defense sits at L2; a 90-day engagement will take it to L4 by shipping the specific attestations and running the specific kronos verifications required."
 3. **Engagement execution** — the operator runs eos cycles to reach L3 in the targeted dimensions, then kronos engagements to reach L4. The scorecard delta is the deliverable.
 4. **Continuous coverage** — after the engagement closes, a scheduled cadence of kronos re-verifications maintains L4 and works toward L5 in the remaining dimensions.
 
 The scorecard is what the customer sees. The scorecard delta is what the customer pays for. The scorecard's continuous coverage is what the customer subscribes to.
 
-`<REVIEW:` reviewers should critically evaluate the choice of pillar/dimension structure. Twelve dimensions divided into four pillars is opinionated; competing structures include NIST CSF (Identify/Protect/Detect/Respond/Recover, five pillars), BSIMM (twelve practices in four domains), OWASP SAMM (fifteen practices in five business functions). Is the kronos structure better positioned than these, or does it need to converge more closely to industry-recognized taxonomies for enterprise adoption? `>`
+`<REVIEW: RESOLVED IN v0.1 —` reviewer recommendation was to keep the kronos-specific structure as primary and publish crosswalks to industry taxonomies (already in INDUSTRY-ALIGNMENT). Enterprise buyers do not need kronos to adopt their taxonomy; they need a defensible mapping to it. The differentiator (adversarial-proof maturity) is preserved by not converging to CSF. Subsequent reviewers may still critique but the current v0.1 direction is to hold. `>`
 
-`<REVIEW:` reviewers should also evaluate the L0-L5 scale. Six levels is deliberate (matching CMMI); could a simpler traffic-light (red/yellow/green) be more legible for executive consumption at the cost of precision? Is the framework's insistence that L4 and L5 require adversarial proof defensible against enterprise customers who will resist any model where their existing certifications cannot reach the top? `>`
+`<REVIEW: RESOLVED IN v0.1 —` reviewer recommendation was to keep six levels for the internal model AND render an executive traffic-light derived from it (L0-L2 red, L3 yellow, L4-L5 green). Both are now shipped in the SCORECARD design. Enterprise resistance to "cannot reach top level without adversarial proof" is real but is a feature, not a bug — the whole point of the framework. Held. `>`
 
 ## 7. Attack modes and environment discipline
 
@@ -133,19 +166,26 @@ Kronos supports many modes of adversarial evaluation, each with its own authoriz
 
 The modes are not exclusive; an engagement may combine modes (e.g., red-team + cost-adversarial against the same target under one authorization) and its authorization ceiling is the max of the combined modes' ceilings. The rationale for enumerating modes explicitly is that each mode has genuinely different operational risk profiles — a `black-box pentest` in `first-signal-stop` mode against production is safe by default, whereas a `destructive-load` in `go-to-town` mode against production would be reckless without extraordinary authorization.
 
-Two environment-safety modes are first-class parameters of every engagement:
+**Execution policies (updated in v0.2 per ADR-0014).** The v0.1 two-mode model (`first-signal-stop` vs `go-to-town`) is superseded by a three-policy model where `first-signal-stop` is one stop condition within one policy, not a standalone safety guarantee:
 
-**`first-signal-stop`** — the engagement proceeds until it produces the first evidence that a defense has failed, at which point it immediately halts, writes the finding, alerts the designated contact, and closes. Blast radius is bounded to one finding.
+- **`passive`** — no target-state-affecting actions. Impact class ≤ I1. May run on production without additional authorization above the standard scope.
+- **`impact-bounded`** — active challenges permitted within a declared impact budget (see ADR-0014 for the full budget schema). May include `first-signal-stop` as one stop condition. Blast radius is bounded by budget, not just by finding count.
 
-**`go-to-town`** — the engagement continues until the planned attack matrix is exhausted, the rate ceilings are hit, or the authorization window closes. Blast radius is bounded only by the authorization envelope.
+**`first-signal-stop`** (as a stop condition within `impact-bounded`) — the engagement proceeds until it produces the first finding at-or-above the engagement's declared **severity threshold** (critical / high / medium / low). Findings below threshold are recorded but do not halt execution. INCONCLUSIVE oracle verdicts are not findings and do not halt. When a threshold-meeting finding lands, the engagement immediately halts, writes the finding, alerts the designated contact, and closes.
 
-The default for production engagements is `first-signal-stop`. Any escalation to `go-to-town` in production requires a signed authorization artifact that explicitly enables destructive testing and names the operator of record as accountable for the operational consequences.
+Two structural constraints ensure this mode produces a meaningful sales/decision artifact:
+- **Severity-ordered matrix.** In first-signal-stop mode, the attack matrix must be severity-ordered (highest-declared-severity attacks first). This ensures "stop early" means "stop on the worst thing reached," not "stop on the first thing tried."
+- **Explicit INCONCLUSIVE semantics.** INCONCLUSIVE oracle verdicts are logged but do not count as findings for the stop condition. Engagements may optionally set INCONCLUSIVE handling to `halt-for-review` if the operator wants human adjudication before continuing.
 
-The commercial implication of `first-signal-stop` is significant: because it bounds the risk of production attack, kronos supports a free-assessment engagement model — point the framework at a prospective customer's production system, run in `first-signal-stop` mode until the first finding surfaces, deliver that finding as the sales artifact. This inverts the traditional pen-testing sales model, which requires either a dedicated test environment (limiting access to prospects who can provide one) or a paid engagement with production authorization (limiting funnel to prospects willing to pay before the value has been demonstrated).
+- **`campaign-complete`** — the engagement continues until the planned attack matrix is exhausted, impact budget is exhausted, rate ceilings are hit, or the authorization window closes. Only permitted at impact class ≥ I2 in staging/lab; only permitted at impact class ≥ I3 in dedicated ephemeral environments per ADR-0014.
+
+The default for production engagements is `impact-bounded` with `first-signal-stop` at severity threshold `critical` — the strictest threshold, guaranteeing the engagement stops only when a critical exposure has been demonstrated. `campaign-complete` in production is not supported; the framework refuses.
+
+The commercial implication is significant: because `first-signal-stop` bounds the risk of production attack, kronos supports an **onboarding-gated free assessment** model (revised in v0.1 per Claude review P1-3B and ADR-0009). The prospect enrolls their target explicitly, signs a single-scope authorization artifact (authorization ceiling 1, first-signal-stop with critical or high threshold, 24-hour duration), and only after signature does the assessment run. The barrier is a single-page authorization signed during enrollment — lower friction than a traditional pen-testing engagement, but structurally an authorization. The v0 design's implicit "point it at a prospect's prod without authorization" framing has been removed as legally indefensible under CFAA and equivalent computer-misuse regimes.
 
 The design commitment that production is in-scope, subject to mode discipline, is deliberate and controversial. Prior adversarial testing tools (`nmap`, `sqlmap`, Burp Suite, ZAP, Metasploit, Nuclei) treat production safety as an operator responsibility outside the tool; they assume the operator knows what they are doing and provide safety flags as suggestions. Kronos treats production safety as a structural feature: the mode is declared in the authorization artifact, enforced by the framework's `first-signal-stop-enforcer` action, and observable in the engagement record.
 
-`<REVIEW:` reviewers should evaluate whether the `first-signal-stop` mode's guarantees are defensible in practice. Consider: what happens if the "first signal" is ambiguous (an oracle evaluates to INCONCLUSIVE rather than FAIL)? What happens if the attack that would have surfaced the first signal is one of the last in the matrix (the engagement then completes without any finding, and the operator has no information about what would have been found)? Are there cases where `first-signal-stop` is actually MORE dangerous than `go-to-town` because it stops at the first finding without exploring whether that finding was the tip of an iceberg? `>`
+`<REVIEW: RESOLVED IN v0.1 —` Claude review P2-1. First-signal-stop redefined as severity-threshold-triggered rather than first-any-finding-triggered. Attack matrix must be severity-ordered when this mode is engaged. INCONCLUSIVE verdicts do not halt (they are not findings). See §7 above. Held pending subsequent reviewer input on edge cases. `>`
 
 ## 8. The threat catalog and adversarial coevolution
 
@@ -165,27 +205,37 @@ The framework becomes strictly stronger over time. No prior remediation is ever 
 
 This adversarial coevolution loop, in which the threat catalog is a versioned first-class object and target scorecards are computed against a specific catalog version, is a structural claim of the framework. It has no direct analogue in the automated security testing literature. Static scanners (Snyk, Dependabot, Semgrep) produce lists of known CVEs against static code; kronos produces a scored assessment against a growing catalog of attack methodologies whose applicability transcends any specific vulnerability. Threat modeling frameworks (STRIDE, PASTA) provide a taxonomy for reasoning about threats during design; kronos provides an execution engine for running the actual attacks and updating the scorecard.
 
-`<REVIEW:` reviewers should evaluate whether the "grow strictly stronger over time" claim is defensible. Consider: what happens when a catalog entry is deprecated (a class of attack becomes obsolete because the underlying technology changed)? Is a "deprecated" state added to the catalog schema? How is a target's scorecard affected when a catalog entry it was previously falsified against becomes deprecated? `>`
+`<REVIEW: RESOLVED IN v0.1 —` Claude review inline resolution. Catalog schema now includes a `deprecated` state. Deprecation freezes historical scores at the catalog version in effect when they were computed; deprecation does not retroactively rescore past engagements. Documented in SCORECARD.md §Deprecated catalog entries. `>`
 
 `<REVIEW:` reviewers should also evaluate the LLM watcher role. Is autonomous LLM curation of a security-critical catalog dangerous? What are the failure modes (LLM hallucinates a threat class that doesn't exist, LLM misclassifies a novel real threat, LLM is prompt-injected via a CVE description into proposing malicious entries)? Where do the guardrails go? `>`
 
-## 9. Attack, oracle, evidence, and finding — the runtime primitives
+## 9. The runtime primitives
 
-The kronos runtime operates over four primitives that together form the execution model of any engagement.
+The kronos runtime operates over six primitives that together form the execution model of any engagement and the observation model of any target under continuous evaluation. (This section supersedes v0's four-primitive enumeration per ADR-0007 and Claude review P1-1.)
 
-**Attack** is the specific probe executed against a target. It is versioned, parameterized, and reproducible from its specification alone. An attack has an identity, a threat-class reference, one or more parameters (target endpoint, payload, timing), and a specification of what constitutes success from the attacker's perspective. Attacks are authored in YAML (initially) and executed by tools in the framework's toolset.
+**Attack** is the specific probe executed against a target during an engagement. It is versioned, parameterized, and specified from a threat-catalog entry. An attack has an identity, a threat-class reference, one or more parameters (target endpoint, payload, timing), a declared severity if the attack succeeds, and a specification of what constitutes success from the attacker's perspective. Attacks are authored in YAML and executed by tools bound through the tool-binding contract (see §10).
 
-**Oracle** is the deterministic assertion that evaluates whether an attack succeeded. Every oracle references observable signals only — response payloads, response status codes, telemetry metrics, log lines, database state, downstream side effects. The oracle produces one of three verdicts: PASS (the attack was blocked as expected), FAIL (the attack succeeded, indicating the defense did not fire), or INCONCLUSIVE (the observable signals did not permit a determination). AI-generated narrative may explain an oracle result but cannot replace it. This constraint is load-bearing: it prevents the framework from being an LLM-in-a-loop that hallucinates security posture.
+**Attack oracle** is the deterministic assertion that evaluates whether an attack succeeded. Every oracle references observable signals only — response payloads, status codes, telemetry metrics, log lines, database state, downstream side-effects. The oracle produces one of three verdicts: PASS (the attack was blocked as expected), FAIL (the attack succeeded, indicating the defense did not fire), or INCONCLUSIVE (the observable signals did not permit a determination). AI-generated narrative may explain an oracle result but cannot replace it. This constraint is load-bearing: it prevents the framework from being an LLM-in-a-loop that hallucinates security posture. (Renamed from "oracle" in v0 to disambiguate from the plausibility monitor below, per ADR-0007.)
 
-**Evidence** is the persistent record of an attack and its oracle evaluation. It includes the exact request that was sent, the exact response received, any telemetry signals observed within the correlation window, any side-effects detected in the target's state, and timing information. Evidence artifacts are hashed by SHA-256 and referenced by content-addressable identifier from the engagement document's §9 execution log. Evidence is stored alongside the engagement document in the target's repository (`<target-repo>/kronos/evidence/<engagement-slug>/`), committed to git, and reproducible from repo state alone.
+**Plausibility monitor** is a continuous or scheduled evaluation of observed values against a declared capacity model. It is a distinct object from the attack oracle: the attack oracle answers "did this specific attack succeed?" once per attack; the plausibility monitor answers "is this observation within physical bounds?" continuously. When the monitor determines that an observed value exceeds the capacity model's physical bound (adjusted by tolerance multiplier), it emits a finding using the same finding schema. The monitor runs outside the engagement lifecycle; it requires only an authorization artifact granting observation-source access and a capacity model. This primitive is the mechanism that would have caught the founding incident within hours instead of five days — the "$76B in NAT charges is impossible given zero NAT gateways" reasoning is the plausibility monitor's central move. See [`methodology/PLAUSIBILITY-MONITOR.md`](methodology/PLAUSIBILITY-MONITOR.md) for the full specification.
 
-**Finding** is the assertion of a specific defense failure, backed by specific evidence, with reproduction instructions and suggested remediation. Every finding has a stable identifier (deduplicating across engagements of the same target), a severity, and a scorecard-delta contribution. Findings are markdown files with structured YAML frontmatter; they are the primary write-facing output of an engagement.
+**Capacity model** is the operator-authored (or observed-inferred) mapping from the target's declared infrastructure to the physical bounds each resource class can produce. Lives at `<target>/kronos/capacity.yaml`. First-class methodology artifact, versioned in git, referenced by plausibility-monitor findings. Bounds are derivations from published vendor specifications and pricing (e.g., "AWS NAT Gateway supports 45 Gbps → 486 TB/day per gateway → $0/day when count is zero"). The framework will ship a reference bounds library for AWS/Azure/GCP; adopters extend for private infrastructure.
 
-The runtime executes an engagement by iterating through its §7 attack matrix: for each attack, invoke the appropriate tool to execute, collect the raw response and telemetry as evidence, invoke the oracle to evaluate, and if the oracle returns FAIL, produce a finding. When the matrix is exhausted (or `first-signal-stop` triggers), the engagement moves from `04_running/` to `05_evidence/` and the oracle/finding pass runs to close out. Then to `06_shipped/` with the scorecard delta committed.
+**Evidence** is the persistent record of an attack execution and its oracle evaluation, or of a plausibility-monitor observation. It includes exact request/response payloads, telemetry signals within the correlation window, side-effects detected in target state, and timing. Evidence artifacts are hashed by SHA-256 and referenced by content-addressable identifier from the engagement's §9 execution log or the plausibility-monitor's finding record. Evidence is stored under `<target-repo>/kronos/evidence/`, committed to git.
 
-The runtime is deliberately simple. There is no distributed orchestration, no message queue, no evidence-collection agent running in-target. The runtime is a shell that invokes tools, hashes their output, and writes markdown. This simplicity is a design commitment: the framework must be operable from a laptop, with git and a few command-line tools, without any framework-hosted service. This is what makes kronos adoptable by any target regardless of infrastructure.
+**Execution provenance** is the signed attestation binding an evidence artifact to a specific tool invocation at a specific time by a specific operator. Contains: attack ID, tool ID + version, target slug + endpoint, invocation timestamps, operator identity + runner identity, evidence-artifact hashes. Signed with an ed25519 or equivalent key by the operator or runner. Evidence hashes prove the artifact was not altered after commit; execution provenance proves the artifact was produced by a real execution. Both are required for public findings to be independently verifiable. (Added in v0.1 per Claude review P2-3 to distinguish evidence-integrity from execution-authenticity.)
 
-`<REVIEW:` reviewers should evaluate whether the runtime's simplicity is a liability at scale. Consider: what happens when an engagement needs to coordinate attacks across dozens of endpoints in parallel? What happens when evidence collection requires running collectors that are not accessible from the operator's laptop (e.g., CloudWatch metrics from a customer's AWS account)? The simple runtime may need extension points for these cases without losing the "operable from a laptop" property. `>`
+**Finding** is the assertion of a specific defense failure or plausibility violation, backed by specific evidence and execution provenance, with reproduction instructions and suggested remediation. Every finding has a stable identifier (deduplicating across engagements of the same target), a severity, a source (`attack:<id>` or `plausibility-monitor:<observable>`), and a scorecard-delta contribution. Findings are markdown files with YAML frontmatter.
+
+**Reproducibility caveat.** Evidence integrity (hash) and execution provenance (signature) are durable. **Reproducibility** of an attack against a live target is not durable in general — target state drifts, credentials rotate, attacker-owned resources are torn down. A finding can be valid and still fail to reproduce months later. The framework distinguishes evidence-of-what-happened (durable) from re-executability (often ephemeral) and does not promise the latter unconditionally. (Added in v0.1 per Claude review P2-3.)
+
+**Engagement runtime loop.** The runtime executes an engagement by iterating through its §7 attack matrix (severity-ordered for first-signal-stop engagements): for each attack, invoke the appropriate tool through the tool-binding contract, collect raw response and telemetry as evidence, produce the execution-provenance attestation, invoke the attack oracle to evaluate, and if the oracle returns FAIL at-or-above the engagement's severity threshold, produce a finding and (in first-signal-stop mode) halt the engagement. When the matrix is exhausted or first-signal-stop triggers, the engagement moves from `04_running/` to `05_evidence/` and the oracle/finding pass runs to close out. Then to `06_shipped/` with the scorecard delta committed.
+
+**Plausibility-monitor runtime loop.** Runs outside the engagement lifecycle. On its declared cadence (continuous, scheduled, or on-demand), the monitor polls each observable declared in the target's capacity model, evaluates against the model's declared bounds (with tolerance multiplier), and emits findings for any observation exceeding bounds. Findings land at `<target>/kronos/findings/plausibility/YYYY-MM-DD-<hash>.md` and are aggregated by the scorecard.
+
+The runtime is deliberately simple. There is no distributed orchestration, no message queue, no evidence-collection agent running in-target for the core case. The core runtime is a shell that invokes tools, hashes their output, signs provenance, and writes markdown. This simplicity is a design commitment: the framework must be operable from a laptop, with git and a few command-line tools, without any framework-hosted service.
+
+**Extension points** (added in v0.1 per Claude review §9 inline). The simple core does not preclude parallel execution or external collectors. The framework declares two extension interfaces: (a) an optional **parallel executor** interface for engagements that need to coordinate attacks across dozens of endpoints simultaneously; (b) a **collector interface** for evidence sources that are not accessible from the operator's laptop (in-target CloudWatch subscribers, cloud-native metric-stream consumers). Both are optional; the reference implementation ships the sequential/laptop-only core, with the extension interfaces documented and reference implementations shipped as separate optional packages.
 
 ## 10. Tool binding — how the framework delegates attack execution
 
@@ -228,6 +278,10 @@ Kronos addresses this property structurally rather than pretending it does not e
 
 **Authorization artifact as first-class primitive.** Every kronos engagement requires a signed authorization artifact naming target scope, timeframe, rate ceilings, destructive-testing permission, approver identity, and contact of record. The artifact is a first-class first-order object in the methodology — not a click-through EULA, but a signed, versioned, git-committed record that is validated by the framework's `authorization-artifact-validator` action at every engagement start. The framework's runtime refuses to execute active probes without a valid artifact.
 
+**Incident-state discipline** (added in v0.1 per ADR-0009). The authorization artifact recognizes a distinct incident-state (`incidentState.declared: true`) with two structural consequences: (a) `dataClassPreservation: enforced` — the framework refuses to invoke any tool whose declared `resource_classes_affected` intersects the engagement's enumerated `dataClassResources` (persistent storage, identity records, DNS, audit logs, encryption keys by default), regardless of the operator's authorization or the tool's declared capabilities; (b) `signedSober: false` — the framework refuses tools at authorization ceiling ≥ 3 (destructive testing). The `dataClassPreservation: waived` mode requires an additional signature beyond the standard approver signature, making the "sign it in the middle of a panic to waive the preservation" path expensive enough to prevent operator error under duress. This is the founding-incident lesson made structural.
+
+**Chain-of-authorization for third parties** (added in v0.1 per ADR-0009 and Claude review P2-6). Engagements whose attack matrix touches third-party platforms (cloud providers, SaaS services, third-party APIs) require an explicit `chainOfAuthorization.thirdParties` block enumerating each party, the resource classes affected, and the operator's acknowledgment that the actions fall within the third party's acceptable-use policy. The framework's `authorization-artifact-validator` action fails engagements whose attack matrix references third-party resource classes not declared in the chain. Chain-of-authorization is documentation, not delegation — the block does not create legal authorization the operator does not otherwise have; it makes the operator's affirmation structurally recorded and versioned.
+
 **License and terms of use.** Kronos is licensed under GNU AGPL v3. The license does not restrict use, but it does require that any hosted service running modified kronos code make the modified source available to that service's users. This means an adversary running a hosted kronos-derivative for malicious purposes cannot hide the fork; the source is subject to disclosure.
 
 **Explicit authorized-user vs unauthorized-user liability separation.** The repository's README and every public artifact state clearly that CloudPremise LLC (the framework's authoring entity) operates only under signed authorization. Unauthorized use by any party is the responsibility of that party. The framework maintainer does not indemnify unauthorized users and disclaims all liability for their actions.
@@ -240,9 +294,13 @@ The structural coupling of dual-use tooling with a first-class authorization art
 
 `<REVIEW:` reviewers should also evaluate the "refused capabilities" boundary. Is the line between dual-use and single-use offensive coherent in practice? How does the framework prevent a contributor from proposing a capability that seems dual-use but is actually single-use offensive? Is there a review process for proposed capability additions? `>`
 
-## 12. Reference engagement — olympus-616 HUD-v2.3 L14
+## 12. Reference engagements — olympus-616 (two engagements)
 
-The first kronos engagement against a real target is designed to validate the framework's full loop end-to-end. It is intentionally scope-tiny (one attack) and framework-total (every primitive exercised).
+Per Claude review P2-5, the reference implementation covers two engagements rather than one. A single passing engagement exercises the pass path but not the write-heavy paths (finding-writing, scorecard-drop, eos-backlog auto-file, first-signal-stop actually stopping, INCONCLUSIVE handling). Two engagements — one expected PASS and one expected FAIL — exercise the complete framework loop.
+
+### Reference engagement A — expected PASS (validates the pass path)
+
+The first kronos engagement against a real target is designed to validate the framework's full loop end-to-end for the case where the defense holds.
 
 **Target:** olympus-grid, specifically the Ares perimeter cascade of `hostile-universe-defense-v2.3-SEALED-2026-07-23.md`, further specifically the L14 origin-secret zero-leak defense.
 
@@ -264,14 +322,44 @@ The first kronos engagement against a real target is designed to validate the fr
 
 **Alternate outcome:** the L14 defense fails. A critical finding is written naming the failure mode, providing reproduction instructions, and suggesting remediation. The Perimeter Defense dimension drops from L3 to L1 pending remediation and re-verification. The corresponding eos attestation (if it exists) auto-files a backlog cycle for re-attestation after remediation.
 
-Both outcomes validate the framework. The framework's usefulness does not depend on any particular defense outcome; it depends on the framework's ability to produce reproducible evidence about defense outcomes.
+Both outcomes validate the framework, but only one exercises each set of paths. Engagement A demonstrates the pass path; engagement B (below) demonstrates the write-heavy paths.
 
 The engagement will produce, as artifacts committed to `olympus-616/foundation/kronos/`:
 
 - One engagement document: `olympus-grid.kronos-1.md` in `06_shipped/`
-- One evidence folder: `evidence/olympus-grid.kronos-1/` containing the raw request, the raw response, and the CloudWatch metric excerpt
+- One evidence folder: `evidence/olympus-grid.kronos-1/` containing the raw request, the raw response, the CloudWatch metric excerpt, and the execution-provenance attestation
 - One scorecard update: the target's `SCORECARD.md` reflecting the new Perimeter Defense level
-- Zero or one findings: `06_shipped/olympus-grid.kronos-1.finding-1.md` if the defense failed
+- Zero findings expected
+
+### Reference engagement B — expected FAIL (validates the write-heavy path)
+
+The second reference engagement targets a deliberately-injected weakness in an isolated staging environment to exercise the write-heavy paths: finding generation, scorecard-drop, eos-backlog auto-file, first-signal-stop actually halting, and INCONCLUSIVE handling under genuine ambiguity.
+
+**Target:** olympus-grid staging, with a temporary configuration change disabling one specific L-layer defense (candidate: L1 event-registry drop-first classification is temporarily set to allow-first for a specific unknown event_type). This is authored expressly so the engagement will produce a finding.
+
+**Threat model class:** perimeter-bypass via forged event-type header.
+
+**Attack:** POST 40 requests with a forged `event_type: "payment.stripe.settled"` header to a public endpoint that emits to Plutus, per the L1 diagnostic attack in `hostile-universe-defense-kronos-redteam-plan-2026-07-24.md`.
+
+**Mode:** `first-signal-stop` with severity threshold `high`. The attack matrix is severity-ordered.
+
+**Oracle:** expect CloudWatch metric `AresEventsDropped` with dimension `Tier=recon` to show drops ≥ 30 within 60s; if not, defense failed and the finding is critical severity.
+
+**Expected outcome:** the disabled L1 defense does not fire; the recon-tier rate cap does not drain; over-threshold events are admitted; the oracle returns FAIL; a critical finding is written; the engagement halts at first-signal-stop; the scorecard's Perimeter Defense dimension drops from its previous state to L1 with the finding cited; if eos is co-installed, the finding auto-files a backlog cycle in `olympus-616/foundation/eos/cycle/00_backlog/` naming the L1 attestation as falsified.
+
+The engagement produces:
+
+- Engagement document `olympus-grid.kronos-2.md` in `06_shipped/`
+- Evidence folder with request/response artifacts, CloudWatch metric excerpts showing the missing drop count, and execution-provenance attestation
+- Finding markdown `06_shipped/olympus-grid.kronos-2.finding-1.md` with reproduction instructions and remediation suggestion
+- Scorecard update reflecting the drop
+- Auto-filed eos backlog cycle in `foundation/eos/cycle/00_backlog/eos-N-perimeter-restoration.md`
+
+After the engagement closes, the temporary configuration change is reverted and engagement C is planned to re-verify the defense holds.
+
+### Third-party authorization prerequisite
+
+Per Claude review P2-6 and ADR-0009, engagement A's use of an attacker-owned AWS CloudFront distribution requires an explicit chain-of-authorization block in the engagement's §2 authorization artifact naming AWS as the third party, enumerating the resource classes (CloudFront distribution creation, ALB target invocation), and containing the operator's acknowledgment that the actions fall within AWS Acceptable Use Policy. This is not a future concept; it is a prerequisite for engagement A shipping.
 
 ## 13. Roadmap and MVP prototype architecture
 
@@ -286,6 +374,14 @@ The design converges through cross-LLM review before any framework code is writt
 - v0.4 after Gemini 2.5 Pro review
 - Loop until two consecutive reviewers propose only cosmetic changes
 - Patent disclosure draft authored based on converged design
+
+### Tension between reviewers on MVP sequence (v0.3 note)
+
+Grok's cross-LLM review recommended prioritizing the runner scaffold (React/TS dual-number scorecard + kanban + evidence drill-down) and dogfooding immediately against the kronos repo itself. ChatGPT's review recommended engine-first (schemas → CLI → typed executor → oracle → evidence → watchdog → L14 reference engagement → static report → scorecard → React runner). These are directly opposite sequences.
+
+The v0.3 documents preserve ChatGPT's engine-first ordering below because engine-first ensures every UI rendering has real underlying primitives to render; UI-first risks producing a polished interface backed by an incomplete domain model. But Grok's argument for early dogfooding has merit for adopter validation. The subsequent reviewer (Gemini) is invited to weigh in explicitly on this sequencing question; if consensus doesn't emerge, the operator will decide.
+
+Regardless of sequence, both reviewers agree the runner and engine are both required for v1.0; the disagreement is only about which ships first as MVP.
 
 ### Phase 1 — MVP prototype scaffold
 
@@ -388,7 +484,23 @@ The full alignment analysis is in [`methodology/INDUSTRY-ALIGNMENT.md`](methodol
 
 See ADR-0006 for the architectural rationale.
 
-## 17. Patent claim scaffold
+## 17. IP posture and patent claim scaffold
+
+### IP posture (deferred hybrid)
+
+The strategic question of whether kronos pursues patent protection on specific technical mechanisms is **deferred pending IP counsel review**. The operator has elected hybrid framing: both patent-claim and open-source-moat language coexist in current documents; downstream resolution will narrow one direction, both, or neither. Contributors accept the AGPL-3.0 patent grant (§11) as part of the contribution agreement.
+
+**The strongest candidates for eventual patent claims** (per prior-art analysis in INVENTIVE-CONCEPT-CANDIDATES.md) are technical mechanisms rather than methodology framing:
+
+- **Enumeration reconciliation** as mandatory tool-binding contract with filtered/unfiltered delta as first-class finding class (ADR-0017 §Enumeration; the specific mechanism that would have caught the founding-incident scanner bug).
+- **Execution-provenance signing** binding evidence artifacts to specific tool invocation via SLSA-aligned signed attestation (ADR-0015).
+- **Git-history scorecard recomputation** producing time-series trajectory from the same source-of-truth without separate persistence (SCORECARD §State versus trajectory).
+- **Capacity-model bounds derivation** for physical-plausibility monitoring (ADR-0007, PLAUSIBILITY-MONITOR §Bounds derivation examples).
+- **Dual-plane execution model** with challenge-as-parent-abstraction and continuous-plane running outside engagement lifecycle (ADR-0011).
+
+Methodology-level framing (presumption-of-failure discipline, dialectic with attestation, scorecard-as-north-star, per-engagement production-safety mode) faces steeper Alice/§101 subject-matter-eligibility headwinds in the US and is more defensibly held as open-source-moat differentiation rather than patent claims.
+
+### Patent claim scaffold
 
 Kronos claims seven novel properties, described conceptually in [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md). A detailed patent disclosure paralleling `foundation/eos/PATENT-DISCLOSURE-DRAFT.md` will be authored after this design converges through the cross-LLM review process.
 
@@ -414,7 +526,47 @@ The **conjunction** of all seven, applied to software assurance, is the inventiv
 
 ## 18. Open questions for the design review
 
-Beyond the inline `<REVIEW:...>` markers, several higher-level questions are open for the review process:
+Beyond the inline `<REVIEW:...>` markers, several higher-level questions remain open for subsequent review rounds. Questions resolved by Claude's first-pass review are marked (RESOLVED IN v0.1); those still open are marked (OPEN).
+
+**(RESOLVED IN v0.1 — Claude review P1-1)** How does the physical-plausibility oracle actually work as a mechanism? — Resolved via ADR-0007 and `methodology/PLAUSIBILITY-MONITOR.md`. Capacity model + plausibility monitor added as first-class primitives distinct from the attack oracle.
+
+**(RESOLVED IN v0.1 — Claude review P1-1)** Where does the enumeration reconciliation live? — Resolved via mandatory `enumeration.reconcile` field in the tool manifest schema (TOOL-BINDING.md).
+
+**(RESOLVED IN v0.1 — Claude review P1-1)** Where does panic-mode authorization with data-class preservation live? — Resolved via `incidentState` and `dataClassResources` blocks in TEMPLATE §2 (ADR-0009).
+
+**(RESOLVED IN v0.1 — Claude review P1-2)** Can kronos reach L3 without eos? — Resolved via ADR-0008 (L3 redefined as "framework-integrated with automated diagnostic attack defined and passing," attainable natively).
+
+**(RESOLVED IN v0.1 — Claude review P1-3A)** How does retroactive catalog growth interact with a sold public number? — Resolved via ADR-0010 (dual-number rendering + 90-day catalog-bump governance window + 72-hour field-falsification exception).
+
+**(RESOLVED IN v0.1 — Claude review P1-3B, P2-6)** How does the free-assessment model comply with authorization discipline? — Resolved via ADR-0009 (onboarding-gated prospect authorization; chain-of-authorization for third parties; unsolicited prod probing dropped).
+
+**(RESOLVED IN v0.1 — Claude review P2-1)** What are the exact semantics of first-signal-stop? — Resolved via severity-threshold + severity-ordered matrix + explicit INCONCLUSIVE handling (documented in §7 and OPERATING-MANUAL).
+
+**(RESOLVED IN v0.1 — Claude review P2-2)** The word "oracle" was overloaded. — Resolved via rename to "attack oracle" throughout, with "plausibility monitor" as the distinct object.
+
+**(RESOLVED IN v0.1 — Claude review P2-3)** Evidence has integrity but not authenticity. — Resolved via execution-provenance signing (TOOL-BINDING and TEMPLATE §9), with explicit reproducibility caveat.
+
+**(RESOLVED IN v0.1 — Claude review P2-4)** The headline score was operator-configurable and not comparable. — Resolved via ADR-0010 (fixed minimum-across-five-critical-dimensions headline).
+
+**(RESOLVED IN v0.1 — Claude review P2-5)** The reference engagement validated only the pass path. — Resolved via addition of reference engagement B (expected FAIL) in §12.
+
+**(RESOLVED IN v0.1 — Claude review P2-8)** An unfalsifiable claim in the reference-impl doc violated the framework's Popperian brand. — Resolved via replacement with bounded operational claims in docs/examples/olympus-616.md.
+
+**(OPEN — deferred to operator + IP counsel, flagged in v0.1)** Is the strategy patent play, open-source moat play, or hybrid? — Deferred-decision block added to SEVEN-CLAIMS. Downstream framing depends on this decision.
+
+**(OPEN — Claude review P2-7)** How is the LLM watcher's curator verification protocol specified? What treats CVE descriptions as untrusted input rather than instructions? Should auto-from-findings promotion ever be fully automatic given its retroactive scorecard impact? Recommendation is to specify curator protocol in a subsequent methodology file and to keep human-in-loop indefinitely for catalog promotion. Not blocking v0.1 shipment.
+
+**(OPEN — subsequent reviewer input needed)** Are the five critical dimensions the correct five? Alternative selections include swapping Incident Response for Availability & Resilience (some argue availability is more consequential than response readiness) or adding Cost Integrity (given the founding incident). Recommendation: hold the current five until a subsequent reviewer proposes a specific alternative with justification.
+
+**(OPEN)** How is community contribution to the threat catalog governed? Reviewer proposal, threat-class contribution flow, curator authority, and revocation procedures.
+
+**(OPEN)** Where does the runtime multi-persona LLM evaluation fit? The methodology mentions AI-assisted attack generation, finding interpretation, and remediation suggestions. The multi-persona pattern (LLMs playing red/blue/synth roles) is proposed but the specific runtime contract is not yet specified.
+
+**(OPEN)** Is the runner's read-only-plus-PR-write model sufficient for long-running engagements with dozens of committed evidence artifacts?
+
+**(OPEN)** How does kronos evolve its own scorecard? Should kronos dogfood itself, running engagements against its own runner and oauth-server?
+
+**(OPEN)** What is the versioning strategy for the framework across breaking methodology changes? Adopters pin catalog versions; do they also pin methodology versions?
 
 **Q1. Is the presumption-of-failure epistemology commercially viable?** Enterprise buyers are accustomed to positive-certification frameworks. A framework that explicitly says "we don't certify your system as safe; we only certify that we couldn't break it" may be a harder sale. Is the framing right, or should the marketing language soften the philosophical commitment while preserving the operational commitment?
 
@@ -437,17 +589,22 @@ Beyond the inline `<REVIEW:...>` markers, several higher-level questions are ope
 This document is v0 of the kronos design. It exists to be reviewed. Companion documents (all in this repository):
 
 - [`methodology/OPERATING-MANUAL.md`](methodology/OPERATING-MANUAL.md) — the operating discipline in full
-- [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md) — the novel-property claims for design review and eventual patent disclosure
-- [`methodology/SCORECARD.md`](methodology/SCORECARD.md) — the maturity scorecard model
-- [`methodology/TEMPLATE.md`](methodology/TEMPLATE.md) — the engagement document template
-- [`methodology/TOOL-BINDING.md`](methodology/TOOL-BINDING.md) — the four-layer tool binding contract and manifest schema
+- [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md) — the novel-property claims (with a deferred-decision block on patent-vs-open-source strategy)
+- [`methodology/SCORECARD.md`](methodology/SCORECARD.md) — the maturity scorecard model, including non-configurable critical-dimension headline and dual-number rendering (v0.1)
+- [`methodology/TEMPLATE.md`](methodology/TEMPLATE.md) — the engagement document template, including the incident-state and chain-of-authorization blocks (v0.1)
+- [`methodology/TOOL-BINDING.md`](methodology/TOOL-BINDING.md) — the four-layer tool binding contract, manifest schema, enumeration reconciliation, and execution-provenance signing (v0.1)
+- [`methodology/PLAUSIBILITY-MONITOR.md`](methodology/PLAUSIBILITY-MONITOR.md) — the capacity-model and plausibility-monitor primitives (new in v0.1)
 - [`methodology/INDUSTRY-ALIGNMENT.md`](methodology/INDUSTRY-ALIGNMENT.md) — kronos's positioning against the compliance landscape and per-standard mapping strategy
-- [`docs/adr/ADR-0001-three-layer-identity.md`](docs/adr/ADR-0001-three-layer-identity.md)
+- [`docs/adr/ADR-0001-three-layer-identity.md`](docs/adr/ADR-0001-three-layer-identity.md) — with directory-materialization section marked superseded-in-part by ADR-0002
 - [`docs/adr/ADR-0002-productization-alignment-with-eos.md`](docs/adr/ADR-0002-productization-alignment-with-eos.md)
 - [`docs/adr/ADR-0003-scorecard-as-north-star.md`](docs/adr/ADR-0003-scorecard-as-north-star.md)
 - [`docs/adr/ADR-0004-eos-dialectic.md`](docs/adr/ADR-0004-eos-dialectic.md)
 - [`docs/adr/ADR-0005-layered-tool-binding.md`](docs/adr/ADR-0005-layered-tool-binding.md)
 - [`docs/adr/ADR-0006-industry-standards-alignment.md`](docs/adr/ADR-0006-industry-standards-alignment.md)
+- [`docs/adr/ADR-0007-plausibility-monitor.md`](docs/adr/ADR-0007-plausibility-monitor.md) — plausibility monitor + capacity model as first-class primitives (new in v0.1)
+- [`docs/adr/ADR-0008-l3-native-attainability.md`](docs/adr/ADR-0008-l3-native-attainability.md) — L3 attainable natively by kronos without external attestation (new in v0.1)
+- [`docs/adr/ADR-0009-authorization-scope-and-third-party.md`](docs/adr/ADR-0009-authorization-scope-and-third-party.md) — incident-state, chain-of-authorization, prospect-scope (new in v0.1)
+- [`docs/adr/ADR-0010-headline-scorecard-comparability.md`](docs/adr/ADR-0010-headline-scorecard-comparability.md) — non-configurable headline + dual-number rendering (new in v0.1)
 - [`docs/inception/00-founding-incident.md`](docs/inception/00-founding-incident.md) — the founding case study
 - [`docs/examples/olympus-616.md`](docs/examples/olympus-616.md) — the flagship reference implementation
 
@@ -458,6 +615,4 @@ To be authored after this design converges:
 - `SOC2-CONTROL-MAPPING.md` — the mapping of scorecard dimensions to SOC 2 control categories
 - `docs/alignment/<standard>.md` — per-industry-standard mapping documents; first-priority set: OWASP ASVS 4.0.3, NIST CSF 2.0, NIST AI RMF 1.0, SOC 2 TSC 2017, AWS Well-Architected
 
-**Next step after this document is committed:** the cross-LLM review round-robin begins. The scribe will produce v0.1, v0.2, v0.3, v0.4 as reviewer feedback arrives, and continue iterating until convergence. Then the patent disclosure draft is authored, then the MVP prototype scaffold begins.
-
-The Steward's directive is *have fun. go.* This document is the go.
+**Next step after this document is committed:** the cross-LLM review round-robin continues. v0.1 (this revision) folds in Claude's first-pass review. Next reviewer: ChatGPT-5. Subsequent reviewers: Grok, Gemini. The scribe will produce v0.2, v0.3, v0.4 as feedback arrives and continue iterating until convergence (two consecutive reviewers proposing only cosmetic changes). Then the patent-strategy decision is resolved, the patent disclosure draft is authored (if patent strategy resolves in that direction), and the MVP prototype scaffold begins.

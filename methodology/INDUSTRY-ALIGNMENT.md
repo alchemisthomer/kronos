@@ -8,7 +8,7 @@ Enterprise adopters do not encounter kronos in a vacuum. They already operate un
 
 This document names each of these landscapes explicitly, describes kronos's relationship to it (complementary, foundational, or competitive), and commits to the specific mapping artifacts kronos will produce so that adopters can position kronos coherently within their existing compliance programs.
 
-The alignment principle is simple: **kronos is the adversarial verification layer beneath every certification claim.** Certifications describe controls that ought to be in place. Kronos runs the attacks that would succeed if the controls were not actually in place. A certification with kronos evidence behind it is a stronger claim than a certification without.
+The alignment principle is (revised in v0.2 per ChatGPT's cross-LLM review to narrow the scope): **kronos is an adversarial and continuous evidence-producing companion for selected technical and operational control objectives across recognized assurance frameworks.** Kronos does not adversarially verify every claim in every certification — many certification requirements concern governance, personnel, contracts, privacy processes, physical controls, board oversight, and organizational conduct that kronos cannot mechanically test. Kronos contributes evidence to the specific technical and operational controls that are within reach of an adversarial or continuous evaluation.
 
 Attainment of any specific certification remains outside kronos's scope. Kronos does not audit. Kronos does not issue certifications. Kronos does not act as an authorized certification body. What kronos does is produce reproducible, evidence-backed answers to the question *"under adversarial pressure, does the control actually hold?"* — answers that certification bodies, auditors, and enterprise stakeholders can consume as inputs to their own decisions.
 
@@ -92,9 +92,9 @@ Kronos will publish an AWS Well-Architected mapping. Particularly relevant is th
 
 These are standards whose structure has significant overlap with the kronos scorecard model. Explicit mapping documents are highest-value here.
 
-**OWASP ASVS (Application Security Verification Standard)** — three levels (L1 opportunistic, L2 standard, L3 advanced) across 14 categories (Architecture, Authentication, Session Management, Access Control, Validation, Cryptography, Error Handling, Data Protection, Communication, Malicious Code, Business Logic, Files & Resources, API & Web Service, Configuration). ASVS is the industry's most comprehensive checklist of application security controls; kronos scorecard cells cite the ASVS control IDs each engagement helps verify. Kronos ASVS mapping is a first-priority artifact.
+**OWASP ASVS (Application Security Verification Standard)** — updated in v0.2 to reference the current version **ASVS 5.0.0** (released May 30, 2025), not the v0.1-referenced 4.0.3. ASVS 5.0.0 organizes application security controls across three levels (L1 opportunistic, L2 standard, L3 advanced) with revised category structure from prior versions. Kronos scorecard cells cite the ASVS 5.0.0 control IDs each engagement helps verify. Kronos ASVS mapping is a first-priority artifact.
 
-Positioning: an application that has passed kronos engagements covering the ASVS L2 or L3 control set has an assurance claim substantially stronger than one that has only self-assessed against ASVS. Kronos is the adversarial-verification-of-ASVS layer.
+Positioning: an application that has passed kronos engagements covering the ASVS L2 or L3 control set has an assurance claim substantially stronger than one that has only self-assessed against ASVS. Kronos is an adversarial-verification companion for the technical controls within ASVS's scope.
 
 **NIST AI Risk Management Framework (AI RMF 1.0)** — four functions (Govern, Map, Measure, Manage) with subcategories under each. Published January 2023; rapidly becoming the reference framework for AI risk in US government and enterprise contexts. Kronos is particularly relevant to the Measure function — AI systems make claims (this model refuses harmful content; this RAG isolates tenants; this agent respects tool authorization) that are otherwise entirely trust-based; kronos can be the canonical adversarial verifier of those claims.
 
@@ -104,6 +104,12 @@ Kronos NIST AI RMF mapping will detail how kronos engagements against AI systems
 
 The AI risk landscape is evolving rapidly. Kronos will track these and publish alignment as they mature.
 
+**OWASP AISVS 1.0** — Artificial Intelligence Security Verification Standard, released June 24, 2026. First-priority AI-specific mapping target. Provides verification requirements for AI systems paralleling ASVS for applications. Kronos AI engagements cite AISVS 1.0 requirement IDs.
+
+**OWASP LLMSVS 2.0** — Large Language Model Security Verification Standard. Complementary to AISVS with focused LLM-specific requirements. Kronos LLM-target engagements cite LLMSVS 2.0 requirement IDs.
+
+**OWASP AI Testing Guide** — repeatable trustworthiness testing across application, model, infrastructure, and data layers. Referenced by kronos AI-target engagement plans.
+
 **AIUC-1** — AI Underwriting Company Level 1 certification, an emerging framework for AI risk certification aimed at insurability of AI systems. Kronos engagement evidence directly supports AIUC-1 assessment criteria around AI system safety and reliability. Mapping to be published as the AIUC-1 specification stabilizes.
 
 **ISO/IEC 42001** — the first international standard for AI management systems (published December 2023). Establishes requirements for organizational AI risk management. Kronos evidence supports ISO 42001 conformance particularly in the operational-controls and continuous-improvement clauses.
@@ -111,6 +117,34 @@ The AI risk landscape is evolving rapidly. Kronos will track these and publish a
 **EU AI Act conformance regimes** — the EU AI Act (published August 2024) requires high-risk AI systems to demonstrate conformance to specific technical standards (risk management, data governance, technical documentation, transparency, accuracy, robustness, cybersecurity). Kronos is directly relevant to the robustness and cybersecurity requirements. Mapping to be published as the EU harmonized standards for AI Act conformance emerge from the CEN-CENELEC working groups.
 
 **Anthropic Responsible Scaling Policy / OpenAI Preparedness Framework / Google DeepMind Frontier Safety Framework** — company-specific frameworks for evaluating frontier AI system risks. Kronos does not compete with these frameworks (they are internal AI-lab governance), but kronos engagements against AI systems can produce evidence that complements the internal evaluations these frameworks require.
+
+## Machine-readable mapping via OSCAL and OpenCRE
+
+Per ChatGPT's cross-LLM review, kronos does not build all mappings as bespoke markdown. The v0.2 mapping strategy uses two existing machine-readable substrates:
+
+**NIST OSCAL (Open Security Controls Assessment Language)** — defines machine-readable models for control catalogs, assessment plans, observations, findings, risks, evidence, assessment assets, and continuous assessment results. Kronos's domain-model schemas (see DOMAIN-MODEL.md) support OSCAL import/export or a defined profile. This means:
+
+- A kronos engagement's observations, findings, and evidence manifest can be exported as an OSCAL Assessment Results document consumable by OSCAL-aware GRC platforms.
+- An OSCAL Control Catalog (NIST 800-53, ISO 27001, PCI DSS, etc.) can be imported as a source of claim mappings.
+- Downstream integrations with continuous ATO systems, third-party GRC platforms, and audit-preparation tools follow the standard OSCAL contract rather than kronos-specific integrations.
+
+**OpenCRE (Open Common Requirement Enumeration)** — cross-references requirements across security standards. Kronos claim identifiers map to OpenCRE IDs, which in turn map to specific requirements across every standard OpenCRE indexes. This means:
+
+- A kronos claim need be mapped only to OpenCRE once; the OpenCRE-to-standard mappings are inherited from OpenCRE's maintenance.
+- Adopters pursuing multiple certifications get multi-standard coverage from a single claim mapping.
+- Kronos does not need to independently maintain per-standard mappings for every standard OpenCRE already indexes.
+
+Recommended mapping structure:
+
+```
+Kronos claim ID
+  ↔ OpenCRE IDs (via OpenCRE maintainers' cross-references)
+  ↔ OSCAL control/objective IDs (via OSCAL catalog import)
+  ↔ ASVS 5.0.0 / AISVS 1.0 / LLMSVS 2.0 requirements
+  ↔ ATT&CK / ATLAS / CAPEC / CWE identifiers (in the catalog entry)
+```
+
+This structure means the framework's mapping-maintenance burden is materially lower than a bespoke-mapping-per-standard approach. Kronos maintains claim-to-OpenCRE and claim-to-OSCAL mappings; the industry maintains OpenCRE-to-standard and OSCAL-to-standard mappings.
 
 ### Adjacent — not yet mapped, worth tracking
 
@@ -128,7 +162,7 @@ Depending on the audience, kronos's positioning against industry standards can b
 
 **For AI teams:** *"NIST AI RMF and AIUC-1 tell you what AI risk management should look like. Kronos runs the attacks that would surface the risks the frameworks describe. If your AI system passes kronos engagements against the RMF Measure subcategories, you have adversarial evidence — not just process documentation — supporting your AI RMF claims."*
 
-**For consulting engagements:** *"We help you pursue certification X. eos closes the paperwork requirements; kronos closes the actual-defense-works verification. Certification bodies see documented controls; kronos evidence shows those controls survive attack. The combined offering moves your assurance posture from 'documented' to 'demonstrated'."*
+**For consulting engagements** (revised in v0.2 per ChatGPT — eos does not "close paperwork" for third-party certifications): *"We help you pursue certification X. Eos supports control documentation and technical attestation of the aspects of the certification within its scope; kronos closes the actual-defense-works verification for the technical and operational controls within its scope. Neither framework substitutes for the third-party audit engagement; both contribute evidence the auditor and the certification body consume."*
 
 ## Mapping artifacts kronos will produce
 

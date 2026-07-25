@@ -1,9 +1,10 @@
 # ADR-0001 — Three-Layer Identity: Framework, Tools, Engagements
 
-- **Status:** Accepted
+- **Status:** Accepted (Directory-Materialization section superseded-in-part by ADR-0002)
 - **Date:** 2026-07-23
-- **Deciders:** The Steward, Kronos
+- **Deciders:** The operator, Kronos scribe
 - **Supersedes:** None
+- **Superseded by:** ADR-0002 (partial — directory materialization pattern only; the three-layer identity claim remains in force)
 
 ## Context
 
@@ -69,15 +70,17 @@ Kronos has three layers, each with a clear identity, boundary, and stability con
 
 - The framework does not commit to a single language. Tools may be TypeScript, Python, Go, Rust, or Bash. The framework is defined in language-neutral schemas (JSON Schema, YAML) with reference validators in whichever language is convenient.
 
-## Directory Materialization
+## Directory Materialization (SUPERSEDED-IN-PART BY ADR-0002)
 
-At the moment this ADR is accepted, none of the three layer directories exist. They will be created as real work justifies them:
+> ⚠️ **This section is superseded by ADR-0002.** The three-layer identity described above remains in force, but the concrete directory names originally proposed here (`kronos-framework/`, `kronos-tools/`, `kronos-engagements/`) have been replaced by the eos-productization pattern (`methodology/`, `actions/` + `runner/` + `oauth-server/` + future `alchemisthomer/kronos-tools/`, and each target's `<target>/kronos/engagement/` — with `<target>/foundation/kronos/engagement/` used by targets like olympus-616 that follow a foundation/ convention). See ADR-0002 for the current directory shape.
+
+The original proposal (retained for historical reference):
 
 - `kronos-framework/` — created when the first schema (probably `authorization.schema.json`) needs to land.
 - `kronos-tools/` — created when the first runnable tool needs a home.
 - `kronos-engagements/olympus-616/` — created when we run the first scenario against Olympus-616 and need a place for its authorization artifact and evidence.
 
-This deferred materialization is deliberate. Empty directories are architectural claims we have not yet earned.
+The deferred-materialization principle underlying this section (empty directories are architectural claims we have not yet earned) is preserved by ADR-0002.
 
 ## References
 

@@ -12,7 +12,8 @@
 | **Prior engagement** | `<target-slug>.kronos-<N-1>` (`—` if first against this target) |
 | **Mode** | `red-team` / `black-box` / `gray-box` / `assertion-harness` / `destructive-load` / `data-pollution` / `backend-flooding` / `social-engineering` / `supply-chain` / `insider-simulation` / `cost-adversarial` / `compliance-drift` / `recovery-adversarial` (comma-separated if multiple) |
 | **Environment** | `production` / `staging` / `isolated-test` |
-| **Safety mode** | `first-signal-stop` / `go-to-town` |
+| **Execution policy** | `passive` / `impact-bounded` / `campaign-complete` (per ADR-0014) |
+| **Stop condition (if impact-bounded)** | `first-signal-stop` / `matrix-complete` / `impact-budget-exhausted` |
 | **Catalog version** | `kronos-catalog-YYYY.MM.DD` (the threat catalog version this engagement is pinned against) |
 | **Theme** | one-line summary (e.g., "verify origin-secret zero-leak against attacker-owned CloudFront") |
 | **Estimated effort** | Nh |
@@ -32,7 +33,7 @@ Which system is under evaluation, which surfaces are in scope, which credentials
 
 ## §2 Authorization artifact
 
-The signed record that unlocks execution. This section is either an inline authorization block or a reference to an external artifact hash.
+The signed record that unlocks execution. This section is either an inline authorization block or a reference to an external artifact hash. See ADR-0009 for the design rationale.
 
 ```yaml
 authorizationId: KRA-YYYY-NNNNNN
@@ -49,24 +50,119 @@ target:
   environments:
     - {environment}
 permissions:
-  maximumSafetyLevel: {0-4}
+  # Three-axis authorization model (v0.2 per ADR-0016 and ChatGPT P0-7).
+  # The v0.1 single-axis authorizationCeiling is decomposed into three
+  # orthogonal axes so that a "destructive test in staging with a hardened
+  # executor" is distinguishable from "passive test in production with a
+  # local process executor" — the two are different risk shapes.
+  impactClass: {I0-I4}                  # I0=passive, I1=non-mutating active, I2=bounded reversible mutation,
+                                         # I3=disruptive/destructive, I4=irreversible or human-impacting
+  environmentClass: {E0-E4}             # E0=synthetic, E1=isolated lab, E2=staging,
+                                         # E3=production-equivalent, E4=production
+  executorAssuranceClass: {X0-X4}       # X0=local process, X1=restricted container, X2=hardened isolated worker,
+                                         # X3=dedicated VM/account, X4=independently controlled execution environment
+  # Legacy alias for tool-binding compatibility; derived from impactClass.
+  authorizationCeiling: {0-4}
+  # Explicit flags for legacy semantics; must be consistent with impactClass.
   destructiveTesting: {true|false}
   productionTesting: {true|false}
-limits:
+
+impactBudget:
+  # Impact budget (v0.2 per ADR-0014 and ChatGPT P0-4). Bounds impact
+  # rather than only finding count. Enforced structurally by the runtime
+  # watchdog; breach automatically halts the engagement.
+  maxRequests: {N}
   maxRequestsPerSecond: {N}
   maxConcurrentActions: {N}
-  maxRunDurationMinutes: {N}
+  maxStateMutations: {N}                # zero for I0/I1 engagements
   maxEstimatedCostUsd: {N}
+  maxAffectedPrincipals: {N}
+  maxAffectedRecords: {N}
+  maxDurationSeconds: {N}
+  maxErrorRateDelta: {float}            # e.g., 0.5 = target error rate may not rise by 50 percentage points
+  maxLatencyDeltaMs: {N}
+
 emergency:
   contact: {contact of record}
   stopChannel: {stop mechanism URL or process}
+  revocationChannel: {URL or process for the approver to revoke authorization mid-engagement}
+  revocationIdentifier: {stable identifier for this authorization used in revocation systems}
+
+roles:
+  # Separation-of-duty roles (v0.2 per ADR-0016 and ChatGPT P0-7).
+  # A single individual may hold multiple roles for small engagements;
+  # for larger engagements, distinct individuals are required.
+  targetOwner: {identity}                # party accountable for the target system
+  legalOrBusinessAuthorizer: {identity}  # party with authority to bind the target's organization
+  safetyOfficer: {identity}              # party with authority to halt the engagement
+  operator: {identity}                   # party executing the engagement
+  evidenceCustodian: {identity}          # party responsible for evidence retention and chain of custody
+  reviewer: {identity}                   # party that reviews findings before disclosure
+
+precedent:
+  # Explicit alignment with NIST SP 800-115 ROE templates.
+  nistSp800115Section: "3.4 Rules of Engagement"
+  additionalStandards: []
+
+# Incident-state block (per ADR-0009). Governs framework behavior when the
+# authorization is issued under declared incident conditions.
+incidentState:
+  declared: false                                 # true when engagement is authorized under declared incident conditions
+  signedSober: true                               # affirms authorization was signed outside duress
+  dataClassPreservation: enforced                 # enforced | waived (waived requires signedSober=true AND additional signature)
+  additionalSignatureForWaiver: {optional GPG signature required only when dataClassPreservation=waived}
+  dataClassResources:                             # framework refuses to modify these under declared incident
+    - persistent_storage                          # S3 buckets, EBS volumes, EBS snapshots, RDS databases, DynamoDB tables
+    - identity_records                            # IAM users, roles, groups (credential revocation is separate and permitted)
+    - dns_records                                 # Route 53 zones and records
+    - audit_logs                                  # CloudTrail trails, log archives, evidence bundles
+    - encryption_keys                             # KMS keys, secrets vault entries
+
+# Chain-of-authorization block (per ADR-0009; MANDATORY in v0.3 per Grok review
+# when any attack references third-party resources). The
+# authorization-artifact-validator action FAILS the engagement if any attack
+# in §7 references a resource class from a party not enumerated here.
+chainOfAuthorization:
+  required: true                                # v0.3: framework enforces
+  thirdParties:
+    - party: aws
+      accountId: {redact-in-public-artifact}
+      resourceClassesAffected: [cloudfront_distribution, alb_target]
+      acknowledgment: |
+        Operator affirms that the actions authorized by this engagement fall
+        within AWS Acceptable Use Policy and AWS Customer Agreement. Operator
+        is the account holder or has written authorization from the account
+        holder to execute the described actions.
+      reference: aws-aup-2024-05
+      signature: {signed by operator}           # v0.3: per-third-party ack signed
+
+# Example: waived incident-state flow (v0.3 per Grok review §4)
+# When incidentState.declared: true AND dataClassPreservation: waived,
+# the following additional signature is required beyond the standard
+# approver signature. This makes the "sign in the middle of a panic" path
+# expensive enough to prevent operator error under duress.
+#
+# incidentState:
+#   declared: true
+#   signedSober: false               # duress-signed authorization
+#   dataClassPreservation: waived    # requires additional signature
+#   additionalSignatureForWaiver:
+#     signer: {second approver identity}
+#     signature: {signed by second approver}
+#     signedAt: {timestamp}
+#     rationale: |
+#       {explicit rationale for why data-class preservation must be waived;
+#        recorded in permanent engagement history for post-incident review}
 ```
 
 ## §3 Rules of engagement
 
 - **Modes enabled:** {list, matches header table}
 - **Environment posture:** {matches header table}
-- **Safety mode:** {first-signal-stop or go-to-town, matches header table}
+- **Execution policy:** {passive / impact-bounded / campaign-complete, matches header table — per ADR-0014}
+- **Stop condition:** {first-signal-stop / matrix-complete / impact-budget-exhausted — only meaningful for impact-bounded}
+- **Severity threshold (for first-signal-stop):** {critical | high | medium | low} — the minimum severity at which a finding stops the engagement. Findings below this threshold are recorded but do not halt execution. (Per ADR-0010 and the severity-ordered matrix requirement.)
+- **INCONCLUSIVE handling:** {continue | halt-for-review} — behavior when an oracle returns INCONCLUSIVE. Default is `continue` (INCONCLUSIVE is not a finding); `halt-for-review` requires operator adjudication before the engagement proceeds.
 - **Retention policy:** {how long evidence is retained, where it is stored, who has access}
 - **Prohibited actions:** {actions explicitly refused even under this authorization — e.g., "no attacks that would trigger legal disclosure obligations to third parties"}
 - **Communication cadence:** {when the approver is briefed during the engagement, especially in `first-signal-stop` mode}
@@ -105,14 +201,16 @@ The architecture graph the engagement is executing against. Contains assets, act
 
 For each threat-class × claim pair, the specific diagnostic attack that will be executed. Each row is one attack.
 
-| Attack ID | Threat class | Claim under test | Diagnostic attack | Success would demonstrate |
-|---|---|---|---|---|
-| A-1 | KTC-NNN | {defense claims X} | {specific probe} | {what a successful attack would prove} |
-| A-2 | KTC-NNN | {claim} | {probe} | {proof} |
+**Matrix ordering.** For engagements in `first-signal-stop` mode, the attack matrix MUST be severity-ordered (highest-declared-severity attacks first). This ensures that "stop on the first finding at-or-above threshold" produces a finding that represents the target's worst reached exposure, not an artifact of matrix authoring order. Engagements in `go-to-town` mode may use any order.
 
-## §8 Oracles
+| Attack ID | Threat class | Claim under test | Diagnostic attack | Declared severity if finding | Success would demonstrate |
+|---|---|---|---|---|---|
+| A-1 | KTC-NNN | {defense claims X} | {specific probe} | critical / high / medium / low | {what a successful attack would prove} |
+| A-2 | KTC-NNN | {claim} | {probe} | {severity} | {proof} |
 
-For each attack, the deterministic assertion that determines pass or fail. Oracles reference observable signals only — metrics, log lines, response payloads, telemetry counters. AI-generated narrative may explain an oracle result but cannot replace it.
+## §8 Attack oracles
+
+For each attack, the deterministic assertion that determines pass or fail. Attack oracles reference observable signals only — metrics, log lines, response payloads, telemetry counters. AI-generated narrative may explain an oracle result but cannot replace it. (This section is for **attack oracles** specifically; plausibility-monitor findings from `<target>/kronos/findings/plausibility/` are aggregated separately at scorecard rendering time.)
 
 | Attack ID | Oracle name | Assertion | Data source |
 |---|---|---|---|
@@ -121,11 +219,13 @@ For each attack, the deterministic assertion that determines pass or fail. Oracl
 
 ## §9 Execution log
 
-Ordered record of attacks executed. Each entry captures timing, the request/response evidence hash, and the oracle evaluation.
+Ordered record of attacks executed. Each entry captures timing, the request/response evidence hash, the oracle evaluation, and the execution-provenance signature.
 
-| Timestamp (UTC) | Attack ID | Request evidence (sha256) | Response evidence (sha256) | Oracle evaluation | Notes |
-|---|---|---|---|---|---|
-| YYYY-MM-DDTHH:MM:SSZ | A-1 | {hash → path in evidence/} | {hash → path in evidence/} | PASS / FAIL / INCONCLUSIVE | {notes} |
+| Timestamp (UTC) | Attack ID | Request evidence (sha256) | Response evidence (sha256) | Oracle evaluation | Execution provenance (sha256) | Notes |
+|---|---|---|---|---|---|---|
+| YYYY-MM-DDTHH:MM:SSZ | A-1 | {hash → path in evidence/} | {hash → path in evidence/} | PASS / FAIL / INCONCLUSIVE | {hash → path in evidence/provenance/} | {notes} |
+
+**Execution provenance** (per Claude review P2-3): each attack invocation produces a signed execution-attestation containing timestamp, target identity, tool identity and version, operator identity and signing key. The attestation is hashed and referenced from this table. Evidence hashes prove the artifact was not altered after commit; execution provenance proves the artifact was produced by a real execution against the claimed target at the claimed time by the claimed operator. Both are required for public findings to be independently verifiable.
 
 Full evidence files (request bodies, response bodies, telemetry excerpts, screenshots) are committed as siblings to this document under `../evidence/<engagement-slug>/`.
 

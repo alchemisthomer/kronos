@@ -1,8 +1,10 @@
 # kronos
 
-> Adversarial assurance for AI-built systems — a governance-gated, filesystem-native methodology for proving that software is safe to run.
+> A claim-centric assurance control plane that continuously reconciles system claims against observed reality and executes bounded, authorized challenges to determine which claims survive — under what conditions, with what coverage, confidence, and freshness.
 
-**Status:** pre-alpha. Design converging. Runner, oauth-server, actions, and templates all pending scaffold once the design review completes.
+**Status:** pre-alpha. Design in cross-LLM review (v0.2 post-Claude and post-ChatGPT reviews). Runner, oauth-server, actions, and templates all pending scaffold once the design review completes.
+
+**Kronos does not certify that software is safe. It makes assurance claims testable, challengeable, and auditable.**
 
 ---
 
@@ -41,7 +43,7 @@ Both frameworks operate independently. When co-installed in the same target, the
 
 | Path | Contents |
 |---|---|
-| [`methodology/`](methodology/) | The operating manual, the seven novel claims, the engagement document template, the maturity scorecard model, the tool binding contract, and the industry-standards alignment |
+| [`methodology/`](methodology/) | The operating manual, the seven novel claims, the engagement document template, the maturity scorecard model, the tool binding contract, the plausibility monitor and capacity model, and the industry-standards alignment |
 | [`runner/`](runner/) | (Pending scaffold) A React/TypeScript reference viewer that reads any GitHub repository's `kronos/engagement/**` folder tree via the GitHub REST API and renders the kanban plus the scorecard in the browser. Edits land as pull requests. Independent of the technology of the project under evaluation |
 | [`oauth-server/`](oauth-server/) | (Pending scaffold) A small standalone Node/Express service that completes the GitHub App user-to-server OAuth code-for-token exchange on behalf of the browser viewer. Required only when the viewer is deployed with GitHub App OAuth enabled (viewer works PAT-only without it) |
 | [`actions/`](actions/) | (Pending scaffold) Reusable GitHub Actions: kanban structure validator, authorization artifact validator, evidence hash verifier, scorecard consistency check, first-signal-stop enforcer, production authorization guard, eos backlog auto-file |
@@ -97,9 +99,15 @@ See [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md) for the concept
 
 A more detailed disclosure will be maintained in `PATENT-DISCLOSURE-DRAFT.md` (to be authored after design review converges) for eventual review by IP counsel. Contributions to this repository are subject to the AGPL-3.0 patent grant (§11).
 
+## IP posture (deferred hybrid — see `methodology/INVENTIVE-CONCEPT-CANDIDATES.md`)
+
+Kronos is licensed under GNU AGPL v3 today, published in public, and its findings are opt-in-disclosable per finding. The strategic question of whether specific technical mechanisms (enumeration reconciliation, execution-provenance signing, git-history scorecard recomputation, capacity-model bounds derivation, dual-plane execution model) warrant patent protection is **deferred pending IP counsel review**. The operator has elected hybrid framing — the framework is described using both patent-claim and open-source-moat language in parallel; downstream resolution will narrow one direction, both, or neither.
+
+The framework's structural properties (git-native governance, AGPL license, open catalog, community contribution flow) remain in place regardless of the IP resolution. Contributors to the repository accept the AGPL-3.0 patent grant (§11) as part of the contribution agreement.
+
 ## License
 
-[GNU Affero General Public License v3.0](LICENSE). Deployments that expose modified versions of this code over a network must make the modified source available under the same license.
+[GNU Affero General Public License v3.0](LICENSE). Deployments that expose modified versions of this code over a network must offer corresponding source to those network users. The license does not restrict use, does not detect forks, and does not shield operators from liability for unauthorized activity — it is a copyleft license, not an authorization control.
 
 ## Reference implementation
 
