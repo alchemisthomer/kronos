@@ -38,7 +38,7 @@ Kronos adopts the positioning: **the adversarial verification layer beneath ever
 **Mapping artifact convention.** Mappings live at `docs/alignment/<standard-slug>-<version>.md` following a common template. Each mapping is versioned; when a standard revises, the mapping is updated with a version-bump commit.
 
 **Priority order for initial mappings** (based on estimated customer demand and mapping tractability):
-1. OWASP ASVS 4.0.3
+1. OWASP ASVS 5.0.0
 2. NIST CSF 2.0
 3. NIST AI RMF 1.0
 4. SOC 2 TSC 2017

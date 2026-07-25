@@ -171,7 +171,7 @@ For each standard in the Complementary and Mapping-Target categories above, kron
 ```
 docs/alignment/
 ├── README.md                      # index of mappings
-├── owasp-asvs-4.0.3.md            # first-priority artifact
+├── owasp-asvs-5.0.0.md            # first-priority artifact
 ├── nist-csf-2.0.md                # first-priority artifact
 ├── nist-ai-rmf-1.0.md             # first-priority artifact
 ├── soc-2-tsc-2017.md              # first-priority artifact
@@ -191,7 +191,7 @@ Each mapping document contains:
 4. Guidance on how kronos evidence composes with the standard's audit or certification process
 5. Explicit non-mappings — controls in the standard that kronos does not attempt to verify (and why)
 
-Mappings are versioned. When a standard revises (e.g., ASVS 4.0.3 → 5.0), the mapping is updated in place with a version-bump commit.
+Mappings are versioned. When a standard revises (e.g., ASVS 5.0.0 → 6.0), the mapping is updated in place with a version-bump commit.
 
 ## What kronos does NOT do with respect to industry certifications
 
@@ -207,7 +207,7 @@ The line is clear: kronos produces evidence; certification bodies consume eviden
 
 ## Novelty consideration for patent claim structure
 
-The positioning of kronos as "the adversarial verification layer beneath every industry certification" may constitute a novel property beyond the seven claims already articulated in [`SEVEN-CLAIMS.md`](SEVEN-CLAIMS.md). Prior work in the certification-preparation tool space includes vulnerability scanners (which produce technical evidence without a certification-mapping structure), governance/risk/compliance platforms like RSA Archer, ServiceNow GRC (which produce documentation without adversarial evidence), and consulting practices (which produce narrative reports without reproducible evidence).
+The positioning of kronos as "the adversarial verification layer beneath every industry certification" may constitute a novel property beyond the seven claims already articulated in [`INVENTIVE-CONCEPT-CANDIDATES.md`](INVENTIVE-CONCEPT-CANDIDATES.md). Prior work in the certification-preparation tool space includes vulnerability scanners (which produce technical evidence without a certification-mapping structure), governance/risk/compliance platforms like RSA Archer, ServiceNow GRC (which produce documentation without adversarial evidence), and consulting practices (which produce narrative reports without reproducible evidence).
 
 None of these prior tools combine: (a) adversarial-proof evidence, (b) structural mapping to multiple industry-standard control frameworks, (c) explicit positioning as verification-layer-beneath-certification rather than certification-competitor, (d) mapping artifacts that are versioned and updateable as standards revise, and (e) evidence that composes across multiple standards from a single engagement.
 

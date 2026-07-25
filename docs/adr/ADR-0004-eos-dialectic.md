@@ -75,6 +75,6 @@ These changes are proposed as future eos cycles, not as prerequisites for kronos
 ## References
 
 - [`../../methodology/OPERATING-MANUAL.md`](../../methodology/OPERATING-MANUAL.md) — sections on presumption of failure and independent operation.
-- [`../../methodology/SEVEN-CLAIMS.md`](../../methodology/SEVEN-CLAIMS.md) — property 2 (the dialectic as complementary epistemic backbone).
+- [`../../methodology/INVENTIVE-CONCEPT-CANDIDATES.md`](../../methodology/INVENTIVE-CONCEPT-CANDIDATES.md) — property 2 (the dialectic as complementary epistemic backbone).
 - [`../../methodology/SCORECARD.md`](../../methodology/SCORECARD.md) — L3 eligibility rules that reference eos attestations.
 - `alchemisthomer/eos` — the framework kronos is coupled with.

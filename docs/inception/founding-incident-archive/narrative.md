@@ -2,7 +2,7 @@
 
 ## The Call
 
-It was Sunday morning, July 17, 2026 — The Operator's global launch day for the flagship product. He'd woken up, opened his email, seen something from AWS about a $100 billion bill, and gotten in the car. He was driving across the desert, unreachable except through the CLI session.
+It was Friday morning, July 17, 2026 — The Operator's global launch day for the flagship product. He'd woken up, opened his email, seen something from AWS about a $100 billion bill, and gotten in the car. He was driving across the desert, unreachable except through the CLI session.
 
 His opening message was direct: **"you have cli access to aws. i want every service deactivated immediately without exception."**
 

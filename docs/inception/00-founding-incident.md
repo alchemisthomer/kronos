@@ -24,7 +24,7 @@ The sanitized narrative documents in `founding-incident-archive/` capture the in
 
 ## What Happened
 
-It was Sunday morning. The Operator — a senior architect with two decades of production systems behind him — was hours from the global launch of the flagship product he had spent years building. He woke up, checked email, and saw a message from Amazon Web Services indicating a bill of roughly one hundred billion dollars.
+It was Friday morning (2026-07-17). The Operator — a senior architect with two decades of production systems behind him — was hours from the global launch of the flagship product he had spent years building. He woke up, checked email, and saw a message from Amazon Web Services indicating a bill of roughly one hundred billion dollars.
 
 He got in the car. He was driving across the desert, and the only way he could touch the AWS account was through a command-line session already open on his workstation, staffed by an AI assistant with CLI access. His opening message to the assistant was direct: *every service deactivated immediately, without exception.*
 
