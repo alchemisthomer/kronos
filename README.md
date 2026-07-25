@@ -2,7 +2,7 @@
 
 > A claim-centric assurance control plane that continuously reconciles system claims against observed reality and executes bounded, authorized challenges to determine which claims survive — under what conditions, with what coverage, confidence, and freshness.
 
-**Status:** pre-alpha. Design in cross-LLM review (v0.2 post-Claude and post-ChatGPT reviews). Runner, oauth-server, actions, and templates all pending scaffold once the design review completes.
+**Status:** design frozen at v0.5 (see [`docs/CONVERGENCE-DECLARATION.md`](docs/CONVERGENCE-DECLARATION.md)). Runner, oauth-server, actions, and templates all pending scaffold — the next artifact is an actual implementation prototype, not another review round.
 
 **Kronos does not certify that software is safe. It makes assurance claims testable, challengeable, and auditable.**
 
@@ -18,52 +18,44 @@ The full story of why this bill was never real, why an empty AWS account cannot 
 
 ## What kronos is
 
-**kronos** is a discipline for proving that software is safe to run — through structured, authorized, evidence-preserving attempts to break it. It works on any target system, in any language, on any runtime, at any deployment surface. A project adopts kronos by copying a small folder tree into its repository and running the discipline:
+**kronos** is a discipline for producing reproducible, time-bounded evidence about whether declared system claims survive authorized challenge and continuous reconciliation. It works on any target system, in any language, on any runtime, at any deployment surface.
 
-- Every meaningful adversarial evaluation of a system is one **engagement**.
-- An engagement lives in a single markdown document that travels through a kanban of folders: `00_scope/` → `01_authorized/` → `02_planning/` → `03_ready/` → `04_running/` → `05_evidence/` → `06_shipped/`, with `07_aborted/` for engagements that never close.
-- The document has two halves: a **governance half** (target boundary, authorization artifact, rules of engagement) authored by the human approver, and an **execution half** (target model, attack matrix, oracles, evidence, findings, scorecard delta) authored by the AI agent.
-- The engagement **closes** only when every planned attack has run, every oracle has evaluated, every finding has been written, and the scorecard has been updated in the target's repository.
+Kronos operates two peer runtime planes:
 
-The discipline is intentionally folder-and-file-based. It works with `git` on any host, doesn't require a database or a runtime service to persist findings, and can be adopted by any team without adopting any framework's stack choices.
+- The **continuous assurance plane** runs passive and low-impact evaluations on schedule or event trigger — cost/inventory reconciliation, resource-count-vs-quota, control drift, evidence freshness, alert-channel and kill-switch health. This is the plane that would have caught the founding incident within hours.
+- The **engagement plane** runs explicitly authorized on-demand interventions — diagnostic control challenges, adversarial simulations, fault injections, load tests, tabletop exercises.
+
+The framework's primary consumer-facing artifact is the **kronos scorecard**, which renders a target's assurance posture across twelve dimensions with multidimensional per-cell state (maturity + effectiveness + coverage + confidence + freshness + fidelity + open findings + catalog gap). The scorecard is deliberately not a single-number safety certification; it reports what has been evaluated, what has survived, and what remains untested, at which catalog version, in which environment, with what evidence age.
+
+The discipline is intentionally folder-and-file-based. It works with `git` on any host, doesn't require a database or runtime service to persist findings, and can be adopted by any team without adopting any framework's stack choices. Typed schemas for the domain-model objects are the source of truth; markdown is a human projection of the typed schemas.
 
 ## Why kronos is not only a security tool
 
-Kronos treats **security, cost, availability, data integrity, operational discipline, response readiness, and compliance drift** as peer classes of vulnerability. Any of them can end a company; all of them deserve deterministic, reproducible verdicts. The framework's primary artifact — the **kronos scorecard** — renders the target's assurance posture across all of these dimensions as a single matrix, with the load-bearing property that its top maturity levels are only reachable via adversarial proof.
+Kronos treats **security, cost, availability, data integrity, operational discipline, response readiness, and compliance drift** as peer classes of vulnerability. Any of them can end a company; all of them deserve deterministic, reproducible verdicts.
 
-The founding incident linked above was not a security compromise. It was a cloud-provider billing pipeline defect that surfaced a phantom $131,831,457,005.91 charge on the operator's launch day. No security tool would have caught it; a physical-plausibility oracle would have caught it within hours. Kronos treats the class of vulnerability the founding incident revealed as a first-class concern.
+The founding incident linked above was not a security compromise. It was a cloud-provider billing pipeline defect that surfaced a phantom $131,831,457,005.91 charge on the operator's launch day. No security tool would have caught it; a **plausibility monitor** comparing observed cost against declared infrastructure capacity would have caught it within hours. Kronos treats this class of vulnerability as a first-class concern with its own runtime primitive (see [`methodology/PLAUSIBILITY-MONITOR.md`](methodology/PLAUSIBILITY-MONITOR.md)).
 
 ## The dialectic with eos
 
-Kronos and [eos](https://github.com/alchemisthomer/eos) are complementary methodologies. Eos attests — it produces evidence that a system does what its designers claim it does. Kronos falsifies — it produces evidence that a system's claims can (or cannot) be broken under adversarial pressure. Neither framework is complete alone. A system that has been attested but never adversarially challenged has claims that are internally coherent but empirically untested. A system that has been adversarially challenged but never attested has defenses that hold but no coherent statement of what they defend.
+Kronos and [eos](https://github.com/alchemisthomer/eos) are complementary methodologies. Eos attests — it produces evidence that a system does what its designers claim it does. Kronos falsifies — it produces evidence that a system's claims can (or cannot) be broken under adversarial pressure. Neither framework is complete alone.
 
-Both frameworks operate independently. When co-installed in the same target, they integrate bidirectionally: a kronos finding that falsifies an eos-attested claim auto-files a new backlog cycle in the eos kanban; the kronos scorecard reads the eos cycle folder to determine which dimensions have reached the L3 threshold that adversarial proof can then take to L4 or L5.
+Both frameworks operate independently. When co-installed in the same target, they integrate bidirectionally through git-native structural hooks: a kronos finding that falsifies an eos-attested claim auto-files a new backlog cycle in the eos kanban; the kronos scorecard can read the eos cycle folder for traceability. Per ADR-0008, however, kronos scorecard L3 is attainable natively without external attestation — eos coupling is a value-add for traceability, not a gate.
 
 ## What this repository contains
 
 | Path | Contents |
 |---|---|
-| [`methodology/`](methodology/) | The operating manual, the seven novel claims, the engagement document template, the maturity scorecard model, the tool binding contract, the plausibility monitor and capacity model, and the industry-standards alignment |
-| [`runner/`](runner/) | (Pending scaffold) A React/TypeScript reference viewer that reads any GitHub repository's `kronos/engagement/**` folder tree via the GitHub REST API and renders the kanban plus the scorecard in the browser. Edits land as pull requests. Independent of the technology of the project under evaluation |
-| [`oauth-server/`](oauth-server/) | (Pending scaffold) A small standalone Node/Express service that completes the GitHub App user-to-server OAuth code-for-token exchange on behalf of the browser viewer. Required only when the viewer is deployed with GitHub App OAuth enabled (viewer works PAT-only without it) |
-| [`actions/`](actions/) | (Pending scaffold) Reusable GitHub Actions: kanban structure validator, authorization artifact validator, evidence hash verifier, scorecard consistency check, first-signal-stop enforcer, production authorization guard, eos backlog auto-file |
+| [`methodology/`](methodology/) | Fourteen documents specifying the framework's runtime primitives: operating manual, scorecard model, engagement template, tool binding, plausibility monitor, continuous assurance plane, canonical typed domain model, evidence handling, oracle state machine, catalog governance, autonomous authorization, industry-standards alignment, and inventive-concept candidates |
+| [`runner/`](runner/) | (Pending scaffold) A React/TypeScript reference viewer that reads any GitHub repository's `kronos/engagement/**` folder tree via the GitHub REST API and renders the kanban plus the scorecard in the browser |
+| [`oauth-server/`](oauth-server/) | (Pending scaffold) A small standalone Node/Express service that completes the GitHub App user-to-server OAuth code-for-token exchange on behalf of the browser viewer |
+| [`actions/`](actions/) | (Pending scaffold) Reusable GitHub Actions enforcing kronos discipline on target repositories |
 | [`templates/`](templates/) | Copy-in scaffolds for adopting projects: the eight-stage engagement kanban tree, the engagement document template, the target scorecard configuration |
-| [`docs/`](docs/) | Architecture decision records, examples of kronos applied to real projects, the founding incident case study and sanitized archive |
-| [`DESIGN.md`](DESIGN.md) | The wide-net vision document currently in cross-LLM design review |
+| [`docs/`](docs/) | Twenty architecture decision records, worked-example reference implementations, the founding incident case study, the GTM sanity-check strategy document, and the v0.5 convergence declaration |
+| [`DESIGN.md`](DESIGN.md) | The wide-net vision document. Read this after this README for the full architectural picture. |
 
 ## Installation
 
-Adoption is by filesystem copy today (matching eos's pattern). From the root of the project you're adopting kronos into:
-
-```bash
-# Bring in the engagement kanban tree.
-cp -r path/to/kronos/templates/engagement         ./kronos/engagement
-
-# Bring in the operating manual so contributors can find the discipline.
-cp    path/to/kronos/methodology/OPERATING-MANUAL.md ./kronos/README.md
-```
-
-Then edit `./kronos/engagement/SCORECARD.md` to set your target's slug, display name, and primary repository. The first engagement is authored in `./kronos/engagement/00_scope/` using the template.
+Adoption is by filesystem copy today (matching eos's pattern). See [`docs/HOW-AN-ADOPTER-STARTS.md`](docs/HOW-AN-ADOPTER-STARTS.md) for the one-page adoption flow.
 
 An `npx kronos init` scaffolder is planned for a later revision. The filesystem-copy default is deliberate — the methodology is portable across every stack, so the primary adoption path shouldn't couple adopters to any one runtime (Node, Python, Go, or otherwise).
 
@@ -73,35 +65,23 @@ Kronos operates only under authorized adversarial assessment when operated by Cl
 
 Kronos addresses this property structurally rather than pretending it does not exist:
 
-- The framework requires a signed authorization artifact for every active engagement. This is a first-class primitive with mandatory fields.
+- The framework requires a signed authorization artifact for every active engagement. See [`methodology/AUTONOMOUS-AUTHORIZATION.md`](methodology/AUTONOMOUS-AUTHORIZATION.md) for the two-tier envelope model that handles both human-signed and machine-issued authorizations.
 - CloudPremise LLC operates only under signed authorization. Unauthorized use by any party is the responsibility of that party.
 - The framework does not include, and will not include, any capability whose only rational purpose is malicious use with no authorized-defensive counterpart.
 
-See [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md) §7 for the full dual-use discipline.
+See [`methodology/INVENTIVE-CONCEPT-CANDIDATES.md`](methodology/INVENTIVE-CONCEPT-CANDIDATES.md) §7 for the full dual-use discipline.
 
-## The reference viewer
+## Inventive concept candidates
 
-The runner in [`runner/`](runner/) (pending scaffold) will be a React/TypeScript SPA that reads any GitHub repository's `kronos/engagement/**` folder tree via the GitHub REST API and renders the kanban plus the maturity scorecard in the browser. It intentionally knows nothing about the technology of the project under evaluation — it reads folders, markdown, and YAML frontmatter, and it commits edits back as pull requests. No backend, no database, no state store outside the repository. Point it at any GitHub repository you can read (public repos work anonymously), and it renders that project's kanban and scorecard.
+The kronos methodology has a number of candidate differentiators and potential inventive concepts. **Novelty, non-obviousness, claim scope, and freedom-to-operate have not been established** — the framework acknowledges significant adjacent prior art (NIST SP 800-115, MITRE CALDERA, Atomic Red Team, breach-and-attack-simulation platforms including AttackIQ / SafeBreach / Cymulate / Pentera / Horizon3, cloud-security-posture platforms including Wiz / Prisma / Orca, ATT&CK-based scoring research, NIST OSCAL, SLSA supply-chain provenance).
 
-## The seven novel properties
+The strongest candidates for eventual patent claims are specific technical mechanisms — enumeration reconciliation as mandatory tool-binding contract, execution-provenance signing binding evidence to specific tool invocation via SLSA-aligned attestation, git-history scorecard recomputation producing time-series trajectory from source-of-truth without separate persistence, capacity-model bounds derivation for physical-plausibility monitoring, and dual-plane execution model with challenge-as-parent-abstraction. Methodology-level framing faces steeper Alice/§101 subject-matter-eligibility headwinds in the US and is more defensibly held as open-source-moat differentiation.
 
-The kronos engagement methodology is the conjunction of seven properties that, taken together, are not present in any prior software assurance methodology the author is aware of:
-
-1. Presumption-of-failure as governance discipline
-2. Dialectic with attestation as complementary epistemic backbone
-3. Executive maturity scorecard driven by adversarial proof
-4. Git-native evidence bus with public-by-default findings
-5. Adversarial coevolution through system-agnostic threat catalog
-6. Per-engagement production-safety mode as commercial primitive
-7. Dual-use with explicit authorization discipline and legal-liability boundary
-
-See [`methodology/SEVEN-CLAIMS.md`](methodology/SEVEN-CLAIMS.md) for the conceptual-level description. A potential eighth claim — kronos's positioning as *the adversarial verification layer beneath every industry certification* — is flagged for consideration during cross-LLM design review; see [`methodology/INDUSTRY-ALIGNMENT.md`](methodology/INDUSTRY-ALIGNMENT.md).
-
-A more detailed disclosure will be maintained in `PATENT-DISCLOSURE-DRAFT.md` (to be authored after design review converges) for eventual review by IP counsel. Contributions to this repository are subject to the AGPL-3.0 patent grant (§11).
+See [`methodology/INVENTIVE-CONCEPT-CANDIDATES.md`](methodology/INVENTIVE-CONCEPT-CANDIDATES.md) for the conceptual-level description with explicit prior-art acknowledgment.
 
 ## IP posture (deferred hybrid — see `methodology/INVENTIVE-CONCEPT-CANDIDATES.md`)
 
-Kronos is licensed under GNU AGPL v3 today, published in public, and its findings are opt-in-disclosable per finding. The strategic question of whether specific technical mechanisms (enumeration reconciliation, execution-provenance signing, git-history scorecard recomputation, capacity-model bounds derivation, dual-plane execution model) warrant patent protection is **deferred pending IP counsel review**. The operator has elected hybrid framing — the framework is described using both patent-claim and open-source-moat language in parallel; downstream resolution will narrow one direction, both, or neither.
+Kronos is licensed under GNU AGPL v3 today, published in public, and its findings are opt-in-disclosable per finding. The strategic question of whether specific technical mechanisms warrant patent protection is **deferred pending IP counsel review**. The operator has elected hybrid framing — the framework is described using both patent-claim and open-source-moat language in parallel; downstream resolution will narrow one direction, both, or neither.
 
 The framework's structural properties (git-native governance, AGPL license, open catalog, community contribution flow) remain in place regardless of the IP resolution. Contributors to the repository accept the AGPL-3.0 patent grant (§11) as part of the contribution agreement.
 
@@ -112,6 +92,19 @@ The framework's structural properties (git-native governance, AGPL license, open
 ## Reference implementation
 
 The flagship implementation of kronos is against the [olympus-616](https://github.com/olympus-616/olympus-616) platform. Its installed engagement history — every shipped adversarial evaluation, every open engagement, every scorecard state — lives inside that project at `foundation/kronos/engagement/` and is not part of this repository. See [`docs/examples/olympus-616.md`](docs/examples/olympus-616.md) for how kronos is applied there.
+
+## Where kronos sits among adjacent products
+
+Kronos is neither a scanner nor a certification. Adjacent categories and how kronos relates:
+
+- **Vibe-code security scanners** (CheckVibe, Vibe App Scanner, StackHawk Vibe, Aikido, Lovable native security, Replit Security Center) — these ship commodity security checks and remediation aimed at AI-built apps. Kronos overlaps in check surface but differs in producing a claim-oriented release recommendation with evidence and re-test rather than a scanner report.
+- **Breach-and-attack simulation** (AttackIQ, SafeBreach, Cymulate) — continuous control validation with vendor-cloud evidence stores. Kronos evidence is git-native + opt-in-disclosable, and kronos treats cost/plausibility as a peer of security which BAS platforms do not.
+- **Automated pentesting** (Pentera, Horizon3.ai, XM Cyber) — path-finding from external attacker to crown-jewel data. Kronos is claim-centric ("did this defense fire") rather than exploitation-path-centric ("here is a shell"). Different question, different buyer.
+- **Cloud security posture management** (Wiz, Prisma Cloud, Orca) — passive scan against IaC and running resources. CSPM is passive-only; kronos actively challenges. Kronos treats cost integrity as a peer of security which CSPM does not.
+- **SAST/DAST + dependency scanning** (Snyk, GitHub Advanced Security, Semgrep) — engineering-facing static and runtime analysis. Kronos consumes their output as one input rather than replacing them.
+- **Cloud FinOps** (Harness, Sedai, Kion, Finout, LiteLLM, AI Cost Guard) — statistical anomaly detection and budget enforcement for cloud/LLM spend. Kronos does deductive impossibility ("your declared infra has zero NAT gateways, therefore any NAT charge is physically impossible") which is fundamentally different from anomaly detection ("this spend is unusual vs history").
+
+The go-to-market discussion of these adjacencies lives in [`docs/strategy/gtm-sanity-check-2026-07-24.md`](docs/strategy/gtm-sanity-check-2026-07-24.md).
 
 ## Name
 

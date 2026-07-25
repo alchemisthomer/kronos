@@ -1,12 +1,200 @@
 # Kronos GTM sanity-check — "is this a good idea?"
 
-**Date:** 2026-07-24
-**Author:** kronos scribe (in response to the operator's direct request after the four-LLM design review round)
-**Purpose:** honest strategic assessment of the kronos framework as it stands at v0.4. Addresses three questions the operator raised after reviewing the complete v0 → v0.1 → v0.2 → v0.3 → v0.4 delta stack.
+**Date (v1):** 2026-07-24
+**Date (v2 addendum):** 2026-07-24 (post-convergence review by Claude, Grok, Gemini, ChatGPT)
+**Author:** kronos scribe (in response to the operator's direct request after the four-LLM design review round + a second convergence pass)
+**Purpose:** honest strategic assessment of the kronos framework as it stands at v0.5. Addresses three questions the operator raised after reviewing the complete v0 → v0.1 → v0.2 → v0.3 → v0.4 → v0.5 delta stack.
 **Status:** advisory. This document is a sanity check, not a design decision. GTM choices are the operator's; this document exists to inform them.
 **Not-a-design-doc:** this document adds no framework material. It does not modify methodology, ADRs, or the domain model. It is a strategic reflection meant to be readable alongside DESIGN.md when the operator is deciding what to build first.
+**v2 addendum note:** the v1 document below contains a load-bearing empirical error — it claims the naive-builder assurance market is "materially uncontested." Convergence reviewers (Claude and ChatGPT specifically) verified this is false as of mid-2026. The v2 corrections appear at the top under **"v2 addendum — corrections after the final review round."** The v1 text below remains for provenance but should be read *only* through the v2 corrections. When v1 and v2 disagree, v2 wins.
 
 ---
+
+# v2 addendum — corrections after the final review round
+
+**Written 2026-07-24 after Claude, ChatGPT, Grok, and Gemini each completed a convergence-round review of the framework and gave independent GTM feedback.**
+
+The v1 document below (Sections labeled "TL;DR" through "What this document is not") retains factual errors that reviewers surfaced. Read the v2 addendum first. It supersedes v1's competitive analysis and revises v1's product recommendations.
+
+## v2 correction 1 — the naive-builder assurance market is NOT greenfield
+
+The v1 sanity-check claimed "no known direct competitor" for a hosted scan targeting AI-built apps. This is false as of mid-2026. Actively-shipping competitors surfaced by convergence reviewers:
+
+- **CheckVibe** — free scanner where a user pastes a URL; runs 100+ checks against Lovable, Cursor, Bolt, v0, and Replit apps. No source access needed. ~30-second scan.
+- **Vibe App Scanner (vas)** — built specifically for the vibe-coding workflow. Scans a live app without repo access. Exports findings as markdown with structured remediation that Claude and ChatGPT can execute directly. Ships a "Scanned by vas" badge and weekly monitoring on the paid tier ($19/$39/month). **This is nearly the exact product surface v1 proposed as "Kronos Card."**
+- **VibeEval, Scanbee** — additional security-only entrants in the same niche.
+- **Lovable native security** — Basic and Deep security scans covering RLS policies, database access, dependencies, endpoint protection, secrets, SQL injection, XSS, storage, and error/log leakage. Also supports Wiz and Aikido integrations. Runs pre-publish or scheduled.
+- **Replit Project Security Center** — dependency analysis, application-code analysis, privacy analysis, severity-ranked findings, Agent-driven reviews, automated dependency remediation.
+- **StackHawk Vibe** — MCP-delivered runtime security tester for AI coding assistants, $5/month.
+- **Aikido** — broader code-to-cloud-to-runtime security platform with a free entry point.
+- **Enterprise incumbents** (Snyk, Wiz, Invicti/Veracode) are actively marketing into the vibe-code segment.
+
+The six commodity checks in v1's proposed Kronos Card MVP (secrets, auth/RLS, CVEs, headers, exfil, cost) are exactly the checks these tools already tune for the exact same builder audience with the exact same distribution loop. The pain is real — the Moltbook incident (February 2026, Wiz surfaced misconfigured DB exposing 1.5M auth tokens); the June 2026 Verge warning about vibe-coded app security; the Veracode finding that 45% of AI-generated code shipped a known vulnerability — but real pain is *why the space already has entrants*, not evidence that the space is open.
+
+**Implication for v1's Path B:** the "materially uncontested" premise fails. A vanilla Kronos Card as the first SaaS surface would enter a red ocean against products that have been tuning their checks for longer.
+
+## v2 correction 2 — the actual defensible wedge is narrower than v1 implied
+
+Convergence reviewers verified whether *any* competitor computes kronos's actual differentiator — deductive cost-impossibility from a declared capacity model. The answer:
+
+- **Vibe-security scanners** (vas, CheckVibe, StackHawk Vibe, Aikido): security-only. None do cost-plausibility. Check #3 in v1's MVP list is the one thing that segment does not have.
+- **Cloud FinOps tools** (Harness, Sedai, Kion, Finout): do statistical *anomaly detection* ("this spend is unusual vs your history") and threshold alerts ("you crossed $X"). None compute deductive *impossibility* ("your declared infra has zero NAT gateways, therefore any NAT charge is physically impossible, not merely anomalous").
+- **LLM-spend layer** (LiteLLM, RouteLLM, AI Cost Guard): budget enforcement, model routing, agent throttling. Same anomaly/threshold shape.
+
+**The distinction that survives:** anomaly detection needs historical data to define "unusual." Impossibility reasoning needs only a declared capacity model. The founding-incident case — a billing pipeline defect producing charges against nonexistent infrastructure — is precisely the case where there is no anomalous history to compare against because the charge was never real. Deductive impossibility catches it; anomaly detection does not.
+
+That distinction is real, unoccupied, and technically defensible. It is also **narrow** — a single specific check inside a category (cost) that the buyer already thinks is handled by their existing FinOps tools. Selling it requires teaching the buyer why plausibility beats anomaly, which is a slower sell than the v1 doc implied.
+
+## v2 correction 3 — the $131B founding story undercuts the need at the moment it should close
+
+v1 recommended opening every sales conversation with the $131B story. Convergence reviewers correctly noted: the story's own resolution is "AWS reversed it, actual cost $505.72, nobody lost a dollar." A skeptical CFO hears *"so the existing system worked and it cost you nothing — why am I buying?"*
+
+**Reframe:** the phantom bill is the dramatization; the point is the *class of exposure*. Next time it is a real Lambda retry loop, a real crypto-miner in a compromised account, a real exposed NAT gateway, a real reflected data-transfer attack — and none of those get an AWS reversal. Sell the class, not the anecdote that happened to be free.
+
+Use the incident *after* identifying the buyer's specific risk. Otherwise kronos sounds like a cloud-billing product rather than an assurance framework.
+
+## v2 correction 4 — retire the term "naive builder"
+
+Multiple reviewers (ChatGPT, Grok) flagged that "naive builder" is internally descriptive but commercially corrosive. No one buys assurance from a company whose internal category for them implies incompetence.
+
+The audience is:
+
+- **AI-native app builders** (individuals shipping via Claude, GPT-4, Cursor, v0, Lovable, Bolt, Replit)
+- **AI-assisted founders** (technical founders using AI tools to accelerate)
+- **AI app studios** (agencies delivering client applications through generative-development platforms)
+- **Product agencies** (traditional dev shops incorporating AI-assisted delivery)
+
+Use these terms in all customer-facing material. Reserve "naive builder" for internal doc-writing only.
+
+## v2 correction 5 — reposition as "independent release assurance for AI-built applications"
+
+The v1 doc positioned Path B as another security scanner competing on scan-volume and freemium pricing. That is not a defensible category; incumbents have been tuning their checks for longer and platforms are absorbing basic security.
+
+The stronger positioning per convergence reviewers is:
+
+> **Kronos is the independent release gate for AI-built applications.**
+
+Supporting statement:
+
+> Kronos independently challenges your app's authentication, data boundaries, APIs, cost controls, and recovery mechanisms, then returns evidence and a fix plan your coding agent can execute.
+
+This is meaningfully different from "we run another SAST/DAST scan." It reads as a *judgment* the buyer needs, not a *tool* they need to operate.
+
+## v2 correction 6 — collapse the twelve dimensions to six release gates for the SaaS surface
+
+The full framework's twelve scorecard dimensions are correct for the framework. They are wrong for the SaaS user experience. For an AI-native app founder, the six release gates are:
+
+1. **Identity & Access** — auth enforcement, privileged routes, tenant isolation, session/token handling.
+2. **Data & Privacy** — cross-user data access, public storage exposure, sensitive data in logs/errors, excessive collection.
+3. **Secrets & Supply Chain** — repo-history secrets, client-side credentials, vulnerable dependencies, unsafe third-party integrations.
+4. **APIs & Business Logic** — unauthenticated endpoints, parameter manipulation, payment/entitlement bypass, rate/abuse controls.
+5. **Cost & Blast Radius** — unbounded model/storage/email/SMS consumption, public operations that generate large bills, tenant quotas, provider budgets, **physical and economic plausibility (the defensible wedge)**.
+6. **Detection, Shutdown, Recovery** — monitoring + actionable alerts, kill-switch, credential-revocation path, rollback/restore, recovery verification.
+
+The full 12-dimension scorecard remains the framework artifact; the six gates are what the SaaS surface shows.
+
+## v2 correction 7 — split into two distinct products
+
+A "paste a URL and get a report" product cannot honestly evaluate several of the checks that matter most (tenant isolation, kill-switch health, cost blast radius on the customer's own cloud account). Do not sell surface as depth.
+
+Two products:
+
+**Kronos Preflight** (free, lead generation)
+- Passive; public URL and optionally public repository.
+- Explicitly states: "Surface checks completed. Deeper authorization, data-isolation, cost, and recovery controls were not evaluated."
+- Purpose: acquisition. Every free scan produces a follow-up path to Launch Review.
+
+**Kronos Launch Review** (paid, productized service)
+- Authorized staging assessment.
+- Requires: staging URL, test users, deployment details, read-only cloud inventory, credentials via ephemeral scoped identity, explicit authorization.
+- Deliverable: one-page founder view (Proceed / Proceed with conditions / Block release + three most consequential findings + six release-gate statuses + exact next actions + re-test status) plus technical appendix (evidence + reproduction + confidence + coding-agent-executable remediation prompts).
+- Includes one remediation re-test.
+
+Positioning Preflight as separate from Launch Review protects the framework's epistemic honesty — a surface scan does not claim to be deep assurance.
+
+## v2 correction 8 — pricing hypothesis revised
+
+v1 proposed $29/month for the Kronos Card SaaS. Convergence reviewers noted this sits directly beside Vibe App Scanner ($19/$39), StackHawk Vibe ($5), and free platform-native scans. At $29 kronos is forced to compete on scan volume and UI polish rather than differentiated value.
+
+Revised pricing hypothesis (test, not lock):
+
+| Offer | Initial price hypothesis |
+|---|---|
+| Kronos Preflight (passive URL scan) | Free |
+| First five design-partner Launch Reviews | $750–$1,500 |
+| Standard Launch Review after process stabilization | $2,500–$5,000 |
+| Re-test beyond the included verification | $500–$1,000 |
+| Recurring release monitoring (post-MVP) | $299–$799 per application/month |
+| Enterprise Assurance Sprint | $15,000–$50,000 |
+
+The essential correction: do not sell evidence-backed assurance for the price of an automated scanner. The product is *judgment*, not scanning.
+
+## v2 correction 9 — consulting sequencing softened
+
+v1 recommended enterprise consulting as a rigid 120-day prerequisite before validating the SaaS market. Convergence reviewers correctly noted this could turn kronos into a bespoke consultancy and delay validating whether the productized-service model actually clears.
+
+Revised sequencing:
+
+- **One assurance engine, two packages** — Launch Review for AI app founders and agencies (fixed scope, fixed price, short cycle, repeatable), Assurance Sprint for enterprise buyers (claim-level, eos integration, custom scope, higher price).
+- **Sequenced but not gated** — enterprise engagements can fund the work AND validate against the SMB market can run in parallel if the operator's capacity permits. Do not gate SMB validation on landing three enterprise customers.
+- **The SMB product validates repeatability and willingness to pay.** The enterprise work provides cash and deeper case studies.
+- **Do not build two software products.** One engine, two packagings.
+
+## v2 correction 10 — platform absorption risk
+
+Lovable, Replit, Vercel, Netlify already ship security defaults. They are rationally incentivized to absorb more assurance as a native platform feature (Lovable already integrates Wiz and Aikido; Replit's Agent already reviews security). A standalone scanner is racing the platform to own the platform's own users' safety, and the platform wins that race.
+
+Two responses:
+
+- **Partner with platforms early** where possible (revenue-share integrations into Lovable / Bolt / Cursor / v0 / Replit).
+- **Compete for the layer platforms don't own** — the user's own AWS / GCP / Salesforce account and its cost / recovery / cross-account surface. Which, conveniently, is exactly where the plausibility wedge lives.
+
+## v2 correction 11 — the badge must expire and cannot claim "safe" or "secure"
+
+Any public badge kronos ships must be tied to:
+
+- Commit SHA or release identifier
+- Environment (staging vs production)
+- Catalog/check version at time of scan
+- Assessment date
+- Expiration date
+- Explicit scope limitations
+
+Wording that is permitted:
+- "Kronos Checked — scoped release assessment completed"
+
+Wording that is NOT permitted:
+- "Kronos Safe"
+- "Kronos Secure"
+- "Kronos Certified"
+
+The framework's own epistemic discipline (no framework can certify safety) applies to its marketing surface. Vibe App Scanner already ships a trust badge; kronos's badge earns credibility from transparent scope and evidence, not from novelty.
+
+## v2 correction 12 — 90-day validation gates
+
+Before proceeding from productized-service to self-service SaaS, hit the following gates:
+
+- 10 paid Launch Reviews delivered.
+- 3 strong testimonials or case studies published.
+- 2 repeat or agency customers.
+- Delivery process requiring < 4 human hours per standard review.
+- Material incremental value beyond native Lovable/Replit security demonstrated in specific findings.
+- At least 1 recurring-monitoring customer.
+- No authorization, privacy, or execution-safety incident.
+
+The first milestone is not 1,000 paid users. It is: 10 people paid kronos to tell them whether an AI-built application should launch.
+
+## v2 corrections — summary
+
+The v1 GTM sanity check remains directionally correct on: the design is over-scoped for either target market; the scorecard is the commercial primitive; consulting can fund product development; enterprise-consulting cash flow before SaaS spend.
+
+The v1 GTM sanity check is factually wrong on: greenfield claim; competitor absence; $131B story as universal opener; $29/month pricing; the Kronos Card as first SaaS surface; "naive builder" terminology; the sequencing rigidity between enterprise and SMB.
+
+Read the v1 sections below only through this v2 addendum. When they disagree, v2 wins.
+
+---
+
+# v1 sanity check (preserved for provenance)
 
 ## Context
 

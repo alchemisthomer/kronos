@@ -102,6 +102,32 @@ That is materially stronger than a "green L4 cell" and more honest about what th
 
 Both renderings are always available. Executive views default to traffic-light; engineering detail views default to the six-level. The runner supports both from the same underlying data.
 
+### Mandated default executive projection (v0.5 per Grok convergence review)
+
+The v0.5 convergence declaration mandates one specific default projection for the executive-facing view. Adopters may configure other projections for internal use, but the executive default is fixed so "kronos executive scorecard" means the same thing across every target:
+
+**Executive default = traffic-light on the five critical dimensions + pinned/latest dual-number headline. Nothing else.**
+
+```
+KRONOS EXECUTIVE SCORECARD — <target-slug>
+Pinned catalog: kronos-catalog-YYYY.MM   |   Latest catalog: kronos-catalog-YYYY.MM
+Overall status (pinned): current | degraded | stale | materially-incomplete
+Overall status (latest): current | degraded | stale | materially-incomplete
+
+The five critical dimensions:
+  Identity & Access Control     ●  green  |  yellow  |  red
+  Perimeter Defense              ●  green  |  yellow  |  red
+  Secret Management              ●  green  |  yellow  |  red
+  Data Integrity                 ●  green  |  yellow  |  red
+  Incident Response              ●  green  |  yellow  |  red
+```
+
+Everything else — the seven non-critical dimensions, the multidimensional per-cell state (maturity + effectiveness + coverage + confidence + freshness + fidelity + open findings + catalog gap), trajectory view, delta view, industry-standard mapping view — lives behind drill-down interaction from the default executive projection.
+
+The multi-axis detail is available on request but is not the default. This is deliberate: the executive default must be legible in under three seconds and comparable across every kronos-scored target. Multi-axis detail is legible and comparable only after the reader has established context.
+
+The runner MUST render this default view exactly. Runner implementations that do not match the mandated default projection are non-conformant and must be corrected before deployment.
+
 ### Plausibility monitor vs attack oracle — double-counting clarification (v0.3 per Grok review)
 
 The plausibility monitor and attack oracles can both produce findings that affect the same scorecard dimension (particularly Cost Integrity, which is fed by both). Double-counting is avoided as follows:
