@@ -1,0 +1,38 @@
+name: content-isolation
+
+# Enforces the client-data isolation policy structurally.
+# Runs on every push and every PR against protected branches.
+# Fails the job if the validator reports any violation.
+#
+# See SECURITY.md for the policy, scripts/verify-no-client-content.sh for
+# the check itself, and .githooks/pre-commit for the local counterpart.
+
+on:
+  push:
+    branches:
+      - brain/2.7.x.x
+      - main
+  pull_request:
+    branches:
+      - brain/2.7.x.x
+      - main
+
+jobs:
+  verify:
+    name: verify-no-client-content
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Make validator executable
+        run: chmod +x scripts/verify-no-client-content.sh
+
+      - name: Run tree-wide content-isolation check
+        run: ./scripts/verify-no-client-content.sh --tree
+
+      - name: Run PR-diff content-isolation check
+        if: github.event_name == 'pull_request'
+        run: ./scripts/verify-no-client-content.sh --diff origin/${{ github.base_ref }}
