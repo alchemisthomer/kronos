@@ -1,0 +1,155 @@
+kind: kronos-tool
+apiVersion: v1
+
+metadata:
+  id: salesforce-rest-user-shares
+  version: 0.1.0
+  vendor: kronos
+  license: AGPL-3.0
+  homepage: https://github.com/alchemisthomer/kronos
+  description: >
+    Enumerate the sharing grants that give this user access to records beyond
+    their explicit ObjectPermissions: role hierarchy chain, direct group
+    memberships (Regular/Queue/Role/etc.), and per-sobject *Share materialized
+    grants (Manual/Rule/Owner/Team). Sees the MATERIALIZED shares in *Share
+    sobjects; sharing rule DEFINITIONS live in Setup metadata (Metadata API)
+    and are the target of a future sibling primitive.
+
+capabilities:
+  attack_classes:
+    - id: recon.enumeration.salesforce.user-sharing-envelope
+      subclasses:
+        - role-hierarchy-traversal
+        - group-membership-enumeration
+        - record-share-sampling
+        - share-recipient-graph-analysis
+  api_family: salesforce.rest
+  endpoint: /services/data/v{{apiVersion}}/query
+  sobjects_queried:
+    - User
+    - UserRole
+    - GroupMember (+ Group relationship)
+    - <configurable>Share (default: AccountShare, ContactShare, LeadShare, OpportunityShare, CaseShare)
+  evidence_types:
+    - user-csv
+    - all-roles-csv
+    - group-memberships-csv
+    - per-sobject-shares-csv
+    - analysis-json
+    - analysis-markdown
+    - run-manifest
+  protocols_supported: [https]
+
+invocation:
+  binding_layer: 1
+  adapter: ./src/index.ts
+  invocation_type: subprocess
+  runtime: node
+  entry_command: ["npx", "tsx", "src/index.ts"]
+  timeout_seconds: 600
+
+  argv:
+    - name: user-id
+      type: string
+      required: true
+      description: Target Salesforce user Id (15 or 18 chars, starts with 005).
+    - name: sobjects
+      type: string
+      required: false
+      default: "Account,Contact,Lead,Opportunity,Case"
+      description: Comma-separated sobjects to probe for shares. Custom objects (__c) are supported.
+    - name: sample-limit
+      type: number
+      required: false
+      default: 2000
+      description: Per-sobject cap on share rows sampled. Truncation surfaces as an anomaly.
+    - name: credentials
+      type: path
+      required: false
+      default: "../salesforce-rest-query-csv/credentials/salesforce.json"
+    - name: login-url
+      type: string
+      required: false
+      default: "https://login.salesforce.com"
+    - name: api-version
+      type: string
+      required: false
+      default: "64.0"
+    - name: output-dir
+      type: path
+      required: false
+      default: "./output"
+
+  outputs:
+    - name: analysis-json
+      format: json
+      channel: file
+      hash_algorithm: sha256
+    - name: analysis-markdown
+      format: markdown
+      channel: file
+      hash_algorithm: sha256
+    - name: per-source-csvs
+      format: csv
+      channel: file
+      hash_algorithm: sha256
+    - name: run-manifest
+      format: json
+      channel: stdout
+      hash_algorithm: sha256
+
+authorization:
+  requires_network:
+    - "{{argv.login-url}}"
+    - "*.salesforce.com"
+    - "*.force.com"
+    - "*.my.salesforce.com"
+  requires_credentials: true
+  requires_elevated_privilege: false
+  destructive_testing: false
+  authorization_ceiling_max: 2
+
+data_class:
+  # Sharing metadata reveals which records this user can implicitly access —
+  # sensitive under privacy frameworks that require access-audit records.
+  resource_classes_affected:
+    - salesforce.authorization-metadata
+    - salesforce.record-access-graph
+    - salesforce.user-identity
+
+sandbox:
+  recommended: process
+  container_image: null
+  network_restrictions:
+    - allowlist:
+        - "*.salesforce.com"
+        - "*.force.com"
+        - "*.my.salesforce.com"
+  resource_limits:
+    memory_mb: 1024
+    cpu_cores: 1
+
+credentials:
+  file_credentials_permitted: true
+  env_variables_permitted: true
+  env_variables_expected:
+    - KRONOS_SF_USERNAME
+    - KRONOS_SF_PASSWORD
+    - KRONOS_SF_SECURITY_TOKEN
+    - KRONOS_SF_LOGIN_URL
+  credential_leakage_audit: true
+
+conformance:
+  golden_target_verified: false
+  last_verified_at: null
+
+runtime:
+  language: typescript
+  node_engine: ">=22.0.0"
+  package_dependencies:
+    - jsforce@^3
+
+related_tools:
+  - salesforce-rest-user-permissions:0.1.0    # complementary: explicit permissions
+  - salesforce-rest-query-csv:0.1.0
+  - salesforce-rest-sobjects-describe:0.1.0
