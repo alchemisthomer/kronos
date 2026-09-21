@@ -1,67 +1,73 @@
 # runner/prototype/
 
-Static HTML/CSS/JS dashboard for viewing kronos user-assurance analysis reports. Prototype for the future `runner/` React SPA — this proves the data model + interaction pattern without any build step.
+Static executive dashboard for kronos. Single-file HTML/CSS/JS. Zero build. Zero server. Open the file in any browser.
+
+## What this is
+
+The prototype of the CEO-facing assurance console. Top-down drill-down:
+
+```
+Portfolio (home)   → what a CEO or board reviewer sees first
+    Engagement     → what a customer sees for one target
+        Scenario   → the attack / finding / evidence bundle
+```
+
+Every view is deep-linkable via URL hash (`#/`, `#/e/<engagement-id>`, `#/e/<engagement-id>/s/<scenario-id>`) so screenshots and stakeholder shares open to the exact state intended.
 
 ## View
 
-Open `index.html` in a browser. That's it. No server, no build, no `npm install`.
+Open `runner/prototype/index.html` in any browser. Boots to the portfolio home with three synthetic engagements that demonstrate the range of what kronos catches:
 
-The dashboard boots with **embedded synthetic sample data** — two users demonstrating every anomaly class across every dimension. Use the "Load analysis JSONs…" button to swap in real analysis output from the primitive tools.
+- **Northwind Retail** (running · evidence stage) — insider-simulation reproducing a compromised user's data pull. Critical findings surfaced. Six scenarios drill through the compromised user's authorization envelope, login history, OAuth grants, sharing envelope, audit trail, and full data reproduction.
+- **Vega Health** (shipped · clean) — HIPAA-adjacent attestation support. Every finding closed, no waivers, scorecard delta moves Identity/Access and Data Integrity to L4 (adversarially challenged). Demonstrates the "successful audit" ship state.
+- **Meridian Insurance** (running · investigating) — cost-anomaly engagement driven by the plausibility monitor. 41× baseline AWS NAT-gateway spend. Not a security compromise — a cost-integrity dimension no security tool would have caught. Demonstrates the founding-incident class of finding.
 
-## Load real data
+## Home view — what a CEO sees
 
-Click "Load analysis JSONs…" and multi-select any `*-analysis.json` files produced by the kronos salesforce user-scoped tools:
+- **Hero**: portfolio KPIs (open engagements, critical findings, avg maturity, coverage%).
+- **"What you need to know"**: 3-5 curated bulletins with severity coloring — the CEO doesn't need to read every engagement's markdown, they need the headlines that require attention.
+- **Portfolio grid**: engagement cards with status badge, findings summary bar (crit / high / medium / low), and drill-in affordance.
 
-- `user-<slug>-permissions-analysis.json` (from `salesforce-rest-user-permissions`)
-- `loginhistory-<slug>-analysis.json` (from `salesforce-rest-user-loginhistory`)
-- `user-<slug>-shares-analysis.json` (from `salesforce-rest-user-shares`)
-- `user-<slug>-group-membership-analysis.json` (from `salesforce-rest-user-group-membership`)
-- `user-<slug>-connected-apps-analysis.json` (from `salesforce-rest-user-connected-apps`)
-- `user-<slug>-audit-trail-analysis.json` (from `salesforce-rest-user-audit-trail`)
+## Engagement detail — what a customer or auditor sees
 
-The dashboard:
+- **Hero**: target name, engagement-ordinal, mode, environment, opened/updated dates.
+- **Key takeaway**: single-sentence executive verdict, color-coded by severity.
+- **Executive summary**: multi-paragraph prose describing what happened and what it means.
+- **Scenarios list**: every scenario with its verdict badge and threat class.
+- **Findings summary**: 5-card visualization of critical / high / medium / low / total counts.
+- **Scorecard delta**: 4-pillar heatmap showing before → after per dimension with direction arrows.
 
-- **Groups analyses by `user.id`** — different tools all reference the same user.
-- **Reads `kronos_analysis_kind` on each JSON** to route it to the right renderer. Falls back to filename pattern (`*-permissions-*`, `*-loginhistory-*`, etc.) if the field is absent.
-- **Aggregates anomalies** into per-user overview counts (critical / high / medium / low) shown as KPIs and sidebar badges.
-- **Renders each dimension** in its own tab with a summary card, detail tables, and a collapsible raw-JSON viewer.
+## Scenario detail — what an analyst or IR responder sees
 
-## Common JSON envelope
+- **Hero**: scenario name, verdict, severity, threat class.
+- **Oracle verdict**: deterministic pass/fail rationale.
+- **Findings**: cards per finding with severity pill, class name, detail, and evidence blob.
+- **Attack summary**: what the tool did.
+- **Evidence artifacts**: kind / path / bytes / sha256 — the audit trail.
 
-Every analysis file this dashboard consumes has this shape:
+## No client-identifying content
 
-```json
-{
-  "kronos_analysis_kind": "user-permissions" | "user-loginhistory" | "user-shares" | ...,
-  "tool": "salesforce-rest-user-...",
-  "tool_version": "0.1.0",
-  "generated_at": "2026-...",
-  "user": {
-    "id": "005...",
-    "username": "...",
-    "name": "...",
-    ...dimension-specific...
-  },
-  "totals": { ... },
-  "anomalies": [
-    { "class": "...", "severity": "low|medium|high|critical", "detail": "...", "evidence": {} }
-  ],
-  ...dimension-specific dimensions...
-}
-```
+Sample data uses fully synthetic names (`Northwind Retail`, `Vega Health`, `Meridian Insurance`) and fully synthetic user IDs (`005000000000001BBB` style). Real engagement data belongs in the adopter's own repo, not here — see [`../../SECURITY.md`](../../SECURITY.md) for the client-data isolation policy.
 
-The primitive tools that ship with kronos emit this shape. If you're building a custom tool, follow it and the dashboard will render your output alongside the framework tools' output.
+The content-isolation validator scans this file on every commit and CI run.
 
-## Not client data
+## From prototype to production `runner/`
 
-The embedded sample data uses synthetic identifiers (`005000000000000AAA`, `alice.admin@acme.example.com`, `Sales Team West`, etc.). Never modify this file to include real client-identifying strings — see `../../CLAUDE.md` and `../../SECURITY.md`. The content-isolation validator (`scripts/verify-no-client-content.sh`) scans this file on every commit and CI run.
+This prototype defines the design system, interaction model, and drill-down hierarchy the future `runner/` React SPA will implement. The React version will additionally:
 
-## From prototype to `runner/`
+- Read engagement data from a target repo's `kronos/engagement/**` folder via the GitHub REST API.
+- Render engagement markdown documents directly (not just the summary cards).
+- Allow annotations and status changes that land as pull requests against the target repo.
+- Support multi-target portfolios (many engagement repos aggregated into one console).
 
-This dashboard defines the interaction surface the future `runner/` React SPA will implement:
+The visual language, color palette, typography, spacing, and interaction pattern in this prototype are the reference for the React port.
 
-1. Read a target repo's `kronos/engagement/**/*-analysis.json` files via the GitHub REST API (this prototype uses local file input instead).
-2. Group by user, render per-dimension tabs.
-3. Allow edits to engagement documents that land as pull requests.
+## Export / print
 
-The prototype's `renderPermissions`, `renderLoginHistory`, etc. functions are the reference specs for the React components the runner will implement.
+The dashboard's print stylesheet is the CSS defaults — a browser's Print → Save as PDF produces a clean report suitable for stakeholder distribution. Use the top-right Export button to trigger print dialog.
+
+## File contents
+
+- `index.html` — the whole thing. ~2200 lines. HTML + CSS + JS + sample data.
+- `data/` — gitignored drop-zone for future real-data loading.
+- (No `sample-data/` folder; sample data is inline in `index.html` for immediate viewing off file://.)
