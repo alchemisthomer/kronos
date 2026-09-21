@@ -1,0 +1,28 @@
+# Raw unsanitized founding-incident material — never commit.
+# Sanitized narrative documents live in docs/inception/founding-incident-archive/
+# The raw sources are preserved privately by the Steward, outside this repo.
+/2026-07-17-aws-billing-anomaly.zip
+/2026-07-17-aws-billing-anomaly/
+
+# OS + editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Local scratch
+/tmp/
+/.tmp/
+*.bak
+
+# Tools — Node artifacts. Duplicates PR #5's tools/ gitignore rules; merging
+# either PR should be conflict-free.
+/tools/**/node_modules/
+/tools/**/dist/
+/tools/**/*.log
+/tools/**/.env
+/tools/**/.env.*
+!/tools/**/.env.example
