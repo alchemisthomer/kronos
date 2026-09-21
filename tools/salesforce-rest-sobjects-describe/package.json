@@ -1,0 +1,23 @@
+{
+  "name": "@kronos/salesforce-rest-sobjects-describe",
+  "version": "0.1.0",
+  "description": "Kronos tool: fetch the authoritative field/metadata description for one Salesforce sobject via /services/data/v{ver}/sobjects/{name}/describe. Tier-2 API-endpoint primitive.",
+  "type": "module",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "describe": "tsx src/index.ts --describe"
+  },
+  "dependencies": {
+    "jsforce": "^3.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

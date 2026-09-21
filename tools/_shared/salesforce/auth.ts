@@ -1,5 +1,21 @@
-// Duplicated from ../../salesforce-rest-query-csv/src/auth.ts for v0.1.
-// TODO — 4th tool with this dupe; hoist to tools/_shared/salesforce/auth.ts is overdue.
+/**
+ * Shared Salesforce credential loader for kronos framework-shipped tools.
+ *
+ * Two credential sources supported at v0.1:
+ *   1. File on disk (default): `credentials/salesforce.json` — gitignored
+ *      per each tool's `credentials/.gitignore`.
+ *   2. Environment variables (fallback): KRONOS_SF_{USERNAME, PASSWORD,
+ *      SECURITY_TOKEN, LOGIN_URL}.
+ *
+ * `redactCredentials()` scrubs the password, security token, and session
+ * id from any string before it hits stderr or the run manifest. Every
+ * kronos tool that emits credential-adjacent errors must pass its
+ * outbound strings through this function.
+ *
+ * Future: ephemeral scoped credentials via secure channel (FD, UDS,
+ * kernel keyring) or secret-broker reference, per TOOL-BINDING.md §Sandbox
+ * and isolation.
+ */
 
 import { readFileSync, existsSync } from 'node:fs';
 
