@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kronos User Assurance Dashboard — prototype</title>
+<style>
+  :root {
+    --bg: #0e1116;
+    --bg-panel: #161b22;
+    --bg-elev: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --text-faint: #6e7681;
+    --accent: #58a6ff;
+    --accent-dim: #1f6feb;
+    --ok: #3fb950;
+    --low: #d29922;
+    --med: #db6d28;
+    --high: #f85149;
+    --crit: #ff5555;
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  header h1 {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  header h1 .subtitle {
+    color: var(--text-dim);
+    font-weight: 400;
+    font-size: 13px;
+    margin-left: 12px;
+  }
+  header .data-source {
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: var(--font-mono);
+  }
+  header .load-btn {
+    background: var(--accent-dim);
+    color: white;
+    border: 1px solid var(--accent);
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  header .load-btn:hover { background: var(--accent); }
+  #app { flex: 1; display: flex; overflow: hidden; }
+  #sidebar {
+    width: 280px;
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px 0;
+  }
+  #sidebar h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-faint);
+    padding: 0 20px 8px;
+  }
+  .user-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: background 0.1s;
+  }
+  .user-item:hover { background: var(--bg-elev); }
+  .user-item.active { background: var(--bg-elev); border-left-color: var(--accent); }
+  .user-item .name { font-weight: 500; }
+  .user-item .username { color: var(--text-dim); font-size: 12px; font-family: var(--font-mono); }
+  .user-item .anomaly-count {
+    display: inline-block;
+    background: var(--high);
+    color: white;
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-left: 6px;
+  }
+  .user-item .anomaly-count.none { background: var(--ok); }
+  .user-item .anomaly-count.med { background: var(--med); }
+  .user-item .anomaly-count.low { background: var(--low); }
+  #main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 32px;
+  }
+  .empty-state {
+    text-align: center;
+    color: var(--text-dim);
+    padding: 80px 20px;
+  }
+  .user-header {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  .user-header h2 {
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .user-header h2 .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--ok);
+    color: white;
+  }
+  .user-header h2 .badge.inactive { background: var(--text-faint); }
+  .user-header .meta {
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .user-header .kpi-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .kpi {
+    background: var(--bg-elev);
+    padding: 12px 16px;
+    border-radius: 6px;
+    min-width: 120px;
+  }
+  .kpi .label { color: var(--text-faint); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .kpi .value { font-size: 24px; font-weight: 600; margin-top: 4px; }
+  .kpi.high .value { color: var(--high); }
+  .kpi.med .value { color: var(--med); }
+  .kpi.low .value { color: var(--low); }
+  .kpi.ok .value { color: var(--ok); }
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+    overflow-x: auto;
+  }
+  .tab {
+    background: transparent;
+    color: var(--text-dim);
+    border: none;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab .badge {
+    display: inline-block;
+    background: var(--bg-elev);
+    color: var(--text-dim);
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-left: 4px;
+  }
+  .tab .badge.anomalous {
+    background: var(--high);
+    color: white;
+  }
+  .card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card h3 {
+    font-size: 15px;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .card h4 {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 16px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .anomaly {
+    background: var(--bg-elev);
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border-left: 4px solid var(--text-faint);
+    cursor: pointer;
+  }
+  .anomaly:hover { background: var(--bg); }
+  .anomaly.crit { border-left-color: var(--crit); }
+  .anomaly.high { border-left-color: var(--high); }
+  .anomaly.med { border-left-color: var(--med); }
+  .anomaly.low { border-left-color: var(--low); }
+  .anomaly .header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .anomaly .severity {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    background: var(--text-faint);
+    color: white;
+  }
+  .anomaly.crit .severity { background: var(--crit); }
+  .anomaly.high .severity { background: var(--high); }
+  .anomaly.med .severity { background: var(--med); }
+  .anomaly.low .severity { background: var(--low); }
+  .anomaly .class-name {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+  }
+  .anomaly .detail {
+    color: var(--text);
+    font-size: 13px;
+  }
+  .anomaly .evidence {
+    margin-top: 6px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    display: none;
+  }
+  .anomaly.expanded .evidence { display: block; }
+  .anomaly .evidence pre {
+    background: var(--bg);
+    padding: 8px;
+    border-radius: 4px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  table th, table td {
+    padding: 6px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  table th {
+    color: var(--text-dim);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    background: var(--bg-panel);
+  }
+  table td { font-family: var(--font-mono); font-size: 12px; }
+  table td.strong { font-family: inherit; font-weight: 500; }
+  table td.right { text-align: right; }
+  table td.center { text-align: center; }
+  .bit-yes { color: var(--ok); }
+  .bit-no { color: var(--text-faint); }
+  .missing { color: var(--text-faint); font-style: italic; }
+  .scroll-cap {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  details {
+    background: var(--bg-elev);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 12px;
+  }
+  details summary {
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 12px;
+    user-select: none;
+  }
+  details[open] summary { color: var(--text); margin-bottom: 8px; }
+  pre.json {
+    background: var(--bg);
+    padding: 10px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    overflow-x: auto;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .role-chain {
+    list-style: none;
+    padding-left: 0;
+  }
+  .role-chain li {
+    padding: 4px 0 4px 24px;
+    border-left: 2px solid var(--border);
+    margin-left: 8px;
+    position: relative;
+  }
+  .role-chain li::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: 12px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text-faint);
+  }
+  .role-chain li.self::before { background: var(--accent); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2); }
+  .role-chain li.self .role-name { color: var(--accent); font-weight: 600; }
+  .tag {
+    display: inline-block;
+    background: var(--bg-elev);
+    color: var(--text-dim);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    margin-right: 4px;
+    margin-top: 2px;
+    font-family: var(--font-mono);
+  }
+  .tag.crit { background: var(--crit); color: white; }
+  .tag.warn { background: var(--med); color: white; }
+  footer {
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+    padding: 6px 24px;
+    font-size: 11px;
+    color: var(--text-faint);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>
+    kronos
+    <span class="subtitle">user assurance dashboard — prototype</span>
+  </h1>
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <div class="data-source" id="data-source-indicator">source: sample data</div>
+    <input type="file" id="file-input" accept=".json" multiple style="display: none">
+    <button class="load-btn" id="load-btn">Load analysis JSONs…</button>
+  </div>
+</header>
+
+<div id="app">
+  <aside id="sidebar">
+    <h2>Users under assurance</h2>
+    <div id="user-list"></div>
+  </aside>
+  <main id="main">
+    <div class="empty-state" id="empty-state">Select a user from the sidebar to drill into their assurance profile.</div>
+    <div id="user-view" style="display: none"></div>
+  </main>
+</div>
+
+<footer>
+  <div>kronos v0.1 — prototype dashboard for the future runner/</div>
+  <div id="footer-meta">no data loaded</div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   SAMPLE DATA
+   ═══════════════════════════════════════════════════════════════════════
+   Two synthetic users demonstrate every anomaly detector across every
+   analysis kind. Replace by loading real analysis JSONs via the Load
+   button. Never bake real client identifiers here.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const SAMPLE_DATA = {
+  users: [
+    {
+      id: '005000000000000AAA',
+      username: 'alice.admin@acme.example.com',
+      name: 'Alice Admin',
+      is_active: true,
+      user_role_name: 'CEO',
+      profile_name: 'System Administrator',
+    },
+    {
+      id: '005000000000001BBB',
+      username: 'bob.compromised@acme.example.com',
+      name: 'Bob Compromised',
+      is_active: true,
+      user_role_name: 'Sales Representative — West',
+      profile_name: 'Standard User',
+    },
+  ],
+  analyses: [
+    /* ─── alice: expected admin, few or no anomalies ─── */
+    {
+      kronos_analysis_kind: 'user-permissions',
+      tool: 'salesforce-rest-user-permissions', tool_version: '0.1.0',
+      generated_at: '2026-09-21T18:00:00Z',
+      user: { id: '005000000000000AAA', username: 'alice.admin@acme.example.com', name: 'Alice Admin',
+              profile_id: '00e000000000000', profile_name: 'System Administrator',
+              user_role_id: '00E000000000001', user_role_name: 'CEO', is_active: true, user_type: 'Standard',
+              last_login_date: '2026-09-21T14:23:00Z', last_password_change_date: '2026-08-15T10:00:00Z',
+              created_date: '2020-01-15T00:00:00Z', manager_name: null,
+              email: 'alice.admin@acme.example.com' },
+      permission_sources: {
+        profile: { parent_id: '00e000000000000', parent_name: 'System Administrator', kind: 'profile', is_custom: false, is_namespaced: false,
+                   critical_permissions_true: ['PermissionsModifyAllData', 'PermissionsViewAllData', 'PermissionsManageUsers',
+                     'PermissionsAssignPermissionSets', 'PermissionsAuthorApex', 'PermissionsApiEnabled',
+                     'PermissionsExportReport', 'PermissionsViewSetup', 'PermissionsCustomizeApplication'] },
+        permissionsets: [
+          { parent_id: 'pi0000000000001', parent_name: 'API Enabled', kind: 'permissionset', is_custom: false, is_namespaced: false,
+            critical_permissions_true: ['PermissionsApiEnabled'] },
+        ],
+        total_source_count: 2,
+      },
+      critical_permissions_effective: ['PermissionsModifyAllData', 'PermissionsViewAllData', 'PermissionsManageUsers',
+        'PermissionsAssignPermissionSets', 'PermissionsAuthorApex', 'PermissionsApiEnabled',
+        'PermissionsExportReport', 'PermissionsViewSetup', 'PermissionsCustomizeApplication'],
+      effective_object_permissions: [
+        { sobject: 'Account', read: true, create: true, edit: true, delete: true, view_all_records: true, modify_all_records: true, sources: [{ parent_id: '', parent_name: 'System Administrator', is_profile_implicit: true }] },
+        { sobject: 'Contact', read: true, create: true, edit: true, delete: true, view_all_records: true, modify_all_records: true, sources: [] },
+        { sobject: 'Lead', read: true, create: true, edit: true, delete: true, view_all_records: true, modify_all_records: true, sources: [] },
+        { sobject: 'Opportunity', read: true, create: true, edit: true, delete: true, view_all_records: true, modify_all_records: true, sources: [] },
+        { sobject: 'User', read: true, create: true, edit: true, delete: false, view_all_records: true, modify_all_records: true, sources: [] },
+      ],
+      effective_field_permissions_by_sobject: {},
+      totals: { permissionset_count: 1, permissionset_custom_count: 0, permissionset_namespaced_count: 0,
+                object_permission_count: 342, field_permission_count: 5820,
+                sobjects_with_view_all_records: 158, sobjects_with_modify_all_records: 158, sobjects_with_delete: 145 },
+      anomalies: [
+        { class: 'api-plus-modify-all-data', severity: 'critical',
+          detail: 'User has both ApiEnabled and ModifyAllData. Compromise of this account permits arbitrary data pulls and mutations via Salesforce APIs.',
+          evidence: { note: 'expected for System Administrator; document as accepted risk' } },
+        { class: 'view-all-records-broad', severity: 'high',
+          detail: 'User has ViewAllRecords on 158 sobjects — sharing rules do not restrict this user\'s read scope.',
+          evidence: { count: 158, note: 'expected for admin' } },
+        { class: 'apex-authoring-with-modify-all', severity: 'critical',
+          detail: 'User can author Apex code AND ModifyAllData. Arbitrary server-side code execution with unrestricted data access.',
+          evidence: { note: 'expected for admin; enforce code-review + change-control' } },
+        { class: 'manage-users-granted', severity: 'high',
+          detail: 'User can create, modify, and deactivate other users — permission-escalation vector via user provisioning.',
+          evidence: {} },
+      ],
+    },
+    {
+      kronos_analysis_kind: 'user-loginhistory',
+      tool: 'salesforce-rest-user-loginhistory', tool_version: '0.1.0',
+      generated_at: '2026-09-21T18:00:00Z',
+      user: { id: '005000000000000AAA', name: 'Alice Admin', username: 'alice.admin@acme.example.com' },
+      window: { earliest_login: '2026-06-24T09:12:00Z', latest_login: '2026-09-21T14:23:00Z', span_days: 89, total_logins: 178 },
+      outcomes: { success_count: 176, failure_count: 2, failure_by_status: { 'Failed: Invalid Password': 2 } },
+      identities: { unique_user_count: 1, logins_per_user: [{ user_id: '005000000000000AAA', username: 'alice.admin@acme.example.com', profile: 'System Administrator', count: 178 }] },
+      network: { unique_source_ip_count: 3, unique_ip_prefix_count: 2, top_source_ips: [
+        { source_ip: '203.0.113.42', count: 165 }, { source_ip: '198.51.100.7', count: 11 }, { source_ip: '198.51.100.8', count: 2 }] },
+      geography: { unique_country_count: 1, unique_city_count: 2, countries: [{ country_iso: 'US', country: 'United States', count: 178 }] },
+      channel: {
+        login_type_counts: { 'Application': 168, 'Remote Access 2.0': 10 },
+        api_type_counts: { 'Web UI': 168, 'REST': 10 },
+        application_counts: { 'Browser': 168, 'Salesforce CLI': 10 },
+        tls_protocol_counts: { 'TLS 1.2': 178 },
+        ui_vs_api_ratio: { ui: 168, api: 10 },
+      },
+      patterns: { off_hours_login_count: 12, burst_intervals_seconds: [], logins_per_hour_utc: {}, logins_per_day_utc: {} },
+      anomalies: [],
+    },
+
+    /* ─── bob: compromised user, all detectors firing ─── */
+    {
+      kronos_analysis_kind: 'user-permissions',
+      tool: 'salesforce-rest-user-permissions', tool_version: '0.1.0',
+      generated_at: '2026-09-21T18:00:00Z',
+      user: { id: '005000000000001BBB', username: 'bob.compromised@acme.example.com', name: 'Bob Compromised',
+              profile_id: '00e000000000010', profile_name: 'Standard User',
+              user_role_id: '00E000000000020', user_role_name: 'Sales Representative — West',
+              is_active: true, user_type: 'Standard',
+              last_login_date: '2026-09-21T03:47:00Z',
+              last_password_change_date: '2024-11-08T14:20:00Z',
+              created_date: '2023-05-22T00:00:00Z', manager_name: 'Sales Manager West',
+              email: 'bob.compromised@acme.example.com' },
+      permission_sources: {
+        profile: { parent_id: '00e000000000010', parent_name: 'Standard User', kind: 'profile', is_custom: false, is_namespaced: false,
+                   critical_permissions_true: ['PermissionsApiEnabled', 'PermissionsRunReports'] },
+        permissionsets: [
+          { parent_id: 'pi0000000000101', parent_name: 'Sales Team Base', kind: 'permissionset', is_custom: true, is_namespaced: false,
+            critical_permissions_true: [] },
+          { parent_id: 'pi0000000000102', parent_name: 'Data Integration Runner', kind: 'permissionset', is_custom: true, is_namespaced: false,
+            critical_permissions_true: ['PermissionsModifyAllData', 'PermissionsBulkApiHardDelete', 'PermissionsApiEnabled'] },
+          { parent_id: 'pi0000000000103', parent_name: 'Report Exporter', kind: 'permissionset', is_custom: true, is_namespaced: false,
+            critical_permissions_true: ['PermissionsExportReport'] },
+        ],
+        total_source_count: 4,
+      },
+      critical_permissions_effective: ['PermissionsApiEnabled', 'PermissionsRunReports',
+        'PermissionsModifyAllData', 'PermissionsBulkApiHardDelete', 'PermissionsExportReport'],
+      effective_object_permissions: [
+        { sobject: 'Account', read: true, create: true, edit: true, delete: true, view_all_records: true, modify_all_records: true, sources: [
+          { parent_id: 'pi0000000000102', parent_name: 'Data Integration Runner', is_profile_implicit: false }] },
+        { sobject: 'Contact', read: true, create: true, edit: true, delete: true, view_all_records: true, modify_all_records: true, sources: [] },
+        { sobject: 'Lead', read: true, create: true, edit: true, delete: false, view_all_records: true, modify_all_records: false, sources: [] },
+        { sobject: 'Opportunity', read: true, create: true, edit: true, delete: true, view_all_records: true, modify_all_records: false, sources: [] },
+      ],
+      effective_field_permissions_by_sobject: {},
+      totals: { permissionset_count: 3, permissionset_custom_count: 3, permissionset_namespaced_count: 0,
+                object_permission_count: 89, field_permission_count: 412,
+                sobjects_with_view_all_records: 32, sobjects_with_modify_all_records: 12, sobjects_with_delete: 24 },
+      anomalies: [
+        { class: 'admin-permission-not-admin-profile', severity: 'high',
+          detail: 'User has ModifyAllData but base Profile is "Standard User" — verify a PermissionSet grant is intentional.',
+          evidence: { profile: 'Standard User', granted_via_ps: 'Data Integration Runner' } },
+        { class: 'api-plus-modify-all-data', severity: 'critical',
+          detail: 'User has both ApiEnabled and ModifyAllData. Classic data-exfil primitive.',
+          evidence: { via_ps: 'Data Integration Runner' } },
+        { class: 'bulk-api-hard-delete-granted', severity: 'high',
+          detail: 'User can permanently delete records via Bulk API (bypasses recycle bin, unrecoverable).',
+          evidence: {} },
+        { class: 'report-export-granted', severity: 'medium',
+          detail: 'User can export reports. Combined with broad record read access, this is a data-exfil vector.',
+          evidence: {} },
+        { class: 'view-all-records-broad', severity: 'high',
+          detail: 'User has ViewAllRecords on 32 sobjects — sharing rules do not restrict read scope.',
+          evidence: { count: 32 } },
+        { class: 'modify-all-records-broad', severity: 'high',
+          detail: 'User can Modify all records on 12 sobjects.',
+          evidence: { count: 12 } },
+        { class: 'stale-password', severity: 'medium',
+          detail: 'Password last changed 682 days ago on an active user.',
+          evidence: { days_since_change: 682 } },
+      ],
+    },
+    {
+      kronos_analysis_kind: 'user-loginhistory',
+      tool: 'salesforce-rest-user-loginhistory', tool_version: '0.1.0',
+      generated_at: '2026-09-21T18:00:00Z',
+      user: { id: '005000000000001BBB', name: 'Bob Compromised', username: 'bob.compromised@acme.example.com' },
+      window: { earliest_login: '2026-06-24T09:12:00Z', latest_login: '2026-09-21T03:47:00Z', span_days: 89, total_logins: 214 },
+      outcomes: { success_count: 198, failure_count: 16, failure_by_status: {
+        'Failed: Invalid Password': 12, 'Failed: Computer activation required': 4 } },
+      identities: { unique_user_count: 1, logins_per_user: [
+        { user_id: '005000000000001BBB', username: 'bob.compromised@acme.example.com', profile: 'Standard User', count: 214 }] },
+      network: { unique_source_ip_count: 34, unique_ip_prefix_count: 22, top_source_ips: [
+        { source_ip: '203.0.113.99', count: 89 }, { source_ip: '198.51.100.14', count: 42 },
+        { source_ip: '185.220.101.5', count: 28 }, { source_ip: '185.220.101.7', count: 22 },
+        { source_ip: '198.51.100.15', count: 11 }] },
+      geography: { unique_country_count: 3, unique_city_count: 8, countries: [
+        { country_iso: 'US', country: 'United States', count: 131 },
+        { country_iso: 'BG', country: 'Bulgaria', count: 62 },
+        { country_iso: 'NL', country: 'Netherlands', count: 21 }] },
+      channel: {
+        login_type_counts: { 'Application': 118, 'Remote Access 2.0': 88, 'SAML Idp Initiated SSO': 8 },
+        api_type_counts: { 'Web UI': 118, 'REST': 88, 'SOAP Enterprise': 8 },
+        application_counts: { 'Browser': 118, 'Data Loader': 68, 'Salesforce Inspector': 20, 'Unknown': 8 },
+        tls_protocol_counts: { 'TLS 1.2': 202, 'TLS 1.0': 12 },
+        ui_vs_api_ratio: { ui: 118, api: 96 },
+      },
+      patterns: { off_hours_login_count: 89, burst_intervals_seconds: [12, 8, 45, 22, 15, 30, 6, 41, 18, 27],
+                  logins_per_hour_utc: {}, logins_per_day_utc: {} },
+      anomalies: [
+        { class: 'multi-country-login', severity: 'high',
+          detail: 'Logins observed from 3 distinct countries. Non-travel accounts should log in from one country.',
+          evidence: { countries: [
+            { country_iso: 'US', count: 131 }, { country_iso: 'BG', count: 62 }, { country_iso: 'NL', count: 21 }] } },
+        { class: 'high-ip-diversity', severity: 'high',
+          detail: '34 distinct source IPs across 22 /24 prefixes.',
+          evidence: { top: 5 } },
+        { class: 'burst-login-pattern', severity: 'medium',
+          detail: '10 consecutive login pairs less than 60s apart — possible automation or session-instability.',
+          evidence: { burst_count: 10, min_gap_seconds: 6 } },
+        { class: 'off-hours-login-prevalence', severity: 'low',
+          detail: '89 logins outside 06:00-20:00 UTC (41.6% of total).',
+          evidence: { off_hours_count: 89, total: 214 } },
+        { class: 'weak-tls-observed', severity: 'high',
+          detail: 'Login sessions negotiated weak TLS: TLS 1.0. Modern minimum is TLS 1.2.',
+          evidence: { weak_tls: [{ protocol: 'TLS 1.0', count: 12 }] } },
+      ],
+    },
+    {
+      kronos_analysis_kind: 'user-shares',
+      tool: 'salesforce-rest-user-shares', tool_version: '0.1.0',
+      generated_at: '2026-09-21T18:00:00Z',
+      user: { id: '005000000000001BBB', name: 'Bob Compromised', username: 'bob.compromised@acme.example.com',
+              profile_name: 'Standard User', user_role_id: '00E000000000020', user_role_name: 'Sales Representative — West',
+              is_active: true },
+      role_hierarchy: {
+        self_role_id: '00E000000000020',
+        chain_ascending: [
+          { id: '00E000000000020', name: 'Sales Representative — West', developer_name: 'Sales_Rep_West', parent_role_id: '00E000000000019', depth_from_target: 0 },
+          { id: '00E000000000019', name: 'Sales Manager — West', developer_name: 'Sales_Mgr_West', parent_role_id: '00E000000000018', depth_from_target: 1 },
+          { id: '00E000000000018', name: 'VP Sales', developer_name: 'VP_Sales', parent_role_id: '00E000000000001', depth_from_target: 2 },
+          { id: '00E000000000001', name: 'CEO', developer_name: 'CEO', parent_role_id: null, depth_from_target: 3 },
+        ],
+        subordinate_role_ids: [],
+        chain_depth: 4, subordinate_count: 0,
+      },
+      groups: {
+        direct_memberships: [
+          { group_id: '00G000000000001', name: 'Sales Team West', developer_name: 'Sales_Team_West', type: 'Regular', does_include_bosses: false, related_id: null },
+          { group_id: '00G000000000002', name: 'AllInternalUsers', developer_name: 'AllInternalUsers', type: 'Organization', does_include_bosses: false, related_id: null },
+          { group_id: '00G000000000003', name: 'Lead Ingestion Queue', developer_name: 'Lead_Queue', type: 'Queue', does_include_bosses: false, related_id: null },
+          { group_id: '00G000000000004', name: 'West Territory Reps', developer_name: 'West_Reps', type: 'Territory', does_include_bosses: true, related_id: null },
+        ],
+        by_type: { 'Regular': 1, 'Organization': 1, 'Queue': 1, 'Territory': 1 },
+        total_recipient_ids_for_shares: ['005000000000001BBB', '00G000000000001', '00G000000000002', '00G000000000003', '00G000000000004'],
+      },
+      sobject_shares: [
+        { sobject: 'Account', share_row_count: 1240, unique_records_shared: 892,
+          by_row_cause: { 'Manual': 780, 'ImplicitChild': 320, 'Rule': 140 },
+          by_access_level: { 'Read': 340, 'Edit': 780, 'All': 120 },
+          by_recipient_kind: { user: 780, group: 460 }, truncated: false },
+        { sobject: 'Contact', share_row_count: 2000, unique_records_shared: 1445,
+          by_row_cause: { 'Manual': 1240, 'ImplicitChild': 460, 'Rule': 300 },
+          by_access_level: { 'Read': 890, 'Edit': 1010, 'All': 100 },
+          by_recipient_kind: { user: 1200, group: 800 }, truncated: true },
+        { sobject: 'Lead', share_row_count: 340, unique_records_shared: 340,
+          by_row_cause: { 'Owner': 340 },
+          by_access_level: { 'All': 340 }, by_recipient_kind: { user: 340, group: 0 }, truncated: false },
+        { sobject: 'Opportunity', share_row_count: 680, unique_records_shared: 512,
+          by_row_cause: { 'Owner': 380, 'Rule': 200, 'Manual': 100 },
+          by_access_level: { 'All': 380, 'Edit': 200, 'Read': 100 }, by_recipient_kind: { user: 480, group: 200 }, truncated: false },
+        { sobject: 'Case', share_row_count: 0, unique_records_shared: 0,
+          by_row_cause: {}, by_access_level: {}, by_recipient_kind: { user: 0, group: 0 }, truncated: false },
+      ],
+      totals: { role_chain_depth: 4, subordinate_role_count: 0, direct_group_count: 4, queue_membership_count: 1,
+                total_share_recipient_count: 5, total_share_rows: 4260, total_unique_records_shared: 3189,
+                sobjects_probed: 5, sobjects_with_shares: 4 },
+      anomalies: [
+        { class: 'org-wide-group-membership', severity: 'medium',
+          detail: 'User is a member of "AllInternalUsers" — an org-wide group. Anything shared with this group is visible to this user.',
+          evidence: { group_name: 'AllInternalUsers' } },
+        { class: 'manual-share-heavy', severity: 'medium',
+          detail: 'Account: 780 of 1240 shares are "Manual" (63%). Ad-hoc sharing at scale is an audit and revocation risk.',
+          evidence: { sobject: 'Account', manual_count: 780, total: 1240 } },
+        { class: 'share-sample-truncated', severity: 'low',
+          detail: 'Contact: share sample hit the query limit (2000 rows returned). True share count is higher.',
+          evidence: { sobject: 'Contact', sample_limit_hit: true } },
+        { class: 'full-access-shares-broad', severity: 'high',
+          detail: 'Lead: 340 share rows granted with AccessLevel="All". Broad All-access sharing is a data-exfil primitive.',
+          evidence: { sobject: 'Lead', all_access_count: 340 } },
+      ],
+    },
+    {
+      kronos_analysis_kind: 'user-group-membership',
+      tool: 'salesforce-rest-user-group-membership', tool_version: '0.1.0',
+      generated_at: '2026-09-21T18:00:00Z',
+      user: { id: '005000000000001BBB', name: 'Bob Compromised', username: 'bob.compromised@acme.example.com',
+              is_active: true, user_role_id: '00E000000000020', user_role_name: 'Sales Representative — West' },
+      direct_groups: [
+        { id: '00G000000000001', name: 'Sales Team West', developer_name: 'Sales_Team_West', type: 'Regular', does_include_bosses: false, related_id: null, depth: 0, reached_via: [] },
+        { id: '00G000000000002', name: 'AllInternalUsers', developer_name: 'AllInternalUsers', type: 'Organization', does_include_bosses: false, related_id: null, depth: 0, reached_via: [] },
+        { id: '00G000000000003', name: 'Lead Ingestion Queue', developer_name: 'Lead_Queue', type: 'Queue', does_include_bosses: false, related_id: null, depth: 0, reached_via: [] },
+        { id: '00G000000000004', name: 'West Territory Reps', developer_name: 'West_Reps', type: 'Territory', does_include_bosses: true, related_id: null, depth: 0, reached_via: [] },
+      ],
+      transitive_groups: [
+        { id: '00G000000000010', name: 'All Sales Users', developer_name: 'All_Sales', type: 'Regular', does_include_bosses: false, related_id: null, depth: 1, reached_via: ['00G000000000001'] },
+        { id: '00G000000000011', name: 'Global Reports Access', developer_name: 'Global_Reports', type: 'Regular', does_include_bosses: false, related_id: null, depth: 2, reached_via: ['00G000000000010'] },
+      ],
+      queues: {
+        memberships: [{ id: '00G000000000003', name: 'Lead Ingestion Queue', developer_name: 'Lead_Queue', type: 'Queue', does_include_bosses: false, related_id: null, depth: 0, reached_via: [] }],
+        queue_sobjects: [{ queue_id: '00G000000000003', queue_name: 'Lead Ingestion Queue', sobject_type: 'Lead' }],
+        sobjects_reachable_via_queue: ['Lead'],
+      },
+      totals: { direct_group_count: 4, transitive_group_count: 2, total_effective_group_count: 6,
+                queue_membership_count: 1, unique_sobjects_via_queues: 1, max_transitive_depth: 2 },
+      anomalies: [
+        { class: 'org-wide-group-membership', severity: 'medium',
+          detail: 'User is a member of "AllInternalUsers" — org-wide group. Anything shared with this group is visible to this user.',
+          evidence: { group: 'AllInternalUsers' } },
+        { class: 'group-includes-role-bosses', severity: 'low',
+          detail: 'Group "West Territory Reps" has DoesIncludeBosses=true — all users above the group\'s role in the hierarchy inherit its membership.',
+          evidence: {} },
+      ],
+    },
+    {
+      kronos_analysis_kind: 'user-connected-apps',
+      tool: 'salesforce-rest-user-connected-apps', tool_version: '0.1.0',
+      generated_at: '2026-09-21T18:00:00Z',
+      user: { id: '005000000000001BBB', name: 'Bob Compromised', username: 'bob.compromised@acme.example.com', is_active: true },
+      oauth_tokens: [
+        { token_id: 't001', app_name: 'Salesforce Data Loader', app_menu_item_id: null, created_date: '2024-08-01T00:00:00Z', last_used_date: '2026-09-20T22:11:00Z', use_count: 8420, delete_token: null, request_token: null },
+        { token_id: 't002', app_name: 'Salesforce Inspector', app_menu_item_id: null, created_date: '2025-02-14T00:00:00Z', last_used_date: '2026-09-21T02:17:00Z', use_count: 2140, delete_token: null, request_token: null },
+        { token_id: 't003', app_name: 'Workbench', app_menu_item_id: null, created_date: '2025-03-01T00:00:00Z', last_used_date: '2026-04-15T00:00:00Z', use_count: 380, delete_token: null, request_token: null },
+        { token_id: 't004', app_name: 'Salesforce Data Loader', app_menu_item_id: null, created_date: '2025-05-11T00:00:00Z', last_used_date: '2026-05-20T00:00:00Z', use_count: 90, delete_token: null, request_token: null },
+        { token_id: 't005', app_name: 'Salesforce Data Loader', app_menu_item_id: null, created_date: '2025-07-01T00:00:00Z', last_used_date: '2026-06-01T00:00:00Z', use_count: 22, delete_token: null, request_token: null },
+        { token_id: 't006', app_name: 'Salesforce Data Loader', app_menu_item_id: null, created_date: '2025-09-01T00:00:00Z', last_used_date: null, use_count: 0, delete_token: null, request_token: null },
+        { token_id: 't007', app_name: 'Salesforce Data Loader', app_menu_item_id: null, created_date: '2025-11-15T00:00:00Z', last_used_date: null, use_count: 0, delete_token: null, request_token: null },
+        { token_id: 't008', app_name: 'Salesforce Data Loader', app_menu_item_id: null, created_date: '2026-02-01T00:00:00Z', last_used_date: null, use_count: 0, delete_token: null, request_token: null },
+        { token_id: 't009', app_name: 'Unknown Third-Party', app_menu_item_id: null, created_date: '2026-08-05T00:00:00Z', last_used_date: '2026-08-05T01:00:00Z', use_count: 4, delete_token: null, request_token: null },
+      ],
+      third_party_links: [],
+      by_app: [
+        { app_name: 'Salesforce Data Loader', token_count: 5, first_created: '2024-08-01T00:00:00Z', most_recently_used: '2026-09-20T22:11:00Z', total_use_count: 8532, is_dev_tool: true },
+        { app_name: 'Salesforce Inspector', token_count: 1, first_created: '2025-02-14T00:00:00Z', most_recently_used: '2026-09-21T02:17:00Z', total_use_count: 2140, is_dev_tool: true },
+        { app_name: 'Workbench', token_count: 1, first_created: '2025-03-01T00:00:00Z', most_recently_used: '2026-04-15T00:00:00Z', total_use_count: 380, is_dev_tool: true },
+        { app_name: 'Unknown Third-Party', token_count: 1, first_created: '2026-08-05T00:00:00Z', most_recently_used: '2026-08-05T01:00:00Z', total_use_count: 4, is_dev_tool: false },
+      ],
+      totals: { active_token_count: 9, distinct_app_count: 4, third_party_link_count: 0,
+                total_use_count_across_tokens: 11056, stale_token_count: 3, never_used_token_count: 3 },
+      anomalies: [
+        { class: 'stale-oauth-token-accumulation', severity: 'medium',
+          detail: '3 OAuth tokens last used > 90 days ago but still exist. Revoke them.',
+          evidence: { stale_count: 3 } },
+        { class: 'never-used-oauth-tokens', severity: 'medium',
+          detail: '3 OAuth tokens exist with UseCount=0. Abandoned auth attempts or reconnaissance.',
+          evidence: { never_used_count: 3 } },
+        { class: 'high-use-external-app', severity: 'low',
+          detail: 'App "Unknown Third-Party" — external integration marker; verify it\'s authorized.',
+          evidence: { app_name: 'Unknown Third-Party' } },
+        { class: 'developer-tool-oauth-grants', severity: 'low',
+          detail: 'User has OAuth grants for developer tools (Salesforce Data Loader, Salesforce Inspector, Workbench). Suspicious for a Sales rep.',
+          evidence: { dev_tools: ['Salesforce Data Loader', 'Salesforce Inspector', 'Workbench'] } },
+        { class: 'oauth-token-churn', severity: 'medium',
+          detail: 'App "Salesforce Data Loader" has 5 tokens for this user. Session churn or token-leak-and-refresh pattern.',
+          evidence: { app_name: 'Salesforce Data Loader', token_count: 5 } },
+      ],
+    },
+    {
+      kronos_analysis_kind: 'user-audit-trail',
+      tool: 'salesforce-rest-user-audit-trail', tool_version: '0.1.0',
+      generated_at: '2026-09-21T18:00:00Z',
+      user: { id: '005000000000001BBB', name: 'Bob Compromised', username: 'bob.compromised@acme.example.com', is_active: true },
+      window: { earliest_action: '2026-08-15T02:14:00Z', latest_action: '2026-09-20T23:47:00Z', span_days: 37, total_actions: 62 },
+      action_class_counts: { create: 8, modify: 24, delete: 22, read: 6, other: 2 },
+      by_section: [
+        { section: 'Manage Users', count: 14, is_high_privilege: true },
+        { section: 'Permission Sets', count: 12, is_high_privilege: true },
+        { section: 'Custom Objects', count: 10, is_high_privilege: false },
+        { section: 'Data Loader Export', count: 8, is_high_privilege: false },
+        { section: 'Sharing Rules', count: 8, is_high_privilege: true },
+        { section: 'Named Credentials', count: 5, is_high_privilege: true },
+        { section: 'Session Settings', count: 3, is_high_privilege: true },
+        { section: 'Reports', count: 2, is_high_privilege: false },
+      ],
+      by_action: [
+        { action: 'Deleted user Alice.Test', count: 1 },
+        { action: 'Assigned permission set "Data Integration Runner" to bob.compromised', count: 1 },
+        { action: 'Changed sharing rule access for Contact', count: 3 },
+        { action: 'Created custom object DataExport__c', count: 1 },
+        { action: 'Exported Contact records', count: 8 },
+        { action: 'Modified session timeout', count: 3 },
+      ],
+      delegate_activity: { count: 0, delegates: [] },
+      patterns: {
+        off_hours_action_count: 41,
+        weekend_action_count: 18,
+        burst_events_count: 14,
+        logins_per_day: { '2026-09-15': 3, '2026-09-16': 12, '2026-09-17': 8, '2026-09-18': 4, '2026-09-20': 15 },
+      },
+      anomalies: [
+        { class: 'high-privilege-action-activity', severity: 'high',
+          detail: '42 actions in high-privilege Setup sections (Users, Permission Sets, Sharing, Named Credentials, Sessions). Legitimate admin OR compromised admin.',
+          evidence: { high_privilege_action_count: 42 } },
+        { class: 'weekend-admin-activity', severity: 'medium',
+          detail: '18 of 62 actions on weekends (29%). Weekend admin activity is unusual for most business roles.',
+          evidence: { weekend_count: 18, total: 62 } },
+        { class: 'off-hours-admin-activity', severity: 'low',
+          detail: '41 of 62 actions outside 06:00-20:00 UTC (66.1%).',
+          evidence: { off_hours_count: 41, total: 62 } },
+        { class: 'burst-admin-activity', severity: 'medium',
+          detail: '14 consecutive action pairs less than 60s apart. Bulk-change pattern — possible automation or scripted admin action.',
+          evidence: { burst_count: 14, min_gap_sec: 3 } },
+        { class: 'many-delete-actions', severity: 'high',
+          detail: '22 delete/remove/uninstall actions. Elevated destructive activity.',
+          evidence: { delete_count: 22 } },
+      ],
+    },
+  ],
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STATE + LOADING
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const STATE = {
+  users: [],           // [{ id, name, username, is_active, ... }]
+  analyses: [],        // [{ kronos_analysis_kind, user, ... }]
+  selectedUserId: null,
+  source: 'sample',    // 'sample' | 'loaded'
+};
+
+function loadSampleData() {
+  STATE.users = [...SAMPLE_DATA.users];
+  STATE.analyses = [...SAMPLE_DATA.analyses];
+  STATE.source = 'sample';
+  document.getElementById('data-source-indicator').textContent = 'source: sample data (2 users, 8 analyses)';
+  document.getElementById('footer-meta').textContent = `sample data · ${STATE.users.length} users · ${STATE.analyses.length} analyses`;
+  renderUserList();
+  if (STATE.users.length) selectUser(STATE.users[0].id);
+}
+
+function loadFromFiles(fileList) {
+  const reads = [];
+  for (const file of fileList) {
+    reads.push(file.text().then((txt) => {
+      try {
+        const data = JSON.parse(txt);
+        const kind = data.kronos_analysis_kind || detectKindFromFilename(file.name);
+        if (!kind) throw new Error(`no kronos_analysis_kind and unknown filename pattern: ${file.name}`);
+        data.kronos_analysis_kind = kind;
+        return { ok: true, data, filename: file.name };
+      } catch (e) {
+        return { ok: false, filename: file.name, error: e.message };
+      }
+    }));
+  }
+  Promise.all(reads).then((results) => {
+    const analyses = [];
+    const users = new Map();
+    let errors = [];
+    for (const r of results) {
+      if (!r.ok) { errors.push(`${r.filename}: ${r.error}`); continue; }
+      const d = r.data;
+      analyses.push(d);
+      if (d.user && d.user.id) {
+        const existing = users.get(d.user.id) ?? {};
+        users.set(d.user.id, { ...existing, ...d.user });
+      }
+    }
+    STATE.analyses = analyses;
+    STATE.users = [...users.values()];
+    STATE.source = 'loaded';
+    document.getElementById('data-source-indicator').textContent = `source: ${fileList.length} loaded file(s)`;
+    document.getElementById('footer-meta').textContent = `loaded · ${STATE.users.length} users · ${STATE.analyses.length} analyses${errors.length ? ` · ${errors.length} error(s)` : ''}`;
+    if (errors.length) console.warn('Load errors:', errors);
+    renderUserList();
+    if (STATE.users.length) selectUser(STATE.users[0].id);
+  });
+}
+
+function detectKindFromFilename(name) {
+  const patterns = [
+    ['permissions', 'user-permissions'],
+    ['loginhistory', 'user-loginhistory'],
+    ['login-history', 'user-loginhistory'],
+    ['shares', 'user-shares'],
+    ['group-membership', 'user-group-membership'],
+    ['group', 'user-group-membership'],
+    ['connected-apps', 'user-connected-apps'],
+    ['audit-trail', 'user-audit-trail'],
+  ];
+  const lower = name.toLowerCase();
+  for (const [pat, kind] of patterns) {
+    if (lower.includes(pat)) return kind;
+  }
+  return null;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   USER-LIST SIDEBAR
+   ═══════════════════════════════════════════════════════════════════════ */
+
+function anomalyCountFor(userId) {
+  return STATE.analyses
+    .filter((a) => a.user && a.user.id === userId)
+    .reduce((n, a) => n + (a.anomalies ? a.anomalies.length : 0), 0);
+}
+
+function highestSeverityFor(userId) {
+  const sevOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+  let maxSev = 0;
+  for (const a of STATE.analyses) {
+    if (!a.user || a.user.id !== userId) continue;
+    for (const an of a.anomalies || []) maxSev = Math.max(maxSev, sevOrder[an.severity] || 0);
+  }
+  return ['none', 'low', 'med', 'high', 'crit'][maxSev];
+}
+
+function renderUserList() {
+  const el = document.getElementById('user-list');
+  if (!STATE.users.length) {
+    el.innerHTML = '<div style="padding: 12px 20px; color: var(--text-faint); font-size: 12px;">No users. Load analysis JSONs.</div>';
+    return;
+  }
+  el.innerHTML = STATE.users.map((u) => {
+    const count = anomalyCountFor(u.id);
+    const sev = highestSeverityFor(u.id);
+    const active = u.id === STATE.selectedUserId ? 'active' : '';
+    return `
+      <div class="user-item ${active}" data-user-id="${escapeHtml(u.id)}">
+        <div class="name">${escapeHtml(u.name || u.username || u.id)}
+          <span class="anomaly-count ${sev}">${count}</span>
+        </div>
+        <div class="username">${escapeHtml(u.username || '')}</div>
+      </div>
+    `;
+  }).join('');
+  el.querySelectorAll('.user-item').forEach((item) => {
+    item.addEventListener('click', () => selectUser(item.dataset.userId));
+  });
+}
+
+function selectUser(userId) {
+  STATE.selectedUserId = userId;
+  renderUserList();
+  renderUserView();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MAIN VIEW
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const DIMENSION_META = {
+  'user-permissions':      { label: 'Permissions',      icon: '🔐' },
+  'user-loginhistory':     { label: 'Login History',    icon: '🌐' },
+  'user-shares':           { label: 'Shares',           icon: '🔗' },
+  'user-group-membership': { label: 'Group Graph',      icon: '👥' },
+  'user-connected-apps':   { label: 'Connected Apps',   icon: '🔌' },
+  'user-audit-trail':      { label: 'Audit Trail',      icon: '📋' },
+};
+
+const STATE_VIEW = { activeTab: 'overview' };
+
+function renderUserView() {
+  const user = STATE.users.find((u) => u.id === STATE.selectedUserId);
+  if (!user) {
+    document.getElementById('user-view').style.display = 'none';
+    document.getElementById('empty-state').style.display = 'block';
+    return;
+  }
+  document.getElementById('empty-state').style.display = 'none';
+  const view = document.getElementById('user-view');
+  view.style.display = 'block';
+
+  const analyses = STATE.analyses.filter((a) => a.user && a.user.id === user.id);
+  const totalAnom = analyses.reduce((n, a) => n + (a.anomalies || []).length, 0);
+  const critAnom = analyses.reduce((n, a) => n + (a.anomalies || []).filter((x) => x.severity === 'critical').length, 0);
+  const highAnom = analyses.reduce((n, a) => n + (a.anomalies || []).filter((x) => x.severity === 'high').length, 0);
+  const medAnom = analyses.reduce((n, a) => n + (a.anomalies || []).filter((x) => x.severity === 'medium').length, 0);
+  const lowAnom = analyses.reduce((n, a) => n + (a.anomalies || []).filter((x) => x.severity === 'low').length, 0);
+
+  view.innerHTML = `
+    <div class="user-header">
+      <h2>
+        ${escapeHtml(user.name || user.username || user.id)}
+        <span class="badge ${user.is_active === false ? 'inactive' : ''}">${user.is_active === false ? 'INACTIVE' : 'ACTIVE'}</span>
+      </h2>
+      <div class="meta">
+        ${escapeHtml(user.username || '—')} · Id <code>${escapeHtml(user.id)}</code>
+        ${user.profile_name ? ` · Profile: ${escapeHtml(user.profile_name)}` : ''}
+        ${user.user_role_name ? ` · Role: ${escapeHtml(user.user_role_name)}` : ''}
+      </div>
+      <div class="kpi-row">
+        <div class="kpi ${totalAnom ? 'high' : 'ok'}"><div class="label">Anomalies total</div><div class="value">${totalAnom}</div></div>
+        <div class="kpi ${critAnom ? 'high' : 'ok'}"><div class="label">Critical</div><div class="value">${critAnom}</div></div>
+        <div class="kpi ${highAnom ? 'med' : 'ok'}"><div class="label">High</div><div class="value">${highAnom}</div></div>
+        <div class="kpi ${medAnom ? 'low' : 'ok'}"><div class="label">Medium</div><div class="value">${medAnom}</div></div>
+        <div class="kpi ok"><div class="label">Low</div><div class="value">${lowAnom}</div></div>
+        <div class="kpi ok"><div class="label">Dimensions loaded</div><div class="value">${analyses.length}</div></div>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab ${STATE_VIEW.activeTab === 'overview' ? 'active' : ''}" data-tab="overview">Overview</button>
+      ${Object.keys(DIMENSION_META).map((kind) => {
+        const a = analyses.find((x) => x.kronos_analysis_kind === kind);
+        if (!a) return '';
+        const anoms = (a.anomalies || []).length;
+        return `<button class="tab ${STATE_VIEW.activeTab === kind ? 'active' : ''}" data-tab="${kind}">
+          ${DIMENSION_META[kind].icon} ${DIMENSION_META[kind].label}
+          <span class="badge ${anoms ? 'anomalous' : ''}">${anoms}</span>
+        </button>`;
+      }).join('')}
+    </div>
+
+    <div id="tab-body"></div>
+  `;
+
+  view.querySelectorAll('.tab').forEach((tabEl) => {
+    tabEl.addEventListener('click', () => {
+      STATE_VIEW.activeTab = tabEl.dataset.tab;
+      renderUserView();
+    });
+  });
+
+  renderTabBody(user, analyses);
+}
+
+function renderTabBody(user, analyses) {
+  const body = document.getElementById('tab-body');
+  if (STATE_VIEW.activeTab === 'overview') {
+    body.innerHTML = renderOverview(user, analyses);
+    wireAnomalies(body);
+    return;
+  }
+  const a = analyses.find((x) => x.kronos_analysis_kind === STATE_VIEW.activeTab);
+  if (!a) { body.innerHTML = '<div class="empty-state">No analysis loaded for this dimension.</div>'; return; }
+  switch (a.kronos_analysis_kind) {
+    case 'user-permissions':      body.innerHTML = renderPermissions(a); break;
+    case 'user-loginhistory':     body.innerHTML = renderLoginHistory(a); break;
+    case 'user-shares':           body.innerHTML = renderShares(a); break;
+    case 'user-group-membership': body.innerHTML = renderGroupMembership(a); break;
+    case 'user-connected-apps':   body.innerHTML = renderConnectedApps(a); break;
+    case 'user-audit-trail':      body.innerHTML = renderAuditTrail(a); break;
+    default:                      body.innerHTML = `<div class="card"><h3>Raw analysis JSON</h3><pre class="json">${escapeHtml(JSON.stringify(a, null, 2))}</pre></div>`;
+  }
+  wireAnomalies(body);
+}
+
+function renderOverview(user, analyses) {
+  const allAnoms = [];
+  for (const a of analyses) {
+    for (const an of a.anomalies || []) {
+      allAnoms.push({ ...an, source_kind: a.kronos_analysis_kind });
+    }
+  }
+  allAnoms.sort((x, y) => {
+    const so = { critical: 4, high: 3, medium: 2, low: 1 };
+    return (so[y.severity] || 0) - (so[x.severity] || 0);
+  });
+
+  return `
+    <div class="card">
+      <h3>All anomalies across dimensions</h3>
+      ${allAnoms.length === 0 ? '<div class="missing">No anomalies flagged.</div>' :
+        allAnoms.map((an) => renderAnomaly(an, DIMENSION_META[an.source_kind]?.label ?? an.source_kind)).join('')}
+    </div>
+    <div class="card">
+      <h3>Analyses loaded for this user</h3>
+      <table>
+        <thead><tr><th>Dimension</th><th>Tool</th><th>Version</th><th class="right">Anomalies</th><th>Generated</th></tr></thead>
+        <tbody>
+          ${analyses.map((a) => `
+            <tr>
+              <td class="strong">${DIMENSION_META[a.kronos_analysis_kind]?.icon ?? ''} ${DIMENSION_META[a.kronos_analysis_kind]?.label ?? a.kronos_analysis_kind}</td>
+              <td>${escapeHtml(a.tool || '—')}</td>
+              <td>${escapeHtml(a.tool_version || '—')}</td>
+              <td class="right">${(a.anomalies || []).length}</td>
+              <td>${escapeHtml(a.generated_at || '—')}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderAnomaly(an, sourceLabel) {
+  return `
+    <div class="anomaly ${an.severity}" data-anomaly>
+      <div class="header">
+        <span class="severity">${an.severity}</span>
+        <span class="class-name">${escapeHtml(an.class)}</span>
+        ${sourceLabel ? `<span style="color: var(--text-faint); font-size: 12px;">· ${escapeHtml(sourceLabel)}</span>` : ''}
+      </div>
+      <div class="detail">${escapeHtml(an.detail)}</div>
+      <div class="evidence">
+        <pre>${escapeHtml(JSON.stringify(an.evidence || {}, null, 2))}</pre>
+      </div>
+    </div>
+  `;
+}
+
+function wireAnomalies(root) {
+  root.querySelectorAll('[data-anomaly]').forEach((el) => {
+    el.addEventListener('click', () => el.classList.toggle('expanded'));
+  });
+}
+
+/* ─── PERMISSIONS ────────────────────────────────────────────────── */
+function renderPermissions(a) {
+  const anoms = (a.anomalies || []).map((an) => renderAnomaly(an)).join('');
+  const crits = (a.critical_permissions_effective || []).map((p) => `<span class="tag crit">${escapeHtml(p)}</span>`).join('');
+  const psRows = ((a.permission_sources || {}).permissionsets || []).map((ps) => `
+    <tr>
+      <td class="strong">${escapeHtml(ps.parent_name)}</td>
+      <td>${ps.is_custom ? '<span class="tag warn">custom</span>' : ''}${ps.is_namespaced ? '<span class="tag">namespaced</span>' : ''}</td>
+      <td class="right">${(ps.critical_permissions_true || []).length}</td>
+      <td>${(ps.critical_permissions_true || []).map((p) => `<code style="font-size:11px">${escapeHtml(p)}</code>`).join(', ') || '—'}</td>
+    </tr>
+  `).join('');
+  const opRows = (a.effective_object_permissions || []).map((op) => `
+    <tr>
+      <td class="strong">${escapeHtml(op.sobject)}</td>
+      <td class="center">${op.read ? '<span class="bit-yes">✔</span>' : '<span class="bit-no">·</span>'}</td>
+      <td class="center">${op.create ? '<span class="bit-yes">✔</span>' : '<span class="bit-no">·</span>'}</td>
+      <td class="center">${op.edit ? '<span class="bit-yes">✔</span>' : '<span class="bit-no">·</span>'}</td>
+      <td class="center">${op.delete ? '<span class="bit-yes">✔</span>' : '<span class="bit-no">·</span>'}</td>
+      <td class="center">${op.view_all_records ? '<span class="bit-yes">✔</span>' : '<span class="bit-no">·</span>'}</td>
+      <td class="center">${op.modify_all_records ? '<span class="bit-yes">✔</span>' : '<span class="bit-no">·</span>'}</td>
+      <td class="right">${(op.sources || []).length}</td>
+    </tr>
+  `).join('');
+  return `
+    <div class="card">
+      <h3>Anomalies (${(a.anomalies || []).length})</h3>
+      ${anoms || '<div class="missing">None flagged.</div>'}
+    </div>
+    <div class="card">
+      <h3>Critical permissions effective (${(a.critical_permissions_effective || []).length})</h3>
+      ${crits || '<div class="missing">No critical flags set.</div>'}
+    </div>
+    <div class="card">
+      <h3>Permission sources</h3>
+      <h4>Profile: ${escapeHtml((a.permission_sources || {}).profile?.parent_name ?? '—')}</h4>
+      ${((a.permission_sources || {}).profile?.critical_permissions_true || []).map((p) => `<code style="font-size:11px">${escapeHtml(p)}</code>`).join(', ') || '<span class="missing">no tracked critical permissions granted by profile</span>'}
+      <h4>PermissionSets (${((a.permission_sources || {}).permissionsets || []).length})</h4>
+      <table><thead><tr><th>Name</th><th>Flags</th><th class="right">Critical count</th><th>Critical granted here</th></tr></thead>
+      <tbody>${psRows || '<tr><td colspan="4"><span class="missing">No PSs assigned.</span></td></tr>'}</tbody></table>
+    </div>
+    <div class="card">
+      <h3>Effective object permissions (${(a.effective_object_permissions || []).length} sobjects)</h3>
+      <div class="scroll-cap">
+        <table><thead><tr><th>Sobject</th><th class="center">R</th><th class="center">C</th><th class="center">E</th><th class="center">D</th><th class="center">ViewAll</th><th class="center">ModAll</th><th class="right">Src</th></tr></thead>
+        <tbody>${opRows || '<tr><td colspan="8"><span class="missing">None.</span></td></tr>'}</tbody></table>
+      </div>
+    </div>
+    ${renderRawDetail(a)}
+  `;
+}
+
+/* ─── LOGIN HISTORY ─────────────────────────────────────────────── */
+function renderLoginHistory(a) {
+  const anoms = (a.anomalies || []).map((an) => renderAnomaly(an)).join('');
+  const w = a.window || {};
+  const geo = (a.geography?.countries || []).map((c) => `
+    <tr><td>${escapeHtml(c.country || '—')}</td><td>${escapeHtml(c.country_iso)}</td><td class="right">${c.count}</td></tr>
+  `).join('');
+  const ips = (a.network?.top_source_ips || []).slice(0, 15).map((ip) => `
+    <tr><td>${escapeHtml(ip.source_ip)}</td><td class="right">${ip.count}</td></tr>
+  `).join('');
+  const tls = Object.entries(a.channel?.tls_protocol_counts || {}).map(([k, v]) => `<tr><td>${escapeHtml(k)}</td><td class="right">${v}</td></tr>`).join('');
+  const apps = Object.entries(a.channel?.application_counts || {}).sort((x, y) => y[1] - x[1]).slice(0, 10).map(([k, v]) => `<tr><td>${escapeHtml(k)}</td><td class="right">${v}</td></tr>`).join('');
+  return `
+    <div class="card">
+      <h3>Anomalies (${(a.anomalies || []).length})</h3>
+      ${anoms || '<div class="missing">None flagged.</div>'}
+    </div>
+    <div class="card">
+      <h3>Window</h3>
+      <div class="kpi-row">
+        <div class="kpi"><div class="label">Total logins</div><div class="value">${w.total_logins ?? '—'}</div></div>
+        <div class="kpi"><div class="label">Span (days)</div><div class="value">${w.span_days ?? '—'}</div></div>
+        <div class="kpi ${a.outcomes?.failure_count ? 'med' : 'ok'}"><div class="label">Failures</div><div class="value">${a.outcomes?.failure_count ?? 0}</div></div>
+        <div class="kpi ${a.geography?.unique_country_count > 1 ? 'high' : 'ok'}"><div class="label">Countries</div><div class="value">${a.geography?.unique_country_count ?? '—'}</div></div>
+        <div class="kpi ${a.network?.unique_source_ip_count >= 10 ? 'med' : 'ok'}"><div class="label">Source IPs</div><div class="value">${a.network?.unique_source_ip_count ?? '—'}</div></div>
+      </div>
+      <p style="margin-top: 12px; color: var(--text-dim); font-size: 12px;">
+        Earliest: <code>${escapeHtml(w.earliest_login || '—')}</code> · Latest: <code>${escapeHtml(w.latest_login || '—')}</code>
+      </p>
+    </div>
+    <div class="card">
+      <h3>Geography</h3>
+      <table><thead><tr><th>Country</th><th>ISO</th><th class="right">Logins</th></tr></thead>
+      <tbody>${geo || '<tr><td colspan="3"><span class="missing">None.</span></td></tr>'}</tbody></table>
+    </div>
+    <div class="card">
+      <h3>Top source IPs</h3>
+      <table><thead><tr><th>IP</th><th class="right">Count</th></tr></thead>
+      <tbody>${ips || '<tr><td colspan="2"><span class="missing">None.</span></td></tr>'}</tbody></table>
+    </div>
+    <div class="card">
+      <h3>TLS protocols observed</h3>
+      <table><thead><tr><th>Protocol</th><th class="right">Count</th></tr></thead>
+      <tbody>${tls || '<tr><td colspan="2"><span class="missing">None.</span></td></tr>'}</tbody></table>
+      <h4>Top applications</h4>
+      <table><thead><tr><th>App</th><th class="right">Count</th></tr></thead>
+      <tbody>${apps || '<tr><td colspan="2"><span class="missing">None.</span></td></tr>'}</tbody></table>
+    </div>
+    ${renderRawDetail(a)}
+  `;
+}
+
+/* ─── SHARES ─────────────────────────────────────────────────────── */
+function renderShares(a) {
+  const anoms = (a.anomalies || []).map((an) => renderAnomaly(an)).join('');
+  const chain = (a.role_hierarchy?.chain_ascending || []).map((r) => `
+    <li class="${r.depth_from_target === 0 ? 'self' : ''}"><span class="role-name">${escapeHtml(r.name)}</span>
+      <span style="color: var(--text-faint); font-family: var(--font-mono); font-size: 11px; margin-left: 8px;">${escapeHtml(r.id)}</span></li>
+  `).join('');
+  const groups = (a.groups?.direct_memberships || []).map((g) => `
+    <tr><td class="strong">${escapeHtml(g.name)}</td><td><span class="tag">${escapeHtml(g.type)}</span></td><td class="center">${g.does_include_bosses ? '✔' : ''}</td></tr>
+  `).join('');
+  const shares = (a.sobject_shares || []).map((s) => {
+    const topCause = Object.entries(s.by_row_cause || {}).sort((x, y) => y[1] - x[1])[0];
+    const topAccess = Object.entries(s.by_access_level || {}).sort((x, y) => y[1] - x[1])[0];
+    return `<tr>
+      <td class="strong">${escapeHtml(s.sobject)}</td>
+      <td class="right">${s.share_row_count}</td>
+      <td class="right">${s.unique_records_shared}</td>
+      <td class="center">${s.truncated ? '<span class="tag warn">⚠</span>' : ''}</td>
+      <td>${topCause ? `<code>${escapeHtml(topCause[0])}</code> (${topCause[1]})` : '—'}</td>
+      <td>${topAccess ? `<code>${escapeHtml(topAccess[0])}</code> (${topAccess[1]})` : '—'}</td>
+    </tr>`;
+  }).join('');
+  return `
+    <div class="card">
+      <h3>Anomalies (${(a.anomalies || []).length})</h3>
+      ${anoms || '<div class="missing">None flagged.</div>'}
+    </div>
+    <div class="card">
+      <h3>Role hierarchy — ascending chain</h3>
+      <ul class="role-chain">${chain || '<li class="missing">User has no assigned role.</li>'}</ul>
+      <p style="margin-top: 8px; color: var(--text-dim); font-size: 12px;">Subordinate roles beneath user: <strong>${a.role_hierarchy?.subordinate_count ?? 0}</strong></p>
+    </div>
+    <div class="card">
+      <h3>Direct group memberships (${(a.groups?.direct_memberships || []).length})</h3>
+      <table><thead><tr><th>Group</th><th>Type</th><th class="center">Bosses</th></tr></thead>
+      <tbody>${groups || '<tr><td colspan="3"><span class="missing">None.</span></td></tr>'}</tbody></table>
+    </div>
+    <div class="card">
+      <h3>Per-sobject shares (sampled)</h3>
+      <table><thead><tr><th>Sobject</th><th class="right">Share rows</th><th class="right">Unique records</th><th class="center">Truncated</th><th>Top RowCause</th><th>Top AccessLevel</th></tr></thead>
+      <tbody>${shares || '<tr><td colspan="6"><span class="missing">No shares queried.</span></td></tr>'}</tbody></table>
+    </div>
+    ${renderRawDetail(a)}
+  `;
+}
+
+/* ─── GROUP MEMBERSHIP ─────────────────────────────────────────── */
+function renderGroupMembership(a) {
+  const anoms = (a.anomalies || []).map((an) => renderAnomaly(an)).join('');
+  const direct = (a.direct_groups || []).map((g) => `<tr><td class="strong">${escapeHtml(g.name)}</td><td><span class="tag">${escapeHtml(g.type)}</span></td><td class="center">${g.does_include_bosses ? '✔' : ''}</td></tr>`).join('');
+  const trans = (a.transitive_groups || []).map((g) => `<tr><td class="strong">${escapeHtml(g.name)}</td><td><span class="tag">${escapeHtml(g.type)}</span></td><td class="right">${g.depth}</td><td>${(g.reached_via || []).map((v) => `<code>${escapeHtml(v)}</code>`).join(', ')}</td></tr>`).join('');
+  const queues = (a.queues?.queue_sobjects || []).map((qs) => `<tr><td>${escapeHtml(qs.queue_name)}</td><td><code>${escapeHtml(qs.sobject_type)}</code></td></tr>`).join('');
+  return `
+    <div class="card">
+      <h3>Anomalies (${(a.anomalies || []).length})</h3>
+      ${anoms || '<div class="missing">None flagged.</div>'}
+    </div>
+    <div class="card">
+      <div class="kpi-row">
+        <div class="kpi"><div class="label">Direct groups</div><div class="value">${a.totals?.direct_group_count ?? 0}</div></div>
+        <div class="kpi"><div class="label">Transitive</div><div class="value">${a.totals?.transitive_group_count ?? 0}</div></div>
+        <div class="kpi ${(a.totals?.total_effective_group_count ?? 0) >= 30 ? 'med' : 'ok'}"><div class="label">Total effective</div><div class="value">${a.totals?.total_effective_group_count ?? 0}</div></div>
+        <div class="kpi"><div class="label">Queues</div><div class="value">${a.totals?.queue_membership_count ?? 0}</div></div>
+        <div class="kpi"><div class="label">Max depth</div><div class="value">${a.totals?.max_transitive_depth ?? 0}</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Direct memberships (${(a.direct_groups || []).length})</h3>
+      <table><thead><tr><th>Group</th><th>Type</th><th class="center">Bosses</th></tr></thead>
+      <tbody>${direct || '<tr><td colspan="3"><span class="missing">None.</span></td></tr>'}</tbody></table>
+    </div>
+    <div class="card">
+      <h3>Transitive memberships (${(a.transitive_groups || []).length})</h3>
+      <table><thead><tr><th>Group</th><th>Type</th><th class="right">Depth</th><th>Reached via</th></tr></thead>
+      <tbody>${trans || '<tr><td colspan="4"><span class="missing">No group nesting reaches this user.</span></td></tr>'}</tbody></table>
+    </div>
+    <div class="card">
+      <h3>Queue → Sobject map (${(a.queues?.queue_sobjects || []).length})</h3>
+      <table><thead><tr><th>Queue</th><th>Sobject</th></tr></thead>
+      <tbody>${queues || '<tr><td colspan="2"><span class="missing">Not in any queue.</span></td></tr>'}</tbody></table>
+    </div>
+    ${renderRawDetail(a)}
+  `;
+}
+
+/* ─── CONNECTED APPS ──────────────────────────────────────────── */
+function renderConnectedApps(a) {
+  const anoms = (a.anomalies || []).map((an) => renderAnomaly(an)).join('');
+  const byApp = (a.by_app || []).map((app) => `
+    <tr>
+      <td class="strong">${escapeHtml(app.app_name)}${app.is_dev_tool ? ' <span class="tag warn">dev tool</span>' : ''}</td>
+      <td class="right">${app.token_count}</td>
+      <td class="right">${app.total_use_count}</td>
+      <td>${escapeHtml(app.most_recently_used || '—')}</td>
+      <td>${escapeHtml(app.first_created || '—')}</td>
+    </tr>
+  `).join('');
+  const tokens = (a.oauth_tokens || []).map((t) => `
+    <tr>
+      <td>${escapeHtml(t.app_name)}</td>
+      <td class="right">${t.use_count}</td>
+      <td>${escapeHtml(t.last_used_date || '—')}</td>
+      <td>${escapeHtml(t.created_date)}</td>
+    </tr>
+  `).join('');
+  const links = (a.third_party_links || []).map((l) => `
+    <tr><td>${escapeHtml(l.provider_developer_name || '—')}</td><td>${escapeHtml(l.provider_type || '')}</td><td>${escapeHtml(l.remote_identifier)}</td><td class="center">${l.sso_used ? '✔' : ''}</td></tr>
+  `).join('');
+  return `
+    <div class="card">
+      <h3>Anomalies (${(a.anomalies || []).length})</h3>
+      ${anoms || '<div class="missing">None flagged.</div>'}
+    </div>
+    <div class="card">
+      <div class="kpi-row">
+        <div class="kpi ${a.totals?.active_token_count >= 5 ? 'med' : 'ok'}"><div class="label">Active tokens</div><div class="value">${a.totals?.active_token_count ?? 0}</div></div>
+        <div class="kpi"><div class="label">Distinct apps</div><div class="value">${a.totals?.distinct_app_count ?? 0}</div></div>
+        <div class="kpi ${a.totals?.stale_token_count >= 3 ? 'med' : 'ok'}"><div class="label">Stale (&gt;90d)</div><div class="value">${a.totals?.stale_token_count ?? 0}</div></div>
+        <div class="kpi ${a.totals?.never_used_token_count >= 3 ? 'med' : 'ok'}"><div class="label">Never used</div><div class="value">${a.totals?.never_used_token_count ?? 0}</div></div>
+        <div class="kpi"><div class="label">Total UseCount</div><div class="value">${a.totals?.total_use_count_across_tokens ?? 0}</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>By app (${(a.by_app || []).length})</h3>
+      <table><thead><tr><th>App</th><th class="right">Tokens</th><th class="right">Total UseCount</th><th>Most recent use</th><th>First created</th></tr></thead>
+      <tbody>${byApp || '<tr><td colspan="5"><span class="missing">No OAuth tokens.</span></td></tr>'}</tbody></table>
+    </div>
+    <div class="card">
+      <h3>OAuth tokens (${(a.oauth_tokens || []).length})</h3>
+      <div class="scroll-cap">
+      <table><thead><tr><th>App</th><th class="right">Uses</th><th>Last used</th><th>Created</th></tr></thead>
+      <tbody>${tokens || '<tr><td colspan="4"><span class="missing">None.</span></td></tr>'}</tbody></table>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Third-party account links (${(a.third_party_links || []).length})</h3>
+      <table><thead><tr><th>Provider</th><th>Type</th><th>Remote id</th><th class="center">SSO</th></tr></thead>
+      <tbody>${links || '<tr><td colspan="4"><span class="missing">None.</span></td></tr>'}</tbody></table>
+    </div>
+    ${renderRawDetail(a)}
+  `;
+}
+
+/* ─── AUDIT TRAIL ─────────────────────────────────────────────── */
+function renderAuditTrail(a) {
+  const anoms = (a.anomalies || []).map((an) => renderAnomaly(an)).join('');
+  const bySection = (a.by_section || []).slice(0, 15).map((s) => `
+    <tr><td class="strong">${escapeHtml(s.section)}</td><td class="right">${s.count}</td><td class="center">${s.is_high_privilege ? '<span class="tag warn">⚠ HP</span>' : ''}</td></tr>
+  `).join('');
+  const byAction = (a.by_action || []).slice(0, 15).map((act) => `<tr><td>${escapeHtml(act.action)}</td><td class="right">${act.count}</td></tr>`).join('');
+  const delegates = (a.delegate_activity?.delegates || []).map((d) => `<tr><td><code>${escapeHtml(d.delegate_username)}</code></td><td class="right">${d.count}</td></tr>`).join('');
+  return `
+    <div class="card">
+      <h3>Anomalies (${(a.anomalies || []).length})</h3>
+      ${anoms || '<div class="missing">None flagged.</div>'}
+    </div>
+    <div class="card">
+      <div class="kpi-row">
+        <div class="kpi"><div class="label">Total actions</div><div class="value">${a.window?.total_actions ?? 0}</div></div>
+        <div class="kpi"><div class="label">Span (days)</div><div class="value">${a.window?.span_days ?? '—'}</div></div>
+        <div class="kpi ${a.action_class_counts?.delete >= 20 ? 'high' : 'ok'}"><div class="label">Deletes</div><div class="value">${a.action_class_counts?.delete ?? 0}</div></div>
+        <div class="kpi"><div class="label">Modifies</div><div class="value">${a.action_class_counts?.modify ?? 0}</div></div>
+        <div class="kpi"><div class="label">Creates</div><div class="value">${a.action_class_counts?.create ?? 0}</div></div>
+        <div class="kpi ${a.patterns?.weekend_action_count / (a.window?.total_actions || 1) > 0.15 ? 'med' : 'ok'}"><div class="label">Weekend</div><div class="value">${a.patterns?.weekend_action_count ?? 0}</div></div>
+        <div class="kpi ${a.patterns?.off_hours_action_count / (a.window?.total_actions || 1) > 0.25 ? 'med' : 'ok'}"><div class="label">Off-hours</div><div class="value">${a.patterns?.off_hours_action_count ?? 0}</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>By section (top 15)</h3>
+      <table><thead><tr><th>Section</th><th class="right">Count</th><th class="center">High-priv</th></tr></thead>
+      <tbody>${bySection || '<tr><td colspan="3"><span class="missing">None.</span></td></tr>'}</tbody></table>
+    </div>
+    <div class="card">
+      <h3>Top actions (top 15)</h3>
+      <table><thead><tr><th>Action</th><th class="right">Count</th></tr></thead>
+      <tbody>${byAction || '<tr><td colspan="2"><span class="missing">None.</span></td></tr>'}</tbody></table>
+    </div>
+    <div class="card">
+      <h3>Delegate activity (${a.delegate_activity?.count ?? 0})</h3>
+      <table><thead><tr><th>Delegate</th><th class="right">Count</th></tr></thead>
+      <tbody>${delegates || '<tr><td colspan="2"><span class="missing">No delegate actions.</span></td></tr>'}</tbody></table>
+    </div>
+    ${renderRawDetail(a)}
+  `;
+}
+
+function renderRawDetail(a) {
+  return `
+    <details>
+      <summary>Show raw analysis JSON</summary>
+      <pre class="json">${escapeHtml(JSON.stringify(a, null, 2))}</pre>
+    </details>
+  `;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   UTIL
+   ═══════════════════════════════════════════════════════════════════════ */
+
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════════════════════════════ */
+
+document.getElementById('load-btn').addEventListener('click', () => {
+  document.getElementById('file-input').click();
+});
+document.getElementById('file-input').addEventListener('change', (e) => {
+  if (e.target.files && e.target.files.length) loadFromFiles(e.target.files);
+});
+
+loadSampleData();
+</script>
+</body>
+</html>
