@@ -1,0 +1,66 @@
+kind: kronos-tool
+apiVersion: v1
+
+metadata:
+  id: salesforce-rest-user-group-membership
+  version: 0.1.0
+  vendor: kronos
+  license: AGPL-3.0
+  description: >
+    Traverse the Salesforce group graph from a target user's perspective:
+    direct GroupMember rows, transitive membership via BFS through nested
+    public groups, Queue → sobject mapping via QueueSobject. Complements
+    salesforce-rest-user-shares by explaining WHERE the user's group
+    membership graph reaches.
+
+capabilities:
+  attack_classes:
+    - id: recon.enumeration.salesforce.user-group-graph
+  api_family: salesforce.rest
+  endpoint: /services/data/v{{apiVersion}}/query
+  sobjects_queried:
+    - User
+    - GroupMember (+ Group relationship)
+    - QueueSobject
+  evidence_types:
+    - direct-groups-csv
+    - transitive-groups-csv
+    - queue-sobjects-csv
+    - analysis-json
+    - analysis-markdown
+    - run-manifest
+
+invocation:
+  binding_layer: 1
+  adapter: ./src/index.ts
+  invocation_type: subprocess
+  runtime: node
+  entry_command: ["npx", "tsx", "src/index.ts"]
+  timeout_seconds: 300
+  argv:
+    - name: user-id
+      type: string
+      required: true
+    - name: max-transitive-depth
+      type: number
+      required: false
+      default: 5
+    - name: credentials
+      type: path
+      required: false
+      default: "../salesforce-rest-query-csv/credentials/salesforce.json"
+
+authorization:
+  requires_credentials: true
+  requires_elevated_privilege: false
+  destructive_testing: false
+  authorization_ceiling_max: 2
+
+runtime:
+  language: typescript
+  node_engine: ">=22.0.0"
+  package_dependencies:
+    - jsforce@^3
+
+related_tools:
+  - salesforce-rest-user-shares:0.1.0
