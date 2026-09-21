@@ -1,73 +1,77 @@
 # runner/prototype/
 
-Static executive dashboard for kronos. Single-file HTML/CSS/JS. Zero build. Zero server. Open the file in any browser.
+Static executive assurance dashboard for kronos. Single-file HTML/CSS/JS. Zero build. Zero server. Open the file in any browser.
 
-## What this is
+## Companion to EOS
 
-The prototype of the CEO-facing assurance console. Top-down drill-down:
+The visual language mirrors [`alchemisthomer/eos`](https://github.com/alchemisthomer/eos) — the two frameworks are designed as companions:
+
+- **EOS attests.** It produces evidence that a system does what its designers claim it does.
+- **Kronos falsifies.** It produces evidence that a system's claims can (or cannot) be broken under adversarial pressure.
+
+Same palette, same typography, same design vocabulary — so a stakeholder reviewing both consoles in the same session doesn't context-switch between visual languages.
+
+| Token | Value | Meaning |
+|---|---|---|
+| `--bg` | `#06060a` | Near-black canvas |
+| `--fg` | `#e8e4dc` | Parchment-cream text |
+| `--gold` | `#fcd34d` | Brand accent, headings, highlights |
+| `--emerald` | `#34d399` | Success, clean, attested |
+| `--rose` | `#ef4444` | Critical finding, danger |
+| `--amber` | `#f59e0b` | High severity |
+| `--sapphire` | `#60a5fa` | Low / informational |
+| — | Cinzel serif | Headings, brand mark |
+| — | JetBrains Mono | Everything else |
+
+## Drill-down structure
 
 ```
-Portfolio (home)   → what a CEO or board reviewer sees first
-    Engagement     → what a customer sees for one target
-        Scenario   → the attack / finding / evidence bundle
+Portfolio (home)  → the CEO view: KPIs, "what you need to know", engagement grid
+    Engagement    → per-target executive brief: takeaway, summary, scenarios, findings, scorecard delta
+        Scenario  → the attack / oracle verdict / findings / evidence bundle
 ```
 
-Every view is deep-linkable via URL hash (`#/`, `#/e/<engagement-id>`, `#/e/<engagement-id>/s/<scenario-id>`) so screenshots and stakeholder shares open to the exact state intended.
+Every view is deep-linkable via URL hash (`#/`, `#/e/<engagement-id>`, `#/e/<engagement-id>/s/<scenario-id>`) so screenshots and shared links open to the exact intended state.
 
 ## View
 
-Open `runner/prototype/index.html` in any browser. Boots to the portfolio home with three synthetic engagements that demonstrate the range of what kronos catches:
+Open `index.html` in any browser. Boots to the portfolio home with three synthetic engagements:
 
-- **Northwind Retail** (running · evidence stage) — insider-simulation reproducing a compromised user's data pull. Critical findings surfaced. Six scenarios drill through the compromised user's authorization envelope, login history, OAuth grants, sharing envelope, audit trail, and full data reproduction.
-- **Vega Health** (shipped · clean) — HIPAA-adjacent attestation support. Every finding closed, no waivers, scorecard delta moves Identity/Access and Data Integrity to L4 (adversarially challenged). Demonstrates the "successful audit" ship state.
-- **Meridian Insurance** (running · investigating) — cost-anomaly engagement driven by the plausibility monitor. 41× baseline AWS NAT-gateway spend. Not a security compromise — a cost-integrity dimension no security tool would have caught. Demonstrates the founding-incident class of finding.
+- **Northwind Retail** · running · evidence stage · **2 critical findings**. Insider-simulation reproducing a compromised user's data pull. Six scenarios drill through the compromised user's authorization envelope, login history, OAuth grants, sharing envelope, audit trail, and full data reproduction.
+- **Vega Health** · shipped · **clean**. HIPAA-adjacent attestation support. Every finding closed, no waivers, scorecard delta moves Identity/Access + Data Integrity to L4.
+- **Meridian Insurance** · running · investigating. 41× baseline AWS NAT-gateway spend — the cost-integrity dimension no security tool would have caught (echoes the founding-incident case study).
 
-## Home view — what a CEO sees
+## Home view
 
-- **Hero**: portfolio KPIs (open engagements, critical findings, avg maturity, coverage%).
-- **"What you need to know"**: 3-5 curated bulletins with severity coloring — the CEO doesn't need to read every engagement's markdown, they need the headlines that require attention.
-- **Portfolio grid**: engagement cards with status badge, findings summary bar (crit / high / medium / low), and drill-in affordance.
+- **Hero**: portfolio KPIs — engagements open, critical findings, avg maturity, coverage — with a Cinzel headline in the mythic manuscript aesthetic.
+- **"What you need to know"**: curated bulletins with severity coloring (rose = critical, amber = high, gold = medium, sapphire = low, emerald = clean).
+- **Engagement portfolio grid**: cards with target name, platform, status badge, findings-bar visualization, and drill-in.
 
-## Engagement detail — what a customer or auditor sees
+## Engagement detail
 
-- **Hero**: target name, engagement-ordinal, mode, environment, opened/updated dates.
-- **Key takeaway**: single-sentence executive verdict, color-coded by severity.
-- **Executive summary**: multi-paragraph prose describing what happened and what it means.
-- **Scenarios list**: every scenario with its verdict badge and threat class.
-- **Findings summary**: 5-card visualization of critical / high / medium / low / total counts.
-- **Scorecard delta**: 4-pillar heatmap showing before → after per dimension with direction arrows.
+- **Detail hero** with target name in Cinzel, meta row in JetBrains Mono.
+- **Key takeaway** color-coded callout with icon (⚠ / ✓ / ⚡).
+- **Executive summary** — multi-paragraph prose.
+- **Scenarios list** — click any row to drill in.
+- **Findings summary** — 5-card breakdown by severity.
+- **Scorecard delta** — 4 pillars × 3 dimensions, before/after level with direction arrow.
 
-## Scenario detail — what an analyst or IR responder sees
+## Scenario detail
 
-- **Hero**: scenario name, verdict, severity, threat class.
-- **Oracle verdict**: deterministic pass/fail rationale.
-- **Findings**: cards per finding with severity pill, class name, detail, and evidence blob.
-- **Attack summary**: what the tool did.
-- **Evidence artifacts**: kind / path / bytes / sha256 — the audit trail.
+- **Detail hero** with verdict badge and threat class.
+- **Oracle verdict** — the deterministic pass/fail rationale.
+- **Findings** — severity-coloured cards with evidence JSON.
+- **Attack summary** — what the tool did.
+- **Evidence artifacts** — kind / path / bytes / sha256.
 
-## No client-identifying content
+## Content isolation
 
-Sample data uses fully synthetic names (`Northwind Retail`, `Vega Health`, `Meridian Insurance`) and fully synthetic user IDs (`005000000000001BBB` style). Real engagement data belongs in the adopter's own repo, not here — see [`../../SECURITY.md`](../../SECURITY.md) for the client-data isolation policy.
+Sample data uses fully synthetic names (`Northwind Retail`, `Vega Health`, `Meridian Insurance`) and fully synthetic identifiers. The content-isolation validator (`scripts/verify-no-client-content.sh`) scans this file on every commit and CI run. Never modify this file to include real client-identifying strings — see `../../SECURITY.md` and `../../CLAUDE.md`.
 
-The content-isolation validator scans this file on every commit and CI run.
+## From prototype to `runner/`
 
-## From prototype to production `runner/`
+This prototype defines the interaction surface the future `runner/` React SPA will implement. Same design tokens, same drill-down structure, same layout patterns. The React port will additionally read live engagement data from a target repo's `kronos/engagement/**/*.md` via the GitHub REST API.
 
-This prototype defines the design system, interaction model, and drill-down hierarchy the future `runner/` React SPA will implement. The React version will additionally:
+## Export
 
-- Read engagement data from a target repo's `kronos/engagement/**` folder via the GitHub REST API.
-- Render engagement markdown documents directly (not just the summary cards).
-- Allow annotations and status changes that land as pull requests against the target repo.
-- Support multi-target portfolios (many engagement repos aggregated into one console).
-
-The visual language, color palette, typography, spacing, and interaction pattern in this prototype are the reference for the React port.
-
-## Export / print
-
-The dashboard's print stylesheet is the CSS defaults — a browser's Print → Save as PDF produces a clean report suitable for stakeholder distribution. Use the top-right Export button to trigger print dialog.
-
-## File contents
-
-- `index.html` — the whole thing. ~2200 lines. HTML + CSS + JS + sample data.
-- `data/` — gitignored drop-zone for future real-data loading.
-- (No `sample-data/` folder; sample data is inline in `index.html` for immediate viewing off file://.)
+Top-right **Export** button triggers browser print → clean PDF for stakeholder distribution. The dark background prints as-is; if a lighter print is preferred, use browser print settings to invert colors.

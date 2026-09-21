@@ -4,49 +4,41 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>kronos · Executive Assurance Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════
-   DESIGN TOKENS
+   DESIGN TOKENS — companion to alchemisthomer/eos
+   Same palette, same type. Kronos is the attack; EOS is the attestation.
    ═══════════════════════════════════════════════════════════════════════ */
 :root {
-  --bg: #fafbfc;
-  --bg-elev: #ffffff;
-  --bg-sunk: #f3f5f7;
-  --bg-hero: #0f172a;
-  --bg-hero-grad: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #4c1d95 100%);
-  --border: #e5e7eb;
-  --border-strong: #d1d5db;
-  --text: #0f172a;
-  --text-2: #334155;
-  --text-3: #64748b;
-  --text-4: #94a3b8;
-  --text-on-dark: #f8fafc;
-  --text-on-dark-2: #cbd5e1;
-  --text-on-dark-3: #94a3b8;
-  --accent: #7c3aed;
-  --accent-2: #6366f1;
-  --accent-3: #a78bfa;
-  --accent-dim: #ddd6fe;
-  --info: #2563eb;
-  --info-dim: #dbeafe;
-  --ok: #10b981;
-  --ok-dim: #d1fae5;
-  --warn: #f59e0b;
-  --warn-dim: #fef3c7;
-  --danger: #ef4444;
-  --danger-dim: #fee2e2;
-  --crit: #b91c1c;
-  --crit-dim: #fecaca;
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
-  --shadow-xl: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
-  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, Helvetica, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Monaco, monospace;
+  --bg:          #06060a;
+  --bg-header:   #0a0a10;
+  --bg-elev:     #11111a;
+  --bg-card:     #1a1a24;
+  --bg-sunk:     #0d0d14;
+  --fg:          #e8e4dc;
+  --fg-dim:      #9ca3af;
+  --fg-faint:    #6b7280;
+  --fg-veil:     #4b5563;
+  --gold:        #fcd34d;
+  --gold-dim:    #78632a;
+  --emerald:     #34d399;
+  --emerald-dim: #14663f;
+  --rose:        #ef4444;
+  --rose-dim:    #7f1d1d;
+  --crimson:     #b91c1c;
+  --amber:       #f59e0b;
+  --amber-dim:   #6b3f0a;
+  --sapphire:    #60a5fa;
+  --sapphire-dim: #1e3a5f;
+  --rule:        #1f1f29;
+  --rule-strong: #2d2d3a;
+  --shadow:      0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg:   0 8px 24px rgba(0, 0, 0, 0.5);
+  --font-serif:  'Cinzel', 'Trajan Pro', 'Cormorant Garamond', Georgia, serif;
+  --font-mono:   'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -54,459 +46,511 @@
    ═══════════════════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; padding: 0; }
-html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 body {
-  font-family: var(--font);
   background: var(--bg);
-  color: var(--text);
-  font-size: 15px;
-  line-height: 1.55;
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.6;
   min-height: 100vh;
+  font-weight: 400;
 }
-button { font-family: inherit; cursor: pointer; }
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
+button, input, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+button { cursor: pointer; background: transparent; border: none; }
+button:focus, input:focus, textarea:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+a { color: var(--gold); text-decoration: none; }
+a:hover { text-decoration: underline; text-decoration-color: var(--rule-strong); }
+code { font-family: inherit; background: var(--bg-elev); border: 1px solid var(--rule); padding: 1px 5px; border-radius: 2px; color: var(--gold); }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--fg-faint); }
+
+.font-serif { font-family: var(--font-serif); }
+.font-mono { font-family: var(--font-mono); }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   TOP NAV
+   TOP NAV — mirrors EOS header
    ═══════════════════════════════════════════════════════════════════════ */
 .topnav {
-  background: var(--bg-hero-grad);
-  color: var(--text-on-dark);
-  padding: 14px 40px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 32px;
-  box-shadow: var(--shadow-lg);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 28px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--bg-header);
+  position: sticky; top: 0; z-index: 100;
 }
-.topnav .brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-.topnav .brand-mark {
-  width: 30px; height: 30px;
-  background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
-  border-radius: 8px;
-  display: grid; place-items: center;
-  box-shadow: 0 2px 8px rgba(167, 139, 250, 0.35);
-  font-weight: 800; font-size: 15px;
+.topnav .brand {
+  display: flex; align-items: baseline; gap: 12px; cursor: pointer;
+  color: var(--gold); font-family: var(--font-serif); font-size: 22px;
+  letter-spacing: 2px; font-weight: 600;
 }
-.topnav .brand-mark::after { content: "κ"; color: white; font-family: Georgia, serif; }
-.topnav .brand-name { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
-.topnav .brand-sub { color: var(--text-on-dark-2); font-size: 13px; font-weight: 400; margin-left: 4px; }
-.topnav .breadcrumb { display: flex; align-items: center; gap: 8px; flex: 1; font-size: 13px; color: var(--text-on-dark-2); }
-.topnav .breadcrumb .crumb { cursor: pointer; padding: 4px 10px; border-radius: 6px; transition: background 0.15s; }
-.topnav .breadcrumb .crumb:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-on-dark); }
-.topnav .breadcrumb .crumb.current { color: var(--text-on-dark); font-weight: 500; }
-.topnav .breadcrumb .sep { color: var(--text-on-dark-3); }
-.topnav .meta { color: var(--text-on-dark-3); font-size: 12px; font-family: var(--font-mono); }
-.topnav .actions { display: flex; gap: 8px; align-items: center; }
+.topnav .brand:hover { text-decoration: none; }
+.topnav .brand-sub {
+  color: var(--fg-faint); font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.5px; font-weight: 400;
+}
+.topnav .breadcrumb {
+  flex: 1; display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--fg-dim); font-family: var(--font-mono);
+  margin: 0 24px;
+}
+.topnav .crumb {
+  padding: 4px 10px; border-radius: 2px;
+  border: 1px solid transparent;
+  color: var(--fg-dim); transition: color 0.15s, border-color 0.15s;
+}
+.topnav .crumb:hover { color: var(--gold); border-color: var(--rule-strong); }
+.topnav .crumb.current { color: var(--fg); }
+.topnav .sep { color: var(--fg-veil); }
+.topnav .meta {
+  color: var(--fg-faint); font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.5px;
+}
+.topnav .actions { display: flex; gap: 10px; align-items: center; }
 .topnav .btn {
-  padding: 7px 14px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-on-dark);
-  font-size: 13px;
-  font-weight: 500;
-  transition: background 0.15s;
+  border: 1px solid var(--rule-strong); color: var(--fg-dim);
+  padding: 5px 12px; border-radius: 4px; font-size: 11px;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  transition: color 0.15s, border-color 0.15s;
 }
-.topnav .btn:hover { background: rgba(255, 255, 255, 0.12); }
+.topnav .btn:hover { color: var(--gold); border-color: var(--gold-dim); }
 
 /* ═══════════════════════════════════════════════════════════════════════
    LAYOUT
    ═══════════════════════════════════════════════════════════════════════ */
 .page { max-width: 1360px; margin: 0 auto; padding: 32px 40px 80px; }
 
+.section { margin-bottom: 44px; }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
+.section-title { font-family: var(--font-serif); font-size: 20px; color: var(--gold); letter-spacing: 2px; font-weight: 600; }
+.section-sub { color: var(--fg-dim); font-size: 12px; margin-top: 4px; }
+.section-badge {
+  color: var(--fg-faint); font-size: 11px; padding: 3px 10px;
+  border: 1px solid var(--rule); border-radius: 2px;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
-   HERO — HOME VIEW
+   HERO — HOME
    ═══════════════════════════════════════════════════════════════════════ */
 .hero {
-  background: var(--bg-hero-grad);
-  border-radius: var(--radius-xl);
-  padding: 40px 44px 44px;
-  color: var(--text-on-dark);
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 44px 48px 48px;
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-xl);
   margin-bottom: 32px;
+  box-shadow: var(--shadow-lg);
 }
 .hero::before {
-  content: "";
-  position: absolute;
-  top: -80px; right: -80px;
-  width: 320px; height: 320px;
-  background: radial-gradient(circle, rgba(167, 139, 250, 0.35) 0%, transparent 65%);
+  content: ""; position: absolute;
+  top: -140px; right: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(252, 211, 77, 0.08) 0%, transparent 60%);
   pointer-events: none;
 }
 .hero::after {
-  content: "";
-  position: absolute;
-  bottom: -100px; left: -100px;
-  width: 380px; height: 380px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, transparent 65%);
+  content: ""; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(252, 211, 77, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(252, 211, 77, 0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
   pointer-events: none;
 }
 .hero-content { position: relative; z-index: 1; }
-.hero-eyebrow { color: var(--text-on-dark-3); font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; }
-.hero-title { font-size: 44px; font-weight: 800; letter-spacing: -0.02em; margin-top: 6px; line-height: 1.05; }
-.hero-title .accent { background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.hero-sub { color: var(--text-on-dark-2); font-size: 17px; margin-top: 12px; max-width: 720px; line-height: 1.5; }
-.hero-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 32px; }
-.hero-kpi {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius);
-  padding: 18px 20px;
-  backdrop-filter: blur(6px);
+.hero-eyebrow {
+  color: var(--gold); font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase; font-weight: 500;
 }
-.hero-kpi .label { color: var(--text-on-dark-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
-.hero-kpi .value { font-size: 32px; font-weight: 700; margin-top: 6px; letter-spacing: -0.02em; line-height: 1; }
-.hero-kpi .value .unit { font-size: 15px; color: var(--text-on-dark-2); font-weight: 500; margin-left: 4px; }
-.hero-kpi .trend { color: var(--text-on-dark-3); font-size: 12px; margin-top: 6px; font-weight: 500; }
-.hero-kpi .trend.up { color: #86efac; }
-.hero-kpi .trend.down { color: #fca5a5; }
+.hero-title {
+  font-family: var(--font-serif); font-size: 52px; color: var(--fg);
+  letter-spacing: 3px; font-weight: 700; margin-top: 12px; line-height: 1.1;
+}
+.hero-title .accent { color: var(--gold); font-style: italic; }
+.hero-sub {
+  color: var(--fg-dim); font-family: var(--font-mono); font-size: 14px;
+  margin-top: 16px; max-width: 640px; line-height: 1.7;
+}
+.hero-kpis {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 36px;
+}
+.hero-kpi {
+  border: 1px solid var(--rule-strong);
+  background: var(--bg-sunk);
+  padding: 20px;
+}
+.hero-kpi .label {
+  color: var(--fg-faint); font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 1.5px; text-transform: uppercase; font-weight: 500;
+}
+.hero-kpi .value {
+  font-family: var(--font-serif); font-size: 36px; color: var(--gold);
+  font-weight: 700; margin-top: 8px; letter-spacing: 1px; line-height: 1;
+}
+.hero-kpi .value .unit {
+  color: var(--fg-dim); font-family: var(--font-mono); font-size: 12px;
+  font-weight: 400; letter-spacing: 0; margin-left: 6px;
+}
+.hero-kpi .trend {
+  color: var(--fg-faint); font-family: var(--font-mono); font-size: 11px;
+  margin-top: 8px; letter-spacing: 0.5px;
+}
+.hero-kpi .trend.up { color: var(--emerald); }
+.hero-kpi .trend.down { color: var(--rose); }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SECTIONS
-   ═══════════════════════════════════════════════════════════════════════ */
-.section { margin-bottom: 44px; }
-.section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
-.section-title { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
-.section-sub { color: var(--text-3); font-size: 14px; margin-top: 4px; }
-.section-badge { background: var(--bg-sunk); color: var(--text-3); padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   BULLETINS — "THINGS THE CEO NEEDS TO KNOW"
+   BULLETINS — "WHAT YOU NEED TO KNOW"
    ═══════════════════════════════════════════════════════════════════════ */
 .bulletin-card {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 28px 32px;
-  box-shadow: var(--shadow-md);
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 32px 36px;
+  box-shadow: var(--shadow);
 }
-.bulletin-card .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.bulletin-card h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
-.bulletin-card .head .badge { background: var(--accent-dim); color: var(--accent); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-.bulletin { display: flex; gap: 16px; padding: 14px 0; border-top: 1px solid var(--border); }
-.bulletin:first-of-type { border-top: 1px solid transparent; padding-top: 4px; }
-.bulletin .marker {
-  width: 6px;
-  border-radius: 3px;
-  flex-shrink: 0;
-  min-height: 100%;
-}
-.bulletin.crit .marker { background: linear-gradient(180deg, var(--crit), var(--danger)); }
-.bulletin.high .marker { background: linear-gradient(180deg, var(--danger), #fb7185); }
-.bulletin.med .marker { background: var(--warn); }
-.bulletin.low .marker { background: var(--info); }
-.bulletin.ok .marker { background: var(--ok); }
+.bulletin-card .head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
+.bulletin-card h2 { font-family: var(--font-serif); font-size: 22px; color: var(--gold); letter-spacing: 2px; font-weight: 600; }
+.bulletin-card .head .badge { color: var(--fg-faint); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+.bulletin { display: flex; gap: 20px; padding: 18px 0; border-top: 1px solid var(--rule); }
+.bulletin:first-of-type { border-top: none; padding-top: 4px; }
+.bulletin .marker { width: 3px; flex-shrink: 0; min-height: 100%; border-radius: 2px; }
+.bulletin.crit .marker { background: var(--rose); }
+.bulletin.high .marker { background: var(--amber); }
+.bulletin.med .marker { background: var(--gold); }
+.bulletin.low .marker { background: var(--sapphire); }
+.bulletin.ok .marker { background: var(--emerald); }
 .bulletin .body { flex: 1; }
-.bulletin .kicker { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.bulletin .kicker .pill { text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; font-weight: 700; padding: 2px 7px; border-radius: 4px; color: white; }
-.bulletin.crit .pill { background: var(--crit); }
-.bulletin.high .pill { background: var(--danger); }
-.bulletin.med .pill { background: var(--warn); }
-.bulletin.low .pill { background: var(--info); }
-.bulletin.ok .pill { background: var(--ok); }
-.bulletin .kicker .source { color: var(--text-3); font-size: 12px; }
-.bulletin .headline { font-size: 15px; font-weight: 500; line-height: 1.45; color: var(--text); }
-.bulletin .detail { color: var(--text-2); font-size: 13.5px; margin-top: 4px; }
+.bulletin .kicker { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.bulletin .pill {
+  text-transform: uppercase; font-size: 9px; letter-spacing: 1.5px; font-weight: 700;
+  padding: 3px 8px; border: 1px solid; border-radius: 2px;
+}
+.bulletin.crit .pill { color: var(--rose); border-color: var(--rose-dim); }
+.bulletin.high .pill { color: var(--amber); border-color: var(--amber-dim); }
+.bulletin.med .pill { color: var(--gold); border-color: var(--gold-dim); }
+.bulletin.low .pill { color: var(--sapphire); border-color: var(--sapphire-dim); }
+.bulletin.ok .pill { color: var(--emerald); border-color: var(--emerald-dim); }
+.bulletin .source { color: var(--fg-faint); font-size: 11px; letter-spacing: 0.5px; }
+.bulletin .headline { color: var(--fg); font-size: 14px; font-weight: 500; line-height: 1.55; }
+.bulletin .detail { color: var(--fg-dim); font-size: 12.5px; margin-top: 6px; line-height: 1.7; }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   PORTFOLIO GRID — ENGAGEMENT CARDS
+   PORTFOLIO — engagement cards
    ═══════════════════════════════════════════════════════════════════════ */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
 .engagement-card {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 24px 26px;
   cursor: pointer;
-  transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  display: flex; flex-direction: column; gap: 16px;
   min-height: 260px;
+  box-shadow: var(--shadow);
 }
-.engagement-card:hover { box-shadow: var(--shadow-xl); transform: translateY(-2px); border-color: var(--accent-3); }
+.engagement-card:hover {
+  border-color: var(--gold-dim);
+  box-shadow: var(--shadow-lg), 0 0 0 1px var(--gold-dim);
+  transform: translateY(-2px);
+}
 .engagement-card .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.engagement-card .card-title { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; }
-.engagement-card .card-sub { color: var(--text-3); font-size: 13px; margin-top: 2px; }
-.engagement-card .theme { color: var(--text-2); font-size: 13.5px; line-height: 1.5; }
-.engagement-card .findings-bar { display: flex; align-items: center; gap: 4px; height: 8px; border-radius: 4px; overflow: hidden; background: var(--bg-sunk); }
+.engagement-card .card-title {
+  font-family: var(--font-serif); font-size: 18px; color: var(--fg);
+  letter-spacing: 1px; font-weight: 700; line-height: 1.25;
+}
+.engagement-card .card-sub { color: var(--fg-dim); font-family: var(--font-mono); font-size: 11px; margin-top: 4px; letter-spacing: 0.5px; }
+.engagement-card .theme { color: var(--fg-dim); font-size: 12.5px; line-height: 1.6; }
+.engagement-card .findings-bar { display: flex; gap: 2px; height: 6px; background: var(--bg-sunk); border-radius: 1px; overflow: hidden; }
 .engagement-card .findings-bar > div { height: 100%; }
-.engagement-card .findings-bar .crit { background: var(--crit); }
-.engagement-card .findings-bar .high { background: var(--danger); }
-.engagement-card .findings-bar .med { background: var(--warn); }
-.engagement-card .findings-bar .low { background: var(--info); }
-.engagement-card .findings-legend { display: flex; gap: 12px; font-size: 12px; color: var(--text-3); margin-top: 4px; }
-.engagement-card .findings-legend .count-crit { color: var(--crit); font-weight: 600; }
-.engagement-card .findings-legend .count-high { color: var(--danger); font-weight: 600; }
-.engagement-card .findings-legend .count-med { color: var(--warn); font-weight: 600; }
-.engagement-card .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); }
-.engagement-card .metric { display: flex; gap: 16px; font-size: 12px; color: var(--text-3); }
-.engagement-card .metric strong { color: var(--text); font-weight: 600; }
+.engagement-card .findings-bar .crit { background: var(--rose); }
+.engagement-card .findings-bar .high { background: var(--amber); }
+.engagement-card .findings-bar .med { background: var(--gold); }
+.engagement-card .findings-bar .low { background: var(--sapphire); }
+.engagement-card .findings-bar .ok { background: var(--emerald); }
+.engagement-card .findings-legend { display: flex; gap: 14px; font-size: 11px; color: var(--fg-faint); margin-top: 6px; letter-spacing: 0.3px; }
+.engagement-card .findings-legend .count-crit { color: var(--rose); font-weight: 600; }
+.engagement-card .findings-legend .count-high { color: var(--amber); font-weight: 600; }
+.engagement-card .findings-legend .count-med { color: var(--gold); font-weight: 600; }
+.engagement-card .findings-legend .count-ok { color: var(--emerald); font-weight: 600; }
+.engagement-card .card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: auto; padding-top: 14px; border-top: 1px solid var(--rule);
+}
+.engagement-card .metric { display: flex; gap: 16px; font-size: 11px; color: var(--fg-faint); letter-spacing: 0.3px; }
+.engagement-card .metric strong { color: var(--fg); font-weight: 600; }
+.engagement-card .drill { color: var(--gold); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
 
 /* ═══════════════════════════════════════════════════════════════════════
    STATUS BADGES
    ═══════════════════════════════════════════════════════════════════════ */
-.badge-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; text-transform: capitalize; }
+.badge-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: 2px;
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1px; border: 1px solid;
+}
 .badge-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; }
-.status-scoped     { background: var(--bg-sunk); color: var(--text-2); }        .status-scoped::before     { background: var(--text-3); }
-.status-authorized { background: var(--info-dim); color: var(--info); }         .status-authorized::before { background: var(--info); }
-.status-planning   { background: var(--info-dim); color: var(--info); }         .status-planning::before   { background: var(--info); }
-.status-ready      { background: var(--accent-dim); color: var(--accent); }     .status-ready::before      { background: var(--accent); }
-.status-running    { background: var(--warn-dim); color: #b45309; }             .status-running::before    { background: var(--warn); animation: pulse 2s infinite; }
-.status-evidence   { background: var(--warn-dim); color: #b45309; }             .status-evidence::before   { background: var(--warn); }
-.status-shipped    { background: var(--ok-dim); color: #065f46; }               .status-shipped::before    { background: var(--ok); }
-.status-aborted    { background: var(--danger-dim); color: var(--danger); }     .status-aborted::before    { background: var(--danger); }
+.status-scoped     { color: var(--fg-dim); border-color: var(--rule-strong); }               .status-scoped::before     { background: var(--fg-dim); }
+.status-authorized { color: var(--sapphire); border-color: var(--sapphire-dim); }            .status-authorized::before { background: var(--sapphire); }
+.status-planning   { color: var(--sapphire); border-color: var(--sapphire-dim); }            .status-planning::before   { background: var(--sapphire); }
+.status-ready      { color: var(--gold); border-color: var(--gold-dim); }                    .status-ready::before      { background: var(--gold); }
+.status-running    { color: var(--amber); border-color: var(--amber-dim); }                  .status-running::before    { background: var(--amber); animation: pulse 2s infinite; }
+.status-evidence   { color: var(--amber); border-color: var(--amber-dim); }                  .status-evidence::before   { background: var(--amber); }
+.status-shipped    { color: var(--emerald); border-color: var(--emerald-dim); }              .status-shipped::before    { background: var(--emerald); }
+.status-aborted    { color: var(--rose); border-color: var(--rose-dim); }                    .status-aborted::before    { background: var(--rose); }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-.pill { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
-.pill.crit { background: var(--crit-dim); color: var(--crit); }
-.pill.high { background: var(--danger-dim); color: var(--danger); }
-.pill.med { background: var(--warn-dim); color: #b45309; }
-.pill.low { background: var(--info-dim); color: var(--info); }
-.pill.ok { background: var(--ok-dim); color: #065f46; }
-.pill.neutral { background: var(--bg-sunk); color: var(--text-2); }
+.pill {
+  display: inline-flex; padding: 2px 8px; border-radius: 2px;
+  font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+  border: 1px solid;
+}
+.pill.crit { color: var(--rose); border-color: var(--rose-dim); }
+.pill.high { color: var(--amber); border-color: var(--amber-dim); }
+.pill.med  { color: var(--gold); border-color: var(--gold-dim); }
+.pill.low  { color: var(--sapphire); border-color: var(--sapphire-dim); }
+.pill.ok   { color: var(--emerald); border-color: var(--emerald-dim); }
+.pill.neutral { color: var(--fg-dim); border-color: var(--rule-strong); }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   ENGAGEMENT DETAIL VIEW
+   DETAIL HERO
    ═══════════════════════════════════════════════════════════════════════ */
 .detail-hero {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 36px 40px;
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 40px 44px;
   margin-bottom: 24px;
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow);
 }
 .detail-hero::before {
-  content: "";
-  position: absolute;
-  top: 0; right: 0;
-  width: 200px; height: 200px;
-  background: radial-gradient(circle at top right, var(--accent-dim) 0%, transparent 70%);
+  content: ""; position: absolute; top: 0; right: 0;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle at top right, rgba(252, 211, 77, 0.08) 0%, transparent 65%);
   pointer-events: none;
 }
-.detail-hero-content { position: relative; }
-.detail-hero .eyebrow { color: var(--text-3); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-.detail-hero h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
-.detail-hero .theme { color: var(--text-2); font-size: 16px; margin-top: 12px; max-width: 720px; line-height: 1.5; }
-.detail-hero .meta-row { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
-.detail-hero .meta-row .item { }
-.detail-hero .meta-row .item .label { color: var(--text-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
-.detail-hero .meta-row .item .value { font-size: 14px; font-weight: 500; margin-top: 2px; }
-.detail-hero .meta-row .item .value.mono { font-family: var(--font-mono); font-size: 12px; }
+.detail-hero-content { position: relative; z-index: 1; }
+.detail-hero .eyebrow { color: var(--gold); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 500; margin-bottom: 10px; }
+.detail-hero h1 {
+  font-family: var(--font-serif); font-size: 36px; color: var(--fg);
+  font-weight: 700; letter-spacing: 2px; line-height: 1.15;
+}
+.detail-hero .theme { color: var(--fg-dim); font-size: 14px; margin-top: 14px; max-width: 720px; line-height: 1.65; }
+.detail-hero .meta-row {
+  display: flex; flex-wrap: wrap; gap: 24px;
+  margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--rule);
+}
+.detail-hero .meta-row .item .label { color: var(--fg-faint); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; }
+.detail-hero .meta-row .item .value { font-size: 13px; color: var(--fg); margin-top: 4px; font-weight: 500; }
+.detail-hero .meta-row .item .value.mono { font-family: var(--font-mono); font-size: 11.5px; }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   PANELS + CARDS
+   PANELS
    ═══════════════════════════════════════════════════════════════════════ */
 .panel {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
   padding: 24px 28px;
   margin-bottom: 20px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow);
 }
-.panel h3 { font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); margin-bottom: 14px; }
-.panel h3 .count { color: var(--text-4); font-weight: 500; margin-left: 4px; text-transform: none; letter-spacing: 0; }
+.panel h3 {
+  font-family: var(--font-serif); font-size: 15px; color: var(--gold);
+  letter-spacing: 2px; font-weight: 600; margin-bottom: 18px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--rule);
+  text-transform: uppercase;
+}
+.panel h3 .count {
+  font-family: var(--font-mono); font-weight: 400; color: var(--fg-faint);
+  margin-left: 6px; text-transform: none; letter-spacing: 0;
+}
 .two-col { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
 @media (max-width: 1000px) { .two-col { grid-template-columns: 1fr; } }
 
-/* Executive summary panel */
-.summary-panel { background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px 32px; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
-.summary-panel h3 { font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); margin-bottom: 12px; }
-.summary-panel .prose { font-size: 15px; color: var(--text-2); line-height: 1.65; }
-.summary-panel .prose p { margin-bottom: 10px; }
-.summary-panel .prose p:last-child { margin-bottom: 0; }
-
 .takeaway {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 1px solid var(--warn);
-  border-radius: var(--radius-lg);
-  padding: 20px 24px;
-  margin-bottom: 20px;
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
+  border: 1px solid; border-left-width: 4px;
+  border-radius: 4px; padding: 20px 24px; margin-bottom: 20px;
+  display: flex; gap: 18px; align-items: flex-start;
+  background: var(--bg-card); box-shadow: var(--shadow);
 }
-.takeaway.crit { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border-color: var(--crit); }
-.takeaway.ok { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-color: var(--ok); }
-.takeaway .icon { font-size: 24px; flex-shrink: 0; line-height: 1; margin-top: 2px; }
-.takeaway .body h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 4px; }
-.takeaway .body p { font-size: 15.5px; color: var(--text); font-weight: 500; line-height: 1.5; }
+.takeaway.crit { border-color: var(--rose-dim); border-left-color: var(--rose); background: linear-gradient(90deg, rgba(239, 68, 68, 0.06) 0%, var(--bg-card) 50%); }
+.takeaway.high { border-color: var(--amber-dim); border-left-color: var(--amber); background: linear-gradient(90deg, rgba(245, 158, 11, 0.06) 0%, var(--bg-card) 50%); }
+.takeaway.med { border-color: var(--gold-dim); border-left-color: var(--gold); background: linear-gradient(90deg, rgba(252, 211, 77, 0.06) 0%, var(--bg-card) 50%); }
+.takeaway.low { border-color: var(--sapphire-dim); border-left-color: var(--sapphire); background: linear-gradient(90deg, rgba(96, 165, 250, 0.05) 0%, var(--bg-card) 50%); }
+.takeaway.ok { border-color: var(--emerald-dim); border-left-color: var(--emerald); background: linear-gradient(90deg, rgba(52, 211, 153, 0.06) 0%, var(--bg-card) 50%); }
+.takeaway .icon { font-family: var(--font-serif); font-size: 26px; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+.takeaway.crit .icon, .takeaway.high .icon { color: var(--rose); }
+.takeaway.med .icon { color: var(--gold); }
+.takeaway.low .icon { color: var(--sapphire); }
+.takeaway.ok .icon { color: var(--emerald); }
+.takeaway .body h4 {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+  color: var(--fg-faint); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
+}
+.takeaway .body p { color: var(--fg); font-size: 14.5px; line-height: 1.55; font-weight: 500; }
+
+.summary-panel {
+  background: var(--bg-card); border: 1px solid var(--rule); border-radius: 4px;
+  padding: 28px 32px; margin-bottom: 20px; box-shadow: var(--shadow);
+}
+.summary-panel h3 {
+  font-family: var(--font-serif); font-size: 15px; color: var(--gold);
+  letter-spacing: 2px; font-weight: 600; margin-bottom: 16px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--rule); text-transform: uppercase;
+}
+.summary-panel .prose { color: var(--fg-dim); font-size: 13.5px; line-height: 1.8; }
+.summary-panel .prose p { margin-bottom: 12px; }
+.summary-panel .prose p:last-child { margin-bottom: 0; }
 
 /* ═══════════════════════════════════════════════════════════════════════
    FINDINGS SUMMARY
    ═══════════════════════════════════════════════════════════════════════ */
-.findings-summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.findings-summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 .findings-summary .card {
-  background: var(--bg-sunk);
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  text-align: left;
-  position: relative;
-  overflow: hidden;
+  background: var(--bg-sunk); border: 1px solid var(--rule);
+  border-radius: 3px; padding: 16px 14px; text-align: center;
 }
-.findings-summary .card .count { font-size: 32px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
-.findings-summary .card .label { color: var(--text-3); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
-.findings-summary .card.crit { background: var(--crit-dim); }
-.findings-summary .card.crit .count { color: var(--crit); }
-.findings-summary .card.high { background: var(--danger-dim); }
-.findings-summary .card.high .count { color: var(--danger); }
-.findings-summary .card.med { background: var(--warn-dim); }
-.findings-summary .card.med .count { color: #b45309; }
-.findings-summary .card.low { background: var(--info-dim); }
-.findings-summary .card.low .count { color: var(--info); }
-.findings-summary .card.total { background: var(--bg-hero); color: var(--text-on-dark); }
-.findings-summary .card.total .count { color: white; }
-.findings-summary .card.total .label { color: var(--text-on-dark-3); }
+.findings-summary .card .count {
+  font-family: var(--font-serif); font-size: 32px;
+  font-weight: 700; letter-spacing: 1px; line-height: 1;
+}
+.findings-summary .card .label {
+  color: var(--fg-faint); font-size: 10px; text-transform: uppercase;
+  letter-spacing: 1.5px; margin-top: 8px; font-weight: 500;
+}
+.findings-summary .card.crit { border-color: var(--rose-dim); }
+.findings-summary .card.crit .count { color: var(--rose); }
+.findings-summary .card.high { border-color: var(--amber-dim); }
+.findings-summary .card.high .count { color: var(--amber); }
+.findings-summary .card.med { border-color: var(--gold-dim); }
+.findings-summary .card.med .count { color: var(--gold); }
+.findings-summary .card.low { border-color: var(--sapphire-dim); }
+.findings-summary .card.low .count { color: var(--sapphire); }
+.findings-summary .card.total { background: var(--bg-elev); border-color: var(--rule-strong); }
+.findings-summary .card.total .count { color: var(--fg); }
 
 /* ═══════════════════════════════════════════════════════════════════════
    SCORECARD HEATMAP
    ═══════════════════════════════════════════════════════════════════════ */
-.scorecard { }
-.scorecard-pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.scorecard-pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .scorecard-pillar {
-  background: var(--bg-sunk);
-  border-radius: var(--radius);
-  padding: 16px;
+  background: var(--bg-sunk); border: 1px solid var(--rule);
+  border-radius: 3px; padding: 14px;
 }
-.scorecard-pillar h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; color: var(--text-3); margin-bottom: 12px; }
-.dim-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 6px 0; font-size: 12px; }
-.dim-row + .dim-row { border-top: 1px solid var(--border); }
-.dim-row .name { color: var(--text); font-weight: 500; }
+.scorecard-pillar h4 {
+  font-family: var(--font-serif); font-size: 11px; text-transform: uppercase;
+  color: var(--gold); letter-spacing: 1.5px; font-weight: 600; margin-bottom: 12px;
+}
+.dim-row {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 8px;
+  align-items: center; padding: 5px 0; font-size: 11px;
+}
+.dim-row + .dim-row { border-top: 1px solid var(--rule); }
+.dim-row .name { color: var(--fg); font-weight: 500; }
 .dim-row .level {
-  min-width: 30px; text-align: center; padding: 3px 6px; border-radius: 4px; font-family: var(--font-mono); font-weight: 700; font-size: 11px;
+  min-width: 28px; text-align: center; padding: 2px 6px;
+  font-family: var(--font-mono); font-weight: 700; font-size: 10px;
+  border-radius: 2px; letter-spacing: 0.5px; border: 1px solid;
 }
-.level-L0 { background: var(--danger-dim); color: var(--danger); }
-.level-L1 { background: #ffedd5; color: #c2410c; }
-.level-L2 { background: var(--warn-dim); color: #b45309; }
-.level-L3 { background: var(--info-dim); color: var(--info); }
-.level-L4 { background: var(--ok-dim); color: #065f46; }
-.level-L5 { background: linear-gradient(135deg, var(--ok-dim), var(--accent-dim)); color: var(--accent); }
-.dim-row .arrow { font-size: 11px; color: var(--text-3); }
-.dim-row .arrow.up { color: var(--ok); }
-.dim-row .arrow.down { color: var(--danger); }
+.level-L0 { color: var(--rose); border-color: var(--rose-dim); background: rgba(239, 68, 68, 0.08); }
+.level-L1 { color: var(--amber); border-color: var(--amber-dim); background: rgba(245, 158, 11, 0.08); }
+.level-L2 { color: var(--gold); border-color: var(--gold-dim); background: rgba(252, 211, 77, 0.06); }
+.level-L3 { color: var(--sapphire); border-color: var(--sapphire-dim); background: rgba(96, 165, 250, 0.06); }
+.level-L4 { color: var(--emerald); border-color: var(--emerald-dim); background: rgba(52, 211, 153, 0.08); }
+.level-L5 { color: var(--gold); border-color: var(--gold); background: rgba(252, 211, 77, 0.12); }
+.dim-row .arrow { font-size: 10px; color: var(--fg-faint); letter-spacing: 0.3px; }
+.dim-row .arrow.up { color: var(--emerald); }
+.dim-row .arrow.down { color: var(--rose); }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SCENARIO ROW LIST
+   SCENARIO ROW
    ═══════════════════════════════════════════════════════════════════════ */
-.scenario-list { display: flex; flex-direction: column; gap: 10px; }
+.scenario-list { display: flex; flex-direction: column; gap: 8px; }
 .scenario-row {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px 22px;
-  cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 20px;
-  align-items: center;
+  background: var(--bg-sunk); border: 1px solid var(--rule);
+  border-radius: 3px; padding: 16px 20px; cursor: pointer;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: center;
+  transition: border-color 0.15s, transform 0.1s;
 }
-.scenario-row:hover { border-color: var(--accent-3); box-shadow: var(--shadow-md); transform: translateX(2px); }
+.scenario-row:hover { border-color: var(--gold-dim); transform: translateX(3px); }
 .scenario-row .verdict-badge {
-  min-width: 90px; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 700;
-  text-align: center; text-transform: uppercase; letter-spacing: 0.06em;
+  min-width: 92px; padding: 5px 8px; border-radius: 2px;
+  font-size: 10px; font-weight: 700; text-align: center;
+  text-transform: uppercase; letter-spacing: 1.5px; border: 1px solid;
 }
-.scenario-row .verdict-badge.confirmed { background: var(--crit-dim); color: var(--crit); }
-.scenario-row .verdict-badge.high { background: var(--danger-dim); color: var(--danger); }
-.scenario-row .verdict-badge.medium { background: var(--warn-dim); color: #b45309; }
-.scenario-row .verdict-badge.low { background: var(--info-dim); color: var(--info); }
-.scenario-row .verdict-badge.clean { background: var(--ok-dim); color: #065f46; }
-.scenario-row .verdict-badge.inconclusive { background: var(--bg-sunk); color: var(--text-3); }
-.scenario-row .body h4 { font-size: 15px; font-weight: 600; letter-spacing: -0.005em; margin-bottom: 4px; }
-.scenario-row .body .meta { font-size: 12.5px; color: var(--text-3); font-family: var(--font-mono); }
-.scenario-row .arrow { color: var(--text-4); font-size: 20px; }
+.scenario-row .verdict-badge.confirmed { color: var(--rose); border-color: var(--rose-dim); background: rgba(239, 68, 68, 0.08); }
+.scenario-row .verdict-badge.high { color: var(--amber); border-color: var(--amber-dim); background: rgba(245, 158, 11, 0.06); }
+.scenario-row .verdict-badge.medium, .scenario-row .verdict-badge.med { color: var(--gold); border-color: var(--gold-dim); }
+.scenario-row .verdict-badge.low { color: var(--sapphire); border-color: var(--sapphire-dim); }
+.scenario-row .verdict-badge.clean { color: var(--emerald); border-color: var(--emerald-dim); background: rgba(52, 211, 153, 0.06); }
+.scenario-row .verdict-badge.inconclusive { color: var(--fg-dim); border-color: var(--rule-strong); }
+.scenario-row .body h4 { font-family: var(--font-serif); font-size: 15px; color: var(--fg); font-weight: 600; letter-spacing: 0.5px; margin-bottom: 4px; }
+.scenario-row .body .meta { font-family: var(--font-mono); font-size: 11px; color: var(--fg-faint); letter-spacing: 0.3px; }
+.scenario-row .arrow { color: var(--fg-faint); font-size: 18px; font-family: var(--font-serif); }
+.scenario-row:hover .arrow { color: var(--gold); }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SCENARIO DETAIL VIEW
+   FINDING CARDS + ARTIFACTS
    ═══════════════════════════════════════════════════════════════════════ */
 .finding-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px 22px;
-  margin-bottom: 12px;
-  background: var(--bg-elev);
-  border-left-width: 4px;
-}
-.finding-card.crit { border-left-color: var(--crit); }
-.finding-card.high { border-left-color: var(--danger); }
-.finding-card.med { border-left-color: var(--warn); }
-.finding-card.low { border-left-color: var(--info); }
-.finding-card .head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-.finding-card .head h4 { font-family: var(--font-mono); font-size: 13px; color: var(--accent); font-weight: 700; }
-.finding-card .detail { color: var(--text); font-size: 14px; }
-.finding-card .evidence { margin-top: 10px; }
-.finding-card .evidence pre { background: var(--bg-sunk); padding: 12px; border-radius: 6px; font-family: var(--font-mono); font-size: 11.5px; overflow-x: auto; color: var(--text-2); }
-
-.artifact-list { display: flex; flex-direction: column; gap: 8px; }
-.artifact-row {
+  border: 1px solid var(--rule); border-left-width: 3px;
+  border-radius: 3px; padding: 16px 20px; margin-bottom: 10px;
   background: var(--bg-sunk);
-  border-radius: 8px;
-  padding: 12px 16px;
-  display: grid;
-  grid-template-columns: auto 1fr auto auto;
-  gap: 16px;
-  align-items: center;
-  font-size: 13px;
 }
-.artifact-row .kind { font-family: var(--font-mono); font-size: 11px; padding: 3px 8px; border-radius: 4px; background: var(--bg-elev); color: var(--text-2); font-weight: 600; }
-.artifact-row .path { font-family: var(--font-mono); font-size: 12px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.artifact-row .size { color: var(--text-3); font-size: 12px; font-family: var(--font-mono); }
-.artifact-row .hash { color: var(--text-4); font-size: 11px; font-family: var(--font-mono); }
+.finding-card.crit { border-left-color: var(--rose); }
+.finding-card.high { border-left-color: var(--amber); }
+.finding-card.med  { border-left-color: var(--gold); }
+.finding-card.low  { border-left-color: var(--sapphire); }
+.finding-card .head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.finding-card .head h4 {
+  font-family: var(--font-mono); font-size: 12px; color: var(--gold);
+  font-weight: 600; letter-spacing: 0.3px;
+}
+.finding-card .detail { color: var(--fg); font-size: 13px; line-height: 1.6; }
+.finding-card .evidence { margin-top: 10px; }
+.finding-card .evidence pre {
+  background: var(--bg); border: 1px solid var(--rule); padding: 10px 12px;
+  border-radius: 3px; font-family: var(--font-mono); font-size: 11px;
+  color: var(--fg-dim); overflow-x: auto;
+}
 
-/* ═══════════════════════════════════════════════════════════════════════
-   MARKDOWN BODY (rendered engagement doc)
-   ═══════════════════════════════════════════════════════════════════════ */
-.md { color: var(--text-2); font-size: 14.5px; line-height: 1.65; }
-.md h1, .md h2, .md h3, .md h4 { color: var(--text); margin-top: 20px; margin-bottom: 8px; line-height: 1.25; letter-spacing: -0.01em; }
-.md h1 { font-size: 24px; font-weight: 800; }
-.md h2 { font-size: 19px; font-weight: 700; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-.md h3 { font-size: 16px; font-weight: 700; }
-.md h4 { font-size: 14px; font-weight: 700; }
-.md p { margin: 8px 0; }
-.md ul, .md ol { margin: 8px 0; padding-left: 24px; }
-.md li { margin: 4px 0; }
-.md code { background: var(--bg-sunk); padding: 2px 6px; border-radius: 3px; font-family: var(--font-mono); font-size: 12.5px; color: var(--accent); }
-.md pre { background: var(--bg-sunk); padding: 14px; border-radius: 6px; overflow-x: auto; margin: 10px 0; }
-.md pre code { background: transparent; padding: 0; color: var(--text); font-size: 12.5px; }
-.md blockquote { border-left: 3px solid var(--accent-3); padding: 4px 12px; color: var(--text-3); font-style: italic; margin: 10px 0; }
-.md table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 13.5px; }
-.md th, .md td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
-.md th { background: var(--bg-sunk); font-weight: 600; color: var(--text); }
-.md strong { color: var(--text); font-weight: 600; }
+.artifact-list { display: flex; flex-direction: column; gap: 6px; }
+.artifact-row {
+  background: var(--bg-sunk); border: 1px solid var(--rule);
+  border-radius: 3px; padding: 10px 14px; font-size: 12px;
+  display: grid; grid-template-columns: auto 1fr auto auto; gap: 14px; align-items: center;
+}
+.artifact-row .kind {
+  font-family: var(--font-mono); font-size: 10px; padding: 2px 7px;
+  border: 1px solid var(--rule-strong); border-radius: 2px;
+  color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+}
+.artifact-row .path { font-family: var(--font-mono); font-size: 11px; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.artifact-row .size { color: var(--fg-faint); font-size: 11px; font-family: var(--font-mono); }
+.artifact-row .hash { color: var(--fg-veil); font-size: 10px; font-family: var(--font-mono); }
 
 /* ═══════════════════════════════════════════════════════════════════════
    FOOTER
    ═══════════════════════════════════════════════════════════════════════ */
 .footer {
-  border-top: 1px solid var(--border);
-  padding: 20px 40px;
-  color: var(--text-4);
-  font-size: 12px;
-  text-align: center;
-  font-family: var(--font-mono);
+  border-top: 1px solid var(--rule); padding: 20px 40px;
+  color: var(--fg-veil); font-family: var(--font-mono); font-size: 10px;
+  text-align: center; letter-spacing: 1px;
 }
-.footer a { color: var(--text-3); }
+.footer .glyph { color: var(--gold); font-family: var(--font-serif); }
+.footer a { color: var(--fg-dim); }
 </style>
 </head>
 <body>
 
 <nav class="topnav">
   <div class="brand" onclick="navigate('#/')">
-    <div class="brand-mark"></div>
-    <div>
-      <div class="brand-name">kronos <span class="brand-sub">Executive Assurance Console</span></div>
-    </div>
+    KRONOS<span class="brand-sub">Executive Assurance Console</span>
   </div>
   <div class="breadcrumb" id="breadcrumb"></div>
   <div class="actions">
@@ -518,114 +562,59 @@ a:hover { text-decoration: underline; }
 <main class="page" id="page"></main>
 
 <footer class="footer">
-  kronos v0.1 · prototype dashboard · every engagement scoped by a signed authorization artifact · <a href="https://github.com/alchemisthomer/kronos" target="_blank" rel="noopener">source</a>
+  <span class="glyph">κρόνος</span> · v0.1 prototype · every engagement scoped by a signed authorization artifact · <a href="https://github.com/alchemisthomer/kronos" target="_blank" rel="noopener">source</a> · companion to <a href="https://github.com/alchemisthomer/eos" target="_blank" rel="noopener">eos</a>
 </footer>
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════════
-   SAMPLE DATA — synthetic engagements demonstrating every view.
-   Marketing/screenshot demo data; no client identifiers.
+   SAMPLE DATA — synthetic engagements; no client identifiers.
    ═══════════════════════════════════════════════════════════════════════ */
 
 const KRONOS_DATA = {
   as_of: '2026-09-21',
-  organization: {
-    name: 'CloudPremise LLC',
-    tagline: 'Adversarial Assurance Portfolio',
-  },
+  organization: { name: 'CloudPremise LLC', tagline: 'Adversarial Assurance Portfolio' },
   ceo_bulletins: [
-    {
-      severity: 'crit',
-      pill: 'critical finding',
-      source: 'Northwind Retail · Salesforce Authorization Audit',
+    { severity: 'crit', pill: 'critical', source: 'Northwind Retail · Salesforce Authorization Audit',
       headline: 'One user account grants data-exfiltration primitives via an unaudited PermissionSet.',
-      detail: 'The audit surfaced a Standard User with ApiEnabled + ModifyAllData + BulkApiHardDelete via a custom PermissionSet named "Data Integration Runner". Compromise of this account permits arbitrary data pulls, mutations, and permanent record deletion via the Salesforce API. Remediation ticket filed; recommend immediate PS revocation pending review.',
-    },
-    {
-      severity: 'high',
-      pill: 'action needed',
-      source: 'Meridian Insurance · Cloud Cost Anomaly',
+      detail: 'The audit surfaced a Standard User with ApiEnabled + ModifyAllData + BulkApiHardDelete via a custom PermissionSet named "Data Integration Runner". Compromise of this account permits arbitrary data pulls, mutations, and permanent record deletion via the Salesforce API. Remediation ticket filed; recommend immediate PS revocation pending review.' },
+    { severity: 'high', pill: 'action needed', source: 'Meridian Insurance · Cloud Cost Anomaly',
       headline: 'AWS NAT-gateway spend is 41× baseline; investigation ongoing.',
-      detail: 'Plausibility monitor flagged a 41-fold increase in NAT-gateway data-processing charges over 72 hours. Not a security compromise — appears to be a defective load balancer forwarding traffic through NAT. Estimated overspend if uncontained: $47K by month-end.',
-    },
-    {
-      severity: 'ok',
-      pill: 'closed clean',
-      source: 'Vega Health · HIPAA Attestation Support',
+      detail: 'Plausibility monitor flagged a 41-fold increase in NAT-gateway data-processing charges over 72 hours. Not a security compromise — appears to be a defective load balancer forwarding traffic through NAT. Estimated overspend if uncontained: $47K by month-end.' },
+    { severity: 'ok', pill: 'closed clean', source: 'Vega Health · HIPAA Attestation Support',
       headline: 'HIPAA-adjacent controls attested clean across all critical dimensions.',
-      detail: 'Every finding closed with no waivers. All L3 dimensions passed adversarial verification, moving Perimeter/Access and Data Integrity to L4. Auditor-review packet handed off.',
-    },
-    {
-      severity: 'low',
-      pill: 'informational',
-      source: 'Portfolio observability',
+      detail: 'Every finding closed with no waivers. All L3 dimensions passed adversarial verification, moving Perimeter/Access and Data Integrity to L4. Auditor-review packet handed off.' },
+    { severity: 'low', pill: 'informational', source: 'Portfolio observability',
       headline: 'Framework itself surfaced 1 self-adversarial finding this quarter.',
-      detail: 'A meta-finding (KRONOS-TOOL-001) revealed that kronos\'s own field-enumeration primitive silently omitted 3 Salesforce fields at older API versions. Fixed via architecture change; documented in the engagement\'s §12 evidence manifest. Kronos catches its own tools.',
-    },
+      detail: 'A meta-finding (KRONOS-TOOL-001) revealed that kronos\'s own field-enumeration primitive silently omitted 3 Salesforce fields at older API versions. Fixed via architecture change; documented in the engagement\'s §12 evidence manifest. Kronos catches its own tools.' },
   ],
   portfolio_metrics: {
-    engagements_open: 3,
-    engagements_shipped: 12,
-    findings_critical_open: 2,
-    findings_total_open: 18,
-    coverage_pct: 78,
-    avg_maturity_level: 3.2,
-    quarter_trend: 'improving',
+    engagements_open: 3, engagements_shipped: 12, findings_critical_open: 2, findings_total_open: 18,
+    coverage_pct: 78, avg_maturity_level: 3.2, quarter_trend: 'improving',
   },
   engagements: [
-    /* ═══ ENGAGEMENT 1: In-flight, evidence stage, critical findings ═══ */
     {
-      id: 'northwind-1',
-      target_slug: 'northwind',
-      target_display: 'Northwind Retail',
-      target_platform: 'Salesforce Sales Cloud',
-      engagement_ordinal: 'kronos-1',
-      status: 'evidence',
-      mode: 'insider-simulation, gray-box',
-      environment: 'production',
-      opened: '2026-09-18',
-      updated: '2026-09-21',
+      id: 'northwind-1', target_slug: 'northwind', target_display: 'Northwind Retail',
+      target_platform: 'Salesforce Sales Cloud', engagement_ordinal: 'kronos-1',
+      status: 'evidence', mode: 'insider-simulation, gray-box', environment: 'production',
+      opened: '2026-09-18', updated: '2026-09-21',
       theme: 'Reproduce the compromised user data-pull to feed incident post-mortem.',
       executive_summary: [
         'Northwind Retail requested a full reproduction of the data one specific user account could pull from their Salesforce org, following a suspected credential compromise on 2026-09-14. Kronos executed the same query pattern the attacker would have run against the same user identity, under signed authorization.',
         'The engagement recovered 367,679 records across five sobjects and identified a critical over-privilege condition: the compromised user\'s Standard User profile is augmented by a custom PermissionSet (Data Integration Runner) that grants ApiEnabled + ModifyAllData + BulkApiHardDelete. Any compromise of this account is a data-exfil primitive.',
         'Findings are being reviewed with Northwind security. Immediate remediation: revoke the PermissionSet from the compromised user. Broader remediation: audit every user assigned "Data Integration Runner" and restrict to service accounts only.',
       ],
-      key_takeaway: {
-        severity: 'crit',
-        icon: '⚠',
-        text: 'The compromised user account grants data-exfiltration primitives (ApiEnabled + ModifyAllData + BulkApiHardDelete) via a single custom PermissionSet. Revoke immediately.',
-      },
+      key_takeaway: { severity: 'crit', icon: '⚠',
+        text: 'The compromised user account grants data-exfiltration primitives (ApiEnabled + ModifyAllData + BulkApiHardDelete) via a single custom PermissionSet. Revoke immediately.' },
       findings_summary: { critical: 2, high: 5, medium: 8, low: 3 },
       scorecard_delta: {
-        A: {
-          identity_and_access_control: { before: 'L2', after: 'L1' },
-          perimeter_defense:           { before: 'L3', after: 'L3' },
-          secret_management:           { before: 'L2', after: 'L2' },
-        },
-        B: {
-          data_integrity:              { before: 'L2', after: 'L2' },
-          availability_and_resilience: { before: 'L3', after: 'L3' },
-          observability:               { before: 'L2', after: 'L2' },
-        },
-        C: {
-          cost_integrity:              { before: 'L3', after: 'L3' },
-          change_discipline:           { before: 'L2', after: 'L2' },
-          supply_chain:                { before: 'L2', after: 'L2' },
-        },
-        D: {
-          incident_response:           { before: 'L2', after: 'L3' },
-          recovery_and_continuity:     { before: 'L3', after: 'L3' },
-          compliance_posture:          { before: 'L2', after: 'L2' },
-        },
+        A: { identity_and_access_control: { before: 'L2', after: 'L1' }, perimeter_defense: { before: 'L3', after: 'L3' }, secret_management: { before: 'L2', after: 'L2' } },
+        B: { data_integrity: { before: 'L2', after: 'L2' }, availability_and_resilience: { before: 'L3', after: 'L3' }, observability: { before: 'L2', after: 'L2' } },
+        C: { cost_integrity: { before: 'L3', after: 'L3' }, change_discipline: { before: 'L2', after: 'L2' }, supply_chain: { before: 'L2', after: 'L2' } },
+        D: { incident_response: { before: 'L2', after: 'L3' }, recovery_and_continuity: { before: 'L3', after: 'L3' }, compliance_posture: { before: 'L2', after: 'L2' } },
       },
       scenarios: [
-        {
-          id: 'S1',
-          name: 'User authorization envelope enumeration',
-          threat_class: 'recon.enumeration.salesforce.user-authorization-envelope',
-          verdict: 'confirmed',
-          severity: 'crit',
+        { id: 'S1', name: 'User authorization envelope enumeration', threat_class: 'recon.enumeration.salesforce.user-authorization-envelope',
+          verdict: 'confirmed', severity: 'crit',
           attack_summary: 'Enumerated the tested user\'s Profile + PermissionSet assignments + effective ObjectPermissions + FieldPermissions. Cross-referenced against the four expected sobjects (Account, Contact, Lead, Opportunity).',
           oracle_verdict: 'Field-permission enumeration matched the primary tool\'s expected coverage; describe-vs-FIELDS(ALL) drift clean; and the union of PermissionSet grants includes ModifyAllData contrary to the base Profile.',
           findings: [
@@ -637,14 +626,9 @@ const KRONOS_DATA = {
             { kind: 'analysis-json', path: 'user-005…AAA-permissions-analysis.json', bytes: 68420, sha256: 'a1b2c3d4e5f6' },
             { kind: 'csv', path: 'user-005…AAA-permissionsets-detail.csv', bytes: 12440, sha256: 'b2c3d4e5f6a1' },
             { kind: 'csv', path: 'user-005…AAA-object-permissions.csv', bytes: 8912, sha256: 'c3d4e5f6a1b2' },
-          ],
-        },
-        {
-          id: 'S2',
-          name: 'Compromised-user login-history anomaly probe',
-          threat_class: 'recon.enumeration.salesforce.user-authentication-history',
-          verdict: 'confirmed',
-          severity: 'high',
+          ] },
+        { id: 'S2', name: 'Compromised-user login-history anomaly probe', threat_class: 'recon.enumeration.salesforce.user-authentication-history',
+          verdict: 'confirmed', severity: 'high',
           attack_summary: 'Queried LoginHistory for the tested user over the last 90 days; derived source-IP, geography, TLS, and burst-pattern analysis.',
           oracle_verdict: 'Multi-country login pattern (US + BG + NL) and weak-TLS (TLS 1.0) sessions observed — consistent with credential compromise.',
           findings: [
@@ -655,14 +639,9 @@ const KRONOS_DATA = {
           artifacts: [
             { kind: 'analysis-json', path: 'loginhistory-005…AAA-analysis.json', bytes: 22016, sha256: 'd4e5f6a1b2c3' },
             { kind: 'csv', path: 'loginhistory-005…AAA.csv', bytes: 342110, sha256: 'e5f6a1b2c3d4' },
-          ],
-        },
-        {
-          id: 'S3',
-          name: 'OAuth compromise-vector surface',
-          threat_class: 'recon.enumeration.salesforce.user-oauth-surface',
-          verdict: 'high',
-          severity: 'medium',
+          ] },
+        { id: 'S3', name: 'OAuth compromise-vector surface', threat_class: 'recon.enumeration.salesforce.user-oauth-surface',
+          verdict: 'high', severity: 'medium',
           attack_summary: 'Enumerated OAuth token grants and third-party account links for the tested user.',
           oracle_verdict: '9 active OAuth tokens across 4 apps including 5 tokens for Salesforce Data Loader and 3 never-used tokens (abandoned auth attempts).',
           findings: [
@@ -670,16 +649,9 @@ const KRONOS_DATA = {
             { class: 'stale-oauth-token-accumulation', severity: 'medium', detail: '3 OAuth tokens last used > 90 days ago but still exist.', evidence: { stale_count: 3 } },
             { class: 'developer-tool-oauth-grants', severity: 'low', detail: 'User has OAuth grants for developer tools (Data Loader, Inspector, Workbench). Suspicious for a Sales rep.', evidence: { dev_tools: ['Data Loader', 'Inspector', 'Workbench'] } },
           ],
-          artifacts: [
-            { kind: 'analysis-json', path: 'user-005…AAA-connected-apps-analysis.json', bytes: 8140, sha256: 'f6a1b2c3d4e5' },
-          ],
-        },
-        {
-          id: 'S4',
-          name: 'Sharing envelope + role-hierarchy access surface',
-          threat_class: 'recon.enumeration.salesforce.user-sharing-envelope',
-          verdict: 'medium',
-          severity: 'medium',
+          artifacts: [{ kind: 'analysis-json', path: 'user-005…AAA-connected-apps-analysis.json', bytes: 8140, sha256: 'f6a1b2c3d4e5' }] },
+        { id: 'S4', name: 'Sharing envelope + role-hierarchy access surface', threat_class: 'recon.enumeration.salesforce.user-sharing-envelope',
+          verdict: 'medium', severity: 'medium',
           attack_summary: 'Traversed role hierarchy above and below the tested user + enumerated group memberships + sampled per-sobject Share rows.',
           oracle_verdict: 'User is a member of the org-wide "AllInternalUsers" group and role chain reaches root (CEO); Manual shares dominate Account and Contact (>60%).',
           findings: [
@@ -690,146 +662,119 @@ const KRONOS_DATA = {
           artifacts: [
             { kind: 'analysis-json', path: 'user-005…AAA-shares-analysis.json', bytes: 42200, sha256: 'a1b2c3d4e5f7' },
             { kind: 'csv', path: 'user-005…AAA-all-roles.csv', bytes: 18400, sha256: 'b2c3d4e5f7a1' },
-          ],
-        },
-        {
-          id: 'S5',
-          name: 'Setup-action audit trail (last 60 days)',
-          threat_class: 'recon.enumeration.salesforce.user-setup-audit',
-          verdict: 'clean',
-          severity: 'low',
+          ] },
+        { id: 'S5', name: 'Setup-action audit trail (last 60 days)', threat_class: 'recon.enumeration.salesforce.user-setup-audit',
+          verdict: 'clean', severity: 'low',
           attack_summary: 'Queried SetupAuditTrail for actions attributed to the tested user in the last 60 days; classified action classes and section high-privilege flags.',
           oracle_verdict: 'No high-privilege section activity from this user; no delegate actions observed. The user did not initiate the compromise from within Setup.',
           findings: [],
-          artifacts: [
-            { kind: 'analysis-json', path: 'user-005…AAA-audit-trail-analysis.json', bytes: 4200, sha256: 'c3d4e5f7a1b2' },
-          ],
-        },
-        {
-          id: 'S6',
-          name: 'Full data reproduction (extract)',
-          threat_class: 'recon.enumeration.salesforce.sobject-record-extraction',
-          verdict: 'confirmed',
-          severity: 'crit',
+          artifacts: [{ kind: 'analysis-json', path: 'user-005…AAA-audit-trail-analysis.json', bytes: 4200, sha256: 'c3d4e5f7a1b2' }] },
+        { id: 'S6', name: 'Full data reproduction (extract)', threat_class: 'recon.enumeration.salesforce.sobject-record-extraction',
+          verdict: 'confirmed', severity: 'crit',
           attack_summary: 'Executed the attacker\'s exact query pattern against Account, Contact, Lead, Opportunity — recovered every row the tested user could read.',
           oracle_verdict: 'Recovered 367,679 records across five sobjects (Account 34,279 / Contact 91,656 / Lead 236,256 / Opportunity 5,476 / WorkBadgeDefinition 12). Total 527 MB. Delivered to customer under NDA via out-of-band file transfer.',
-          findings: [
-            { class: 'confirmed-exfil-capability', severity: 'crit', detail: '367,679 records were readable by the tested user account. Full dataset delivered to the customer for their internal breach analysis.', evidence: { records: 367679, bytes: 527036193 } },
-          ],
+          findings: [{ class: 'confirmed-exfil-capability', severity: 'crit', detail: '367,679 records were readable by the tested user account. Full dataset delivered to the customer for their internal breach analysis.', evidence: { records: 367679, bytes: 527036193 } }],
           artifacts: [
             { kind: 'assessment-report', path: 'assessment-report.md', bytes: 5424, sha256: 'd4e5f7a1b2c3' },
             { kind: 'run-manifest', path: 'reverse-data-loader-run-manifest.json', bytes: 9304, sha256: 'e5f7a1b2c3d4' },
             { kind: 'off-repo', path: '<off-repo, tier-2 evidence store>', bytes: 527036193, sha256: '(five files, per manifest)' },
-          ],
-        },
+          ] },
       ],
     },
-    /* ═══ ENGAGEMENT 2: Shipped clean ═══ */
     {
-      id: 'vega-1',
-      target_slug: 'vega',
-      target_display: 'Vega Health',
-      target_platform: 'AWS + Salesforce Health Cloud',
-      engagement_ordinal: 'kronos-1',
-      status: 'shipped',
-      mode: 'gray-box, HIPAA support',
-      environment: 'production',
-      opened: '2026-07-14',
-      updated: '2026-08-30',
+      id: 'vega-1', target_slug: 'vega', target_display: 'Vega Health',
+      target_platform: 'AWS + Salesforce Health Cloud', engagement_ordinal: 'kronos-1',
+      status: 'shipped', mode: 'gray-box, HIPAA support', environment: 'production',
+      opened: '2026-07-14', updated: '2026-08-30',
       theme: 'HIPAA-adjacent control attestation. Every finding must close before ship.',
       executive_summary: [
         'Vega Health engaged kronos as adversarial-verification support for their annual HIPAA attestation. The engagement targeted the seven control objectives most likely to fail a HIPAA audit under adversarial pressure: identity-and-access, encryption-at-rest, encryption-in-transit, access-logging, backup-integrity, incident-response, and data-retention.',
         'Every scenario executed under a signed authorization artifact with production-safe impact class. Two low-severity findings were surfaced (both closed within the engagement window); no medium/high/critical findings remain.',
         'The engagement shipped 2026-08-30 with the auditor packet handed off. Scorecard delta moved Identity/Access-Control and Data Integrity from L3 (verified) to L4 (adversarially challenged) — the L4 upgrade is the load-bearing outcome for the HIPAA renewal.',
       ],
-      key_takeaway: {
-        severity: 'ok',
-        icon: '✓',
-        text: 'HIPAA-adjacent controls attested clean across all critical dimensions. Every finding closed with no waivers. Identity/Access and Data Integrity moved to L4.',
-      },
+      key_takeaway: { severity: 'ok', icon: '✓',
+        text: 'HIPAA-adjacent controls attested clean across all critical dimensions. Every finding closed with no waivers. Identity/Access and Data Integrity moved to L4.' },
       findings_summary: { critical: 0, high: 0, medium: 0, low: 2 },
       scorecard_delta: {
-        A: {
-          identity_and_access_control: { before: 'L3', after: 'L4' },
-          perimeter_defense:           { before: 'L3', after: 'L3' },
-          secret_management:           { before: 'L3', after: 'L3' },
-        },
-        B: {
-          data_integrity:              { before: 'L3', after: 'L4' },
-          availability_and_resilience: { before: 'L3', after: 'L3' },
-          observability:               { before: 'L3', after: 'L4' },
-        },
-        C: {
-          cost_integrity:              { before: 'L2', after: 'L2' },
-          change_discipline:           { before: 'L3', after: 'L3' },
-          supply_chain:                { before: 'L2', after: 'L3' },
-        },
-        D: {
-          incident_response:           { before: 'L3', after: 'L4' },
-          recovery_and_continuity:     { before: 'L3', after: 'L4' },
-          compliance_posture:          { before: 'L3', after: 'L4' },
-        },
+        A: { identity_and_access_control: { before: 'L3', after: 'L4' }, perimeter_defense: { before: 'L3', after: 'L3' }, secret_management: { before: 'L3', after: 'L3' } },
+        B: { data_integrity: { before: 'L3', after: 'L4' }, availability_and_resilience: { before: 'L3', after: 'L3' }, observability: { before: 'L3', after: 'L4' } },
+        C: { cost_integrity: { before: 'L2', after: 'L2' }, change_discipline: { before: 'L3', after: 'L3' }, supply_chain: { before: 'L2', after: 'L3' } },
+        D: { incident_response: { before: 'L3', after: 'L4' }, recovery_and_continuity: { before: 'L3', after: 'L4' }, compliance_posture: { before: 'L3', after: 'L4' } },
       },
       scenarios: [
-        { id: 'S1', name: 'PHI record read-authorization envelope', threat_class: 'recon.enumeration.salesforce.user-authorization-envelope', verdict: 'clean', severity: 'ok', attack_summary: 'Enumerated the effective access-control envelope for every user assigned the PHI-Access permission set.', oracle_verdict: 'Every PHI-Access user has the expected object permission set and only the expected FieldPermissions; no privilege drift.', findings: [], artifacts: [] },
-        { id: 'S2', name: 'Encryption-at-rest verification (Shield PE)', threat_class: 'verification.salesforce.shield-platform-encryption', verdict: 'clean', severity: 'ok', attack_summary: 'Verified that every field configured as PHI is encrypted under Shield Platform Encryption; sampled read attempts to confirm cipher enforcement.', oracle_verdict: 'All 47 designated PHI fields verified encrypted; no plaintext leakage in event logs.', findings: [], artifacts: [] },
-        { id: 'S3', name: 'Access-log completeness under load', threat_class: 'attack.destructive-load.audit-log-integrity', verdict: 'inconclusive', severity: 'low', attack_summary: 'Bounded load test with 5000 record reads/min against LoginHistory + EventLogFile ingest; verified no log-record loss.', oracle_verdict: 'No missing log entries observed at test load; behavior at 10x load unknown (out of scope of this engagement).', findings: [{ class: 'load-ceiling-untested', severity: 'low', detail: 'Log-integrity verified only up to 5000 rec/min. Higher loads not tested in this engagement window.', evidence: { max_tested_rate: 5000 } }], artifacts: [] },
-        { id: 'S4', name: 'Backup integrity — recovery roundtrip', threat_class: 'verification.aws.backup-restore-integrity', verdict: 'clean', severity: 'ok', attack_summary: 'Restored 3 recent nightly backups to an isolated environment; sampled 100 random records for byte-identity.', oracle_verdict: 'All sampled records byte-identical to production; backup hashes match manifest.', findings: [], artifacts: [] },
-        { id: 'S5', name: 'Incident-response drill — declared-incident switch', threat_class: 'exercise.incident-response.data-class-preservation', verdict: 'clean', severity: 'ok', attack_summary: 'Simulated an incident-declaration event; verified that dataClassPreservation flag denies subsequent write operations on PHI-tagged records for the incident window.', oracle_verdict: 'All PHI writes correctly refused during the simulated incident window; correct records unlocked when incident cleared.', findings: [], artifacts: [] },
-        { id: 'S6', name: 'Retention-policy sweep verification', threat_class: 'verification.data-retention', verdict: 'low', severity: 'low', attack_summary: 'Verified that records past retention policy are correctly deleted or anonymized by the scheduled sweep.', oracle_verdict: '2 records past retention discovered still present due to a data-load lag; issue remediated within engagement window.', findings: [{ class: 'retention-sweep-lag', severity: 'low', detail: '2 records past retention window discovered on 2026-08-21; both removed by 2026-08-23. Root cause: data-loader retry queue was 48h behind.', evidence: { records: 2, remediated_by: '2026-08-23' } }], artifacts: [] },
+        { id: 'S1', name: 'PHI record read-authorization envelope', threat_class: 'recon.enumeration.salesforce.user-authorization-envelope', verdict: 'clean', severity: 'ok',
+          attack_summary: 'Enumerated the effective access-control envelope for every user assigned the PHI-Access permission set.',
+          oracle_verdict: 'Every PHI-Access user has the expected object permission set and only the expected FieldPermissions; no privilege drift.',
+          findings: [], artifacts: [] },
+        { id: 'S2', name: 'Encryption-at-rest verification (Shield PE)', threat_class: 'verification.salesforce.shield-platform-encryption', verdict: 'clean', severity: 'ok',
+          attack_summary: 'Verified that every field configured as PHI is encrypted under Shield Platform Encryption; sampled read attempts to confirm cipher enforcement.',
+          oracle_verdict: 'All 47 designated PHI fields verified encrypted; no plaintext leakage in event logs.',
+          findings: [], artifacts: [] },
+        { id: 'S3', name: 'Access-log completeness under load', threat_class: 'attack.destructive-load.audit-log-integrity', verdict: 'inconclusive', severity: 'low',
+          attack_summary: 'Bounded load test with 5000 record reads/min against LoginHistory + EventLogFile ingest; verified no log-record loss.',
+          oracle_verdict: 'No missing log entries observed at test load; behavior at 10x load unknown (out of scope of this engagement).',
+          findings: [{ class: 'load-ceiling-untested', severity: 'low', detail: 'Log-integrity verified only up to 5000 rec/min. Higher loads not tested in this engagement window.', evidence: { max_tested_rate: 5000 } }],
+          artifacts: [] },
+        { id: 'S4', name: 'Backup integrity — recovery roundtrip', threat_class: 'verification.aws.backup-restore-integrity', verdict: 'clean', severity: 'ok',
+          attack_summary: 'Restored 3 recent nightly backups to an isolated environment; sampled 100 random records for byte-identity.',
+          oracle_verdict: 'All sampled records byte-identical to production; backup hashes match manifest.',
+          findings: [], artifacts: [] },
+        { id: 'S5', name: 'Incident-response drill — declared-incident switch', threat_class: 'exercise.incident-response.data-class-preservation', verdict: 'clean', severity: 'ok',
+          attack_summary: 'Simulated an incident-declaration event; verified that dataClassPreservation flag denies subsequent write operations on PHI-tagged records for the incident window.',
+          oracle_verdict: 'All PHI writes correctly refused during the simulated incident window; correct records unlocked when incident cleared.',
+          findings: [], artifacts: [] },
+        { id: 'S6', name: 'Retention-policy sweep verification', threat_class: 'verification.data-retention', verdict: 'low', severity: 'low',
+          attack_summary: 'Verified that records past retention policy are correctly deleted or anonymized by the scheduled sweep.',
+          oracle_verdict: '2 records past retention discovered still present due to a data-load lag; issue remediated within engagement window.',
+          findings: [{ class: 'retention-sweep-lag', severity: 'low', detail: '2 records past retention window discovered on 2026-08-21; both removed by 2026-08-23. Root cause: data-loader retry queue was 48h behind.', evidence: { records: 2, remediated_by: '2026-08-23' } }],
+          artifacts: [] },
       ],
     },
-    /* ═══ ENGAGEMENT 3: Cost-anomaly engagement (non-security demo) ═══ */
     {
-      id: 'meridian-1',
-      target_slug: 'meridian',
-      target_display: 'Meridian Insurance',
-      target_platform: 'AWS · Multi-account',
-      engagement_ordinal: 'kronos-1',
-      status: 'running',
-      mode: 'cost-adversarial, plausibility-monitor-driven',
-      environment: 'production',
-      opened: '2026-09-20',
-      updated: '2026-09-21',
+      id: 'meridian-1', target_slug: 'meridian', target_display: 'Meridian Insurance',
+      target_platform: 'AWS · Multi-account', engagement_ordinal: 'kronos-1',
+      status: 'running', mode: 'cost-adversarial, plausibility-monitor-driven', environment: 'production',
+      opened: '2026-09-20', updated: '2026-09-21',
       theme: 'Investigate 41× baseline NAT-gateway spend spike surfaced by the plausibility monitor.',
       executive_summary: [
         'The kronos plausibility monitor tripped on 2026-09-20 with a 41-fold increase in AWS NAT-gateway data-processing spend over 72 hours. This is not a security compromise; it is the cost-integrity dimension that the plausibility monitor was designed to catch (per the founding-incident case study).',
         'Under signed authorization, kronos initiated a cost-adversarial engagement to identify the root cause and quantify the exposure if uncontained. Three candidate root causes are under investigation: (a) a defective ALB config forwarding health-check traffic through the NAT, (b) a misconfigured EKS pod egress rule, and (c) a data-processing job that flipped from VPC endpoints to public egress after a deploy.',
         'Estimated cost if uncontained through month-end: $47,000. Not catastrophic — but a class of impact that no dedicated security tool would have caught, illustrating why kronos treats cost integrity as a peer to security.',
       ],
-      key_takeaway: {
-        severity: 'high',
-        icon: '⚡',
-        text: 'AWS NAT-gateway spend is 41× baseline over 72h. Not a security incident — a cost-integrity anomaly the plausibility monitor was designed to catch. $47K exposure if uncontained by month-end.',
-      },
+      key_takeaway: { severity: 'high', icon: '⚡',
+        text: 'AWS NAT-gateway spend is 41× baseline over 72h. Not a security incident — a cost-integrity anomaly the plausibility monitor was designed to catch. $47K exposure if uncontained by month-end.' },
       findings_summary: { critical: 0, high: 1, medium: 2, low: 1 },
       scorecard_delta: {
-        A: {
-          identity_and_access_control: { before: 'L3', after: 'L3' },
-          perimeter_defense:           { before: 'L3', after: 'L3' },
-          secret_management:           { before: 'L3', after: 'L3' },
-        },
-        B: {
-          data_integrity:              { before: 'L3', after: 'L3' },
-          availability_and_resilience: { before: 'L3', after: 'L3' },
-          observability:               { before: 'L2', after: 'L2' },
-        },
-        C: {
-          cost_integrity:              { before: 'L2', after: 'L1' },
-          change_discipline:           { before: 'L3', after: 'L3' },
-          supply_chain:                { before: 'L3', after: 'L3' },
-        },
-        D: {
-          incident_response:           { before: 'L3', after: 'L3' },
-          recovery_and_continuity:     { before: 'L3', after: 'L3' },
-          compliance_posture:          { before: 'L3', after: 'L3' },
-        },
+        A: { identity_and_access_control: { before: 'L3', after: 'L3' }, perimeter_defense: { before: 'L3', after: 'L3' }, secret_management: { before: 'L3', after: 'L3' } },
+        B: { data_integrity: { before: 'L3', after: 'L3' }, availability_and_resilience: { before: 'L3', after: 'L3' }, observability: { before: 'L2', after: 'L2' } },
+        C: { cost_integrity: { before: 'L2', after: 'L1' }, change_discipline: { before: 'L3', after: 'L3' }, supply_chain: { before: 'L3', after: 'L3' } },
+        D: { incident_response: { before: 'L3', after: 'L3' }, recovery_and_continuity: { before: 'L3', after: 'L3' }, compliance_posture: { before: 'L3', after: 'L3' } },
       },
       scenarios: [
-        { id: 'S1', name: 'Plausibility-monitor breach investigation', threat_class: 'plausibility-monitor.cost.aws-nat-gateway', verdict: 'high', severity: 'high', attack_summary: 'Investigated the trigger of the plausibility-monitor breach: 41× baseline NAT-gateway data-processing charges over 72 hours.', oracle_verdict: 'Breach confirmed. Traffic volume through the NAT gateway is 3.2 PB (72h), against a rolling baseline of 78 TB.', findings: [{ class: 'cost-integrity-breach', severity: 'high', detail: '41× baseline NAT-gateway data-processing spend. $47K exposure if uncontained by month-end.', evidence: { traffic_pb_72h: 3.2, baseline_tb_72h: 78, projected_overspend_usd: 47000 } }], artifacts: [{ kind: 'plausibility-report', path: 'plausibility-breach-2026-09-20.json', bytes: 12400, sha256: 'aabbccdd1122' }] },
-        { id: 'S2', name: 'Root-cause candidate A: ALB config drift', threat_class: 'attack.change-discipline.config-drift', verdict: 'inconclusive', severity: 'medium', attack_summary: 'Reviewed ALB configs deployed in the 5 days preceding the anomaly; correlated with health-check traffic patterns.', oracle_verdict: 'One ALB target-group change on 2026-09-19 correlates with elevated NAT traffic; not proven causal.', findings: [{ class: 'change-correlated-with-anomaly', severity: 'medium', detail: 'ALB app-lb-primary target-group change 2026-09-19 within 24h of spend spike; requires deeper trace to confirm causation.', evidence: { alb: 'app-lb-primary', change_date: '2026-09-19' } }], artifacts: [] },
-        { id: 'S3', name: 'Root-cause candidate B: EKS pod egress', threat_class: 'attack.change-discipline.k8s-egress', verdict: 'inconclusive', severity: 'medium', attack_summary: 'Reviewed EKS NetworkPolicy changes and pod-level egress configurations across the 3 affected clusters.', oracle_verdict: 'No changed NetworkPolicy detected; however, a new deployment on 2026-09-19 flipped from a VPC endpoint to public S3 egress. Continuing.', findings: [{ class: 'vpc-endpoint-bypass-detected', severity: 'medium', detail: 'data-pipeline-ingest deployment now sends S3 traffic via public IP (through NAT) instead of the configured VPC endpoint. Volume matches anomaly.', evidence: { deployment: 'data-pipeline-ingest', workload: 'S3 uploads' } }], artifacts: [] },
-        { id: 'S4', name: 'Root-cause candidate C: data-job destination flip', threat_class: 'observation.data-flow.destination-drift', verdict: 'clean', severity: 'low', attack_summary: 'Enumerated all scheduled data-processing jobs to confirm none had their target destination changed to public egress.', oracle_verdict: 'No scheduled job destinations changed. Candidate ruled out.', findings: [{ class: 'candidate-ruled-out', severity: 'low', detail: 'Scheduled data-processing job destinations are unchanged. This candidate is not the root cause.', evidence: {} }], artifacts: [] },
+        { id: 'S1', name: 'Plausibility-monitor breach investigation', threat_class: 'plausibility-monitor.cost.aws-nat-gateway',
+          verdict: 'high', severity: 'high',
+          attack_summary: 'Investigated the trigger of the plausibility-monitor breach: 41× baseline NAT-gateway data-processing charges over 72 hours.',
+          oracle_verdict: 'Breach confirmed. Traffic volume through the NAT gateway is 3.2 PB (72h), against a rolling baseline of 78 TB.',
+          findings: [{ class: 'cost-integrity-breach', severity: 'high', detail: '41× baseline NAT-gateway data-processing spend. $47K exposure if uncontained by month-end.', evidence: { traffic_pb_72h: 3.2, baseline_tb_72h: 78, projected_overspend_usd: 47000 } }],
+          artifacts: [{ kind: 'plausibility-report', path: 'plausibility-breach-2026-09-20.json', bytes: 12400, sha256: 'aabbccdd1122' }] },
+        { id: 'S2', name: 'Root-cause candidate A: ALB config drift', threat_class: 'attack.change-discipline.config-drift',
+          verdict: 'inconclusive', severity: 'medium',
+          attack_summary: 'Reviewed ALB configs deployed in the 5 days preceding the anomaly; correlated with health-check traffic patterns.',
+          oracle_verdict: 'One ALB target-group change on 2026-09-19 correlates with elevated NAT traffic; not proven causal.',
+          findings: [{ class: 'change-correlated-with-anomaly', severity: 'medium', detail: 'ALB app-lb-primary target-group change 2026-09-19 within 24h of spend spike; requires deeper trace to confirm causation.', evidence: { alb: 'app-lb-primary', change_date: '2026-09-19' } }],
+          artifacts: [] },
+        { id: 'S3', name: 'Root-cause candidate B: EKS pod egress', threat_class: 'attack.change-discipline.k8s-egress',
+          verdict: 'inconclusive', severity: 'medium',
+          attack_summary: 'Reviewed EKS NetworkPolicy changes and pod-level egress configurations across the 3 affected clusters.',
+          oracle_verdict: 'No changed NetworkPolicy detected; however, a new deployment on 2026-09-19 flipped from a VPC endpoint to public S3 egress. Continuing.',
+          findings: [{ class: 'vpc-endpoint-bypass-detected', severity: 'medium', detail: 'data-pipeline-ingest deployment now sends S3 traffic via public IP (through NAT) instead of the configured VPC endpoint. Volume matches anomaly.', evidence: { deployment: 'data-pipeline-ingest', workload: 'S3 uploads' } }],
+          artifacts: [] },
+        { id: 'S4', name: 'Root-cause candidate C: data-job destination flip', threat_class: 'observation.data-flow.destination-drift',
+          verdict: 'clean', severity: 'low',
+          attack_summary: 'Enumerated all scheduled data-processing jobs to confirm none had their target destination changed to public egress.',
+          oracle_verdict: 'No scheduled job destinations changed. Candidate ruled out.',
+          findings: [{ class: 'candidate-ruled-out', severity: 'low', detail: 'Scheduled data-processing job destinations are unchanged. This candidate is not the root cause.', evidence: {} }],
+          artifacts: [] },
       ],
     },
   ],
@@ -838,11 +783,7 @@ const KRONOS_DATA = {
 /* ═══════════════════════════════════════════════════════════════════════
    STATE + ROUTING
    ═══════════════════════════════════════════════════════════════════════ */
-const STATE = {
-  view: 'home',
-  engagementId: null,
-  scenarioId: null,
-};
+const STATE = { view: 'home', engagementId: null, scenarioId: null };
 
 function parseHash() {
   const h = window.location.hash.slice(1);
@@ -851,16 +792,10 @@ function parseHash() {
   if (parts[0] === 'e' && parts[1] && parts[2] === 's' && parts[3]) {
     return { view: 'scenario', engagementId: parts[1], scenarioId: parts[3] };
   }
-  if (parts[0] === 'e' && parts[1]) {
-    return { view: 'engagement', engagementId: parts[1] };
-  }
+  if (parts[0] === 'e' && parts[1]) return { view: 'engagement', engagementId: parts[1] };
   return { view: 'home' };
 }
-
-function navigate(path) {
-  window.location.hash = path.replace(/^#/, '');
-}
-
+function navigate(path) { window.location.hash = path.replace(/^#/, ''); }
 window.addEventListener('hashchange', render);
 window.addEventListener('load', render);
 
@@ -890,16 +825,16 @@ function severityKey(s) { return { critical: 'crit', crit: 'crit', high: 'high',
 function renderBreadcrumb() {
   const el = document.getElementById('breadcrumb');
   const parsed = parseHash();
-  let html = '<span class="crumb" onclick="navigate(\'#/\')">Portfolio</span>';
+  let html = `<span class="crumb ${parsed.view === 'home' ? 'current' : ''}" onclick="navigate('#/')">Portfolio</span>`;
   if (parsed.view === 'engagement' || parsed.view === 'scenario') {
     const eng = KRONOS_DATA.engagements.find((e) => e.id === parsed.engagementId);
     if (eng) {
-      html += '<span class="sep">/</span>';
+      html += '<span class="sep">›</span>';
       html += `<span class="crumb ${parsed.view === 'engagement' ? 'current' : ''}" onclick="navigate('#/e/${esc(eng.id)}')">${esc(eng.target_display)}</span>`;
       if (parsed.view === 'scenario') {
         const sc = eng.scenarios.find((s) => s.id === parsed.scenarioId);
         if (sc) {
-          html += '<span class="sep">/</span>';
+          html += '<span class="sep">›</span>';
           html += `<span class="crumb current">${esc(sc.id)}: ${esc(sc.name.slice(0, 60))}${sc.name.length > 60 ? '…' : ''}</span>`;
         }
       }
@@ -909,35 +844,34 @@ function renderBreadcrumb() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   HOME VIEW — CEO SUMMARY + PORTFOLIO
+   HOME VIEW
    ═══════════════════════════════════════════════════════════════════════ */
 function renderHome() {
   const m = KRONOS_DATA.portfolio_metrics;
   const bullets = KRONOS_DATA.ceo_bulletins;
   const engs = KRONOS_DATA.engagements;
-
   return `
     <section class="hero">
       <div class="hero-content">
         <div class="hero-eyebrow">${esc(KRONOS_DATA.organization.name)} · Executive Assurance Portfolio</div>
-        <h1 class="hero-title">What ships is <span class="accent">worthy</span>.</h1>
+        <h1 class="hero-title">What ships is <span class="accent">worthy</span></h1>
         <p class="hero-sub">
           Every engagement is a bounded, authorized attempt to break a system that claims to be safe.
           Every finding is evidence. Every scorecard delta is proof that a claim was tested, not merely asserted.
         </p>
         <div class="hero-kpis">
           <div class="hero-kpi">
-            <div class="label">Engagements open</div>
+            <div class="label">Engagements Open</div>
             <div class="value">${m.engagements_open}<span class="unit">in flight</span></div>
             <div class="trend">${m.engagements_shipped} shipped this year</div>
           </div>
           <div class="hero-kpi">
-            <div class="label">Critical findings open</div>
-            <div class="value" style="${m.findings_critical_open > 0 ? 'color:#fca5a5' : ''}">${m.findings_critical_open}</div>
+            <div class="label">Critical Findings Open</div>
+            <div class="value" style="${m.findings_critical_open > 0 ? 'color:var(--rose)' : ''}">${m.findings_critical_open}</div>
             <div class="trend">${m.findings_total_open} total open across all severities</div>
           </div>
           <div class="hero-kpi">
-            <div class="label">Portfolio maturity</div>
+            <div class="label">Portfolio Maturity</div>
             <div class="value">L${m.avg_maturity_level.toFixed(1)}<span class="unit">avg</span></div>
             <div class="trend up">↑ ${m.quarter_trend} this quarter</div>
           </div>
@@ -954,7 +888,7 @@ function renderHome() {
       <div class="bulletin-card">
         <div class="head">
           <h2>What you need to know</h2>
-          <span class="badge">Curated · ${bullets.length}</span>
+          <span class="badge">Curated · ${bullets.length} items</span>
         </div>
         ${bullets.map((b) => `
           <div class="bulletin ${b.severity}">
@@ -975,24 +909,34 @@ function renderHome() {
     <section class="section">
       <div class="section-head">
         <div>
-          <div class="section-title">Engagement portfolio</div>
-          <div class="section-sub">Every real engagement is a signed contract with a target system. Click through for the executive brief.</div>
+          <div class="section-title">Engagement Portfolio</div>
+          <div class="section-sub">Every real engagement is a signed contract with a target system.</div>
         </div>
         <span class="section-badge">${engs.length} engagements</span>
       </div>
-      <div class="grid">
-        ${engs.map((e) => renderEngagementCard(e)).join('')}
-      </div>
+      <div class="grid">${engs.map((e) => renderEngagementCard(e)).join('')}</div>
     </section>
   `;
 }
 
 function renderEngagementCard(e) {
   const total = findingsTotal(e.findings_summary);
-  const critPct = total ? (e.findings_summary.critical / total * 100) : 0;
-  const highPct = total ? (e.findings_summary.high / total * 100) : 0;
-  const medPct  = total ? (e.findings_summary.medium / total * 100) : 0;
-  const lowPct  = total ? (e.findings_summary.low / total * 100) : 0;
+  const bar = total === 0
+    ? `<div class="findings-bar"><div class="ok" style="width:100%"></div></div>`
+    : `<div class="findings-bar">
+        ${e.findings_summary.critical ? `<div class="crit" style="width:${e.findings_summary.critical/total*100}%"></div>` : ''}
+        ${e.findings_summary.high ? `<div class="high" style="width:${e.findings_summary.high/total*100}%"></div>` : ''}
+        ${e.findings_summary.medium ? `<div class="med" style="width:${e.findings_summary.medium/total*100}%"></div>` : ''}
+        ${e.findings_summary.low ? `<div class="low" style="width:${e.findings_summary.low/total*100}%"></div>` : ''}
+      </div>`;
+  const legend = total === 0
+    ? `<div class="findings-legend"><span class="count-ok">Clean · no findings surfaced</span></div>`
+    : `<div class="findings-legend">
+        ${e.findings_summary.critical ? `<span class="count-crit">${e.findings_summary.critical} critical</span>` : ''}
+        ${e.findings_summary.high ? `<span class="count-high">${e.findings_summary.high} high</span>` : ''}
+        ${e.findings_summary.medium ? `<span class="count-med">${e.findings_summary.medium} medium</span>` : ''}
+        ${e.findings_summary.low ? `<span>${e.findings_summary.low} low</span>` : ''}
+      </div>`;
   return `
     <div class="engagement-card" onclick="navigate('#/e/${esc(e.id)}')">
       <div class="card-head">
@@ -1003,44 +947,24 @@ function renderEngagementCard(e) {
         <span class="badge-status status-${esc(e.status)}">${esc(e.status)}</span>
       </div>
       <div class="theme">${esc(e.theme)}</div>
-      ${total > 0 ? `
-        <div>
-          <div class="findings-bar">
-            ${critPct ? `<div class="crit" style="width:${critPct}%"></div>` : ''}
-            ${highPct ? `<div class="high" style="width:${highPct}%"></div>` : ''}
-            ${medPct ? `<div class="med" style="width:${medPct}%"></div>` : ''}
-            ${lowPct ? `<div class="low" style="width:${lowPct}%"></div>` : ''}
-          </div>
-          <div class="findings-legend">
-            ${e.findings_summary.critical ? `<span class="count-crit">${e.findings_summary.critical} critical</span>` : ''}
-            ${e.findings_summary.high ? `<span class="count-high">${e.findings_summary.high} high</span>` : ''}
-            ${e.findings_summary.medium ? `<span class="count-med">${e.findings_summary.medium} medium</span>` : ''}
-            ${e.findings_summary.low ? `<span>${e.findings_summary.low} low</span>` : ''}
-          </div>
-        </div>
-      ` : `
-        <div>
-          <div class="findings-bar"><div class="ok" style="width:100%;background:var(--ok)"></div></div>
-          <div class="findings-legend"><span style="color: var(--ok); font-weight: 600;">Clean — no findings surfaced</span></div>
-        </div>
-      `}
+      <div>${bar}${legend}</div>
       <div class="card-footer">
         <div class="metric">
           <div><strong>${e.scenarios.length}</strong> scenarios</div>
           <div>opened <strong>${fmtDate(e.opened)}</strong></div>
         </div>
-        <div style="color: var(--accent); font-weight: 600; font-size: 12px;">Drill in →</div>
+        <div class="drill">Drill In →</div>
       </div>
     </div>
   `;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   ENGAGEMENT DETAIL VIEW
+   ENGAGEMENT DETAIL
    ═══════════════════════════════════════════════════════════════════════ */
 function renderEngagement(engagementId) {
   const e = KRONOS_DATA.engagements.find((x) => x.id === engagementId);
-  if (!e) return `<div style="padding:80px;text-align:center;color:var(--text-3)">Engagement not found.</div>`;
+  if (!e) return `<div style="padding:80px;text-align:center;color:var(--fg-dim)">Engagement not found.</div>`;
   const total = findingsTotal(e.findings_summary);
   return `
     <section class="detail-hero">
@@ -1070,12 +994,9 @@ function renderEngagement(engagementId) {
     <div class="two-col">
       <div>
         <div class="summary-panel">
-          <h3>Executive summary</h3>
-          <div class="prose">
-            ${e.executive_summary.map((p) => `<p>${esc(p)}</p>`).join('')}
-          </div>
+          <h3>Executive Summary</h3>
+          <div class="prose">${e.executive_summary.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
         </div>
-
         <div class="panel">
           <h3>Scenarios <span class="count">· ${e.scenarios.length}</span></h3>
           <div class="scenario-list">
@@ -1086,16 +1007,15 @@ function renderEngagement(engagementId) {
                   <h4>${esc(s.id)}: ${esc(s.name)}</h4>
                   <div class="meta">${esc(s.threat_class)}</div>
                 </div>
-                <div class="arrow">→</div>
+                <div class="arrow">›</div>
               </div>
             `).join('')}
           </div>
         </div>
       </div>
-
       <div>
         <div class="panel">
-          <h3>Findings summary</h3>
+          <h3>Findings Summary</h3>
           <div class="findings-summary">
             <div class="card crit"><div class="count">${e.findings_summary.critical}</div><div class="label">Critical</div></div>
             <div class="card high"><div class="count">${e.findings_summary.high}</div><div class="label">High</div></div>
@@ -1104,14 +1024,13 @@ function renderEngagement(engagementId) {
             <div class="card total"><div class="count">${total}</div><div class="label">Total</div></div>
           </div>
         </div>
-
         <div class="panel">
-          <h3>Scorecard delta</h3>
+          <h3>Scorecard Delta</h3>
           <div class="scorecard-pillars">
             ${renderScorecardPillar('A · Perimeter & Access', e.scorecard_delta.A)}
             ${renderScorecardPillar('B · Runtime Integrity', e.scorecard_delta.B)}
             ${renderScorecardPillar('C · Operational', e.scorecard_delta.C)}
-            ${renderScorecardPillar('D · Response Readiness', e.scorecard_delta.D)}
+            ${renderScorecardPillar('D · Response', e.scorecard_delta.D)}
           </div>
         </div>
       </div>
@@ -1124,15 +1043,13 @@ function renderScorecardPillar(title, dims) {
     <div class="scorecard-pillar">
       <h4>${esc(title)}</h4>
       ${Object.entries(dims).map(([dim, val]) => {
-        const before = val.before;
-        const after = val.after;
-        const dirn = before === after ? '=' : (after > before ? '↑' : '↓');
-        const dirClass = before === after ? '' : (after > before ? 'up' : 'down');
+        const dirn = val.before === val.after ? '=' : (val.after > val.before ? '↑' : '↓');
+        const dirClass = val.before === val.after ? '' : (val.after > val.before ? 'up' : 'down');
         return `
           <div class="dim-row">
             <span class="name">${esc(dim.replace(/_/g, ' '))}</span>
-            <span class="level level-${esc(after)}">${esc(after)}</span>
-            <span class="arrow ${dirClass}">${dirn}${before === after ? '' : ' from ' + esc(before)}</span>
+            <span class="level level-${esc(val.after)}">${esc(val.after)}</span>
+            <span class="arrow ${dirClass}">${dirn}${val.before === val.after ? '' : ' from ' + esc(val.before)}</span>
           </div>
         `;
       }).join('')}
@@ -1141,14 +1058,13 @@ function renderScorecardPillar(title, dims) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SCENARIO DETAIL VIEW
+   SCENARIO DETAIL
    ═══════════════════════════════════════════════════════════════════════ */
 function renderScenario(engagementId, scenarioId) {
   const e = KRONOS_DATA.engagements.find((x) => x.id === engagementId);
-  if (!e) return `<div style="padding:80px;text-align:center;color:var(--text-3)">Engagement not found.</div>`;
+  if (!e) return `<div style="padding:80px;text-align:center;color:var(--fg-dim)">Engagement not found.</div>`;
   const s = e.scenarios.find((x) => x.id === scenarioId);
-  if (!s) return `<div style="padding:80px;text-align:center;color:var(--text-3)">Scenario not found.</div>`;
-
+  if (!s) return `<div style="padding:80px;text-align:center;color:var(--fg-dim)">Scenario not found.</div>`;
   return `
     <section class="detail-hero">
       <div class="detail-hero-content">
@@ -1166,13 +1082,12 @@ function renderScenario(engagementId, scenarioId) {
     <div class="two-col">
       <div>
         <div class="summary-panel">
-          <h3>Oracle verdict</h3>
+          <h3>Oracle Verdict</h3>
           <div class="prose"><p>${esc(s.oracle_verdict)}</p></div>
         </div>
-
         <div class="panel">
           <h3>Findings <span class="count">· ${s.findings.length}</span></h3>
-          ${s.findings.length === 0 ? '<div style="color:var(--text-3);font-style:italic">No findings from this scenario — verdict is clean.</div>' :
+          ${s.findings.length === 0 ? '<div style="color:var(--fg-faint);font-style:italic">No findings from this scenario — verdict is clean.</div>' :
             s.findings.map((f) => `
               <div class="finding-card ${severityKey(f.severity)}">
                 <div class="head">
@@ -1180,25 +1095,19 @@ function renderScenario(engagementId, scenarioId) {
                   <h4>${esc(f.class)}</h4>
                 </div>
                 <div class="detail">${esc(f.detail)}</div>
-                ${Object.keys(f.evidence || {}).length > 0 ? `
-                  <div class="evidence">
-                    <pre>${esc(JSON.stringify(f.evidence, null, 2))}</pre>
-                  </div>
-                ` : ''}
+                ${Object.keys(f.evidence || {}).length > 0 ? `<div class="evidence"><pre>${esc(JSON.stringify(f.evidence, null, 2))}</pre></div>` : ''}
               </div>
             `).join('')}
         </div>
       </div>
-
       <div>
         <div class="panel">
-          <h3>Attack summary</h3>
-          <div class="md"><p>${esc(s.attack_summary)}</p></div>
+          <h3>Attack Summary</h3>
+          <div style="color: var(--fg-dim); font-size: 13px; line-height: 1.7;">${esc(s.attack_summary)}</div>
         </div>
-
         <div class="panel">
-          <h3>Evidence artifacts <span class="count">· ${s.artifacts.length}</span></h3>
-          ${s.artifacts.length === 0 ? '<div style="color:var(--text-3);font-style:italic">No artifacts.</div>' :
+          <h3>Evidence <span class="count">· ${s.artifacts.length}</span></h3>
+          ${s.artifacts.length === 0 ? '<div style="color:var(--fg-faint);font-style:italic">No artifacts.</div>' :
             `<div class="artifact-list">${s.artifacts.map((a) => `
               <div class="artifact-row">
                 <span class="kind">${esc(a.kind)}</span>
@@ -1215,7 +1124,7 @@ function renderScenario(engagementId, scenarioId) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   RENDER DISPATCH
+   DISPATCH
    ═══════════════════════════════════════════════════════════════════════ */
 function render() {
   const parsed = parseHash();
@@ -1223,15 +1132,13 @@ function render() {
   const page = document.getElementById('page');
   document.getElementById('asof-display').textContent = `as of ${fmtDate(KRONOS_DATA.as_of)}`;
   renderBreadcrumb();
-  if (parsed.view === 'engagement') { page.innerHTML = renderEngagement(parsed.engagementId); }
-  else if (parsed.view === 'scenario') { page.innerHTML = renderScenario(parsed.engagementId, parsed.scenarioId); }
-  else { page.innerHTML = renderHome(); }
+  if (parsed.view === 'engagement') page.innerHTML = renderEngagement(parsed.engagementId);
+  else if (parsed.view === 'scenario') page.innerHTML = renderScenario(parsed.engagementId, parsed.scenarioId);
+  else page.innerHTML = renderHome();
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
-document.getElementById('export-btn').addEventListener('click', () => {
-  window.print();
-});
+document.getElementById('export-btn').addEventListener('click', () => window.print());
 </script>
 </body>
 </html>
