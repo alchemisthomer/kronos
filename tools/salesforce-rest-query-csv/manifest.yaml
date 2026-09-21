@@ -1,0 +1,157 @@
+kind: kronos-tool
+apiVersion: v1
+
+metadata:
+  id: salesforce-rest-query-csv
+  version: 0.1.0
+  vendor: kronos
+  license: AGPL-3.0
+  homepage: https://github.com/alchemisthomer/kronos
+  description: >
+    Execute a SOQL statement against a Salesforce org's standard REST API
+    /query endpoint and emit the result set as CSV. Bounded read-only
+    reconnaissance primitive. v0.1 authenticates via SOAP login with
+    username + password + security token; future variants will accept
+    OAuth JWT / connected-app bearer.
+
+capabilities:
+  attack_classes:
+    - id: recon.enumeration.salesforce.soql
+      subclasses:
+        - record-enumeration
+        - sobject-field-visibility
+  api_family: salesforce.rest
+  endpoint: /services/data/v{{apiVersion}}/query
+  evidence_types:
+    - csv-recordset
+    - run-manifest
+  protocols_supported: [https]
+
+invocation:
+  binding_layer: 1
+  adapter: ./src/index.ts
+  invocation_type: subprocess
+  runtime: node
+  entry_command: ["npx", "tsx", "src/index.ts"]
+  timeout_seconds: 300
+
+  # Params-in contract. Every field here must have a corresponding argv flag.
+  # No shell interpolation; values pass as discrete argv entries.
+  argv:
+    - name: query
+      type: string
+      required: false
+      default: "SELECT FIELDS(ALL) FROM Account LIMIT 200"
+      description: SOQL statement to execute against /query.
+    - name: output
+      type: path
+      required: false
+      default: "./output/query.csv"
+      description: Destination CSV path. Parent directories created as needed.
+    - name: credentials
+      type: path
+      required: false
+      default: "./credentials/salesforce.json"
+      description: JSON file with {username, password, securityToken, loginUrl?}.
+    - name: login-url
+      type: string
+      required: false
+      default: "https://login.salesforce.com"
+      description: Salesforce login endpoint. Use https://test.salesforce.com for sandbox.
+    - name: api-version
+      type: string
+      required: false
+      default: "60.0"
+      description: Salesforce REST API version.
+    - name: manifest-out
+      type: path
+      required: false
+      default: null
+      description: If set, writes the run manifest JSON to this path in addition to stdout.
+
+  # Results-out contract. Artifacts written to disk plus a run-manifest JSON
+  # on the final line of stdout. See tools/README.md §Standard I/O contract.
+  outputs:
+    - name: csv-recordset
+      format: csv
+      path: "{{argv.output}}"
+      hash_algorithm: sha256
+    - name: run-manifest
+      format: json
+      channel: stdout
+      also_path: "{{argv.manifest-out}}"
+      hash_algorithm: sha256
+
+authorization:
+  requires_network:
+    - "{{argv.login-url}}"
+    - "*.salesforce.com"
+    - "*.force.com"
+    - "*.my.salesforce.com"
+  requires_credentials: true
+  requires_elevated_privilege: false
+  destructive_testing: false
+  # Read-only tool. Accepts engagements at authorization ceiling 0..2.
+  # Escalate to 3 if this tool is used for recon during destructive
+  # engagements — the tool itself never mutates state.
+  authorization_ceiling_max: 2
+
+# Per Claude review P1-1 (TOOL-BINDING.md §enumeration): the framework
+# should pair this tool with a paranoid unfiltered cross-check to detect
+# silent FLS/CRUD field drops. This tool does not implement reconciliation
+# itself — reconciliation lives in the harness above. Sibling variant
+# `salesforce-rest-query-recon` (not yet built) will drive the delta.
+enumeration:
+  reconcile: true
+  filter_variants:
+    - unfiltered            # ground truth via Tooling API describe (out of scope for this tool)
+    - fields-all            # this tool: SELECT FIELDS(ALL) — subject to FLS
+  delta_threshold: 0
+  delta_finding_severity: high
+
+sandbox:
+  recommended: process      # v0.1; container publication is a future concern
+  container_image: null
+  network_restrictions:
+    - allowlist:
+        - "*.salesforce.com"
+        - "*.force.com"
+        - "*.my.salesforce.com"
+        - "*.my.site.com"
+  resource_limits:
+    memory_mb: 512
+    cpu_cores: 1
+
+credentials:
+  # v0.1 defaults per Steward: local file on disk + optional env-var fallback.
+  # Both mechanisms are permitted until the secret-broker exists.
+  file_credentials_permitted: true
+  env_variables_permitted: true
+  env_variables_expected:
+    - KRONOS_SF_USERNAME
+    - KRONOS_SF_PASSWORD
+    - KRONOS_SF_SECURITY_TOKEN
+    - KRONOS_SF_LOGIN_URL          # optional; falls back to --login-url argv
+  credential_leakage_audit: true    # tool scrubs credential substrings from any error output
+
+evidence_mapping:
+  csv_recordset:
+    source_field: query.records
+    hash_algorithm: sha256
+    output_format: csv
+  run_manifest:
+    source_field: internal
+    hash_algorithm: sha256
+    output_format: json
+
+conformance:
+  # Golden-target verification per TOOL-BINDING.md §Tool conformance verification.
+  # Framework-side golden-target harness is not yet built.
+  golden_target_verified: false
+  last_verified_at: null
+
+runtime:
+  language: typescript
+  node_engine: ">=22.0.0"
+  package_dependencies:
+    - jsforce@^3
