@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# .githooks/pre-commit — blocks commits that contain client-identifying content
+# in a framework repo. Enable per-clone with:
+#
+#   git config core.hooksPath .githooks
+#
+# The hook delegates to scripts/verify-no-client-content.sh in --staged mode.
+# Failure exit blocks the commit. Bypass with --no-verify is DISCOURAGED and
+# will be flagged in review; see SECURITY.md.
+
+set -euo pipefail
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+VALIDATOR="$REPO_ROOT/scripts/verify-no-client-content.sh"
+
+if [ ! -x "$VALIDATOR" ]; then
+  echo "pre-commit: validator not executable at $VALIDATOR" >&2
+  echo "pre-commit: skipping — chmod +x the validator and re-run 'git commit'." >&2
+  exit 0
+fi
+
+echo "pre-commit: running content-isolation check on staged files..."
+if "$VALIDATOR" --staged; then
+  exit 0
+else
+  echo ""
+  echo "pre-commit: BLOCKED. See SECURITY.md and CLAUDE.md."
+  exit 1
+fi

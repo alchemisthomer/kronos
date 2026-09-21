@@ -40,17 +40,26 @@ Never `engagement/` at the root of this repository. See [`SECURITY.md`](SECURITY
 
 ## Content isolation guardrails
 
-Before opening any PR against this repository, run a text search over your diff for these substrings:
+The framework enforces isolation structurally at four layers (see [`SECURITY.md`](SECURITY.md) §Enforcement):
 
-```
-grep -rE "@[a-z][a-z0-9-]*\.(com|io|net|org|ai|co)" <files>       # real email domains
-grep -rE "00D[a-zA-Z0-9]{12,15}" <files>                          # Salesforce org Ids
-grep -rE "005[a-zA-Z0-9]{12,15}" <files>                          # Salesforce user Ids
-grep -rE "\.my\.salesforce\.com|\.my\.site\.com" <files>          # tenant hostnames
-grep -rE "credentials/[^.]+\.json$" <staged>                      # accidental cred files
+1. **`.gitignore`** blocks `/engagement/` at root plus credential and output paths.
+2. **Pre-commit hook** at [`.githooks/pre-commit`](.githooks/pre-commit) runs the validator on staged files.
+3. **GitHub Action** at [`.github/workflows/content-isolation.yml`](.github/workflows/content-isolation.yml) runs the validator on every PR — cannot be bypassed locally.
+4. **Review gate** on top.
+
+**Before opening any PR, run the validator manually as well** — the CI check is a safety net, not a substitute for local verification:
+
+```bash
+./scripts/verify-no-client-content.sh              # scan whole tree
+./scripts/verify-no-client-content.sh --staged     # scan just staged changes
+./scripts/verify-no-client-content.sh --diff origin/brain/2.7.x.x   # scan diff vs base
 ```
 
-If any hit is a real client identifier, **stop and remediate before pushing.** Dummy identifiers in examples (`acme`, `example-corp`, `00D000000000000AAA`, `005000000000000AAA`, `user@example.com`) are fine.
+The validator flags: Salesforce org Ids matching `00D...`, user Ids matching `005...`, real tenant hostnames matching `*.my.salesforce.com` / `*.my.site.com`, real credential files under `credentials/`, and any root-level `engagement/` folder. Dummy identifiers (`00D000000000000AAA`, `005000000000000AAA`, `example.my.salesforce.com`, `acme.my.salesforce.com`, `user@example.com`) are whitelisted.
+
+**If a hit is a real client identifier: stop. Do not push. Do not attempt to fix it with a follow-up commit that "removes" the string — the removed value stays in git history.** See [`SECURITY.md`](SECURITY.md) §"What to do if client-identifying content is committed here anyway" for the correct remediation.
+
+**Never bypass the hook with `--no-verify`.** The GitHub Action will still catch the violation, but the local bypass is itself a red flag.
 
 ## Related files
 

@@ -18,8 +18,18 @@ Thumbs.db
 /.tmp/
 *.bak
 
-# Tools — Node artifacts. Duplicates PR #5's tools/ gitignore rules; merging
-# either PR should be conflict-free.
+# ────────────────────────────────────────────────────────────────────
+# STRUCTURAL CONTENT-ISOLATION RULES — see SECURITY.md and CLAUDE.md.
+# Real engagement content MUST NOT be committed to this framework repo.
+# ────────────────────────────────────────────────────────────────────
+
+# Never publish a root-level engagement folder from this framework repo.
+# The template lives at templates/engagement/. Real engagements live in
+# adopter repos, not here. If you see this path in `git status`, delete it
+# and move the work to a per-client operator repo.
+/engagement/
+
+# Tools — Node artifacts.
 /tools/**/node_modules/
 /tools/**/dist/
 /tools/**/*.log

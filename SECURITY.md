@@ -29,12 +29,16 @@ Kronos operators run engagements in a separate workspace, following the framewor
 
 The framework tools in `tools/` are safe to publish here because their code is target-agnostic. Their `credentials/` directories carry `.gitignore` rules to prevent real credentials from ever being staged. Their `output/` directories are entirely gitignored.
 
-## Enforcement
+## Enforcement — four structural layers
 
-- **Pre-commit:** the `.gitignore` at repo root and in each `tools/*/credentials/` and `tools/*/output/` directory blocks the most common credential and extract paths. This is a safety net, not a primary control.
-- **Pre-PR:** contributors are expected to run a text search over their diff for known-sensitive substrings before opening a PR. A future GitHub Action in `actions/` will automate this.
-- **Post-PR:** reviewers check for client-identifying content before approving. Any PR that names a real target must be closed and the branch deleted immediately.
-- **AI operators (Claude Code and equivalents):** see [`CLAUDE.md`](CLAUDE.md) for the operator-agent-specific rules and the escalation protocol when the operator is asked to scaffold or author engagement content.
+The policy is enforced with layered controls, not just documentation. In order of when they fire:
+
+1. **`.gitignore` deny-list.** The repo-root `.gitignore` blocks `/engagement/` at the root outright (so accidentally creating an engagement folder here won't stage), plus per-tool blocks for `credentials/*.json` (except `.example.json`) and `output/*`. Files never enter the staging area.
+2. **Pre-commit hook.** [`.githooks/pre-commit`](.githooks/pre-commit) runs [`scripts/verify-no-client-content.sh`](scripts/verify-no-client-content.sh) `--staged` before every commit. Blocks the commit locally on any Salesforce Id / tenant hostname / credential-file / root-level-engagement violation. Every clone opts in with `git config core.hooksPath .githooks` (see [`.githooks/README.md`](.githooks/README.md)).
+3. **GitHub Action.** [`.github/workflows/content-isolation.yml`](.github/workflows/content-isolation.yml) runs the same validator on every push and PR against `brain/2.7.x.x` or `main`. Fails CI on any violation — cannot be bypassed at the developer's workstation. Even if a developer `--no-verify`s locally, CI catches the violation before merge.
+4. **Review gate.** Reviewers check for client-identifying content before approving. Any PR that names a real target must be closed and the branch deleted immediately (see incident-response section below).
+
+**AI operators (Claude Code and equivalents):** see [`CLAUDE.md`](CLAUDE.md) for the operator-agent-specific rules and the escalation protocol when the operator is asked to scaffold or author engagement content in this repo.
 
 ## What to do if client-identifying content is committed here anyway
 
