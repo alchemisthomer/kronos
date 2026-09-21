@@ -1,5 +1,21 @@
-// Duplicated from ../../salesforce-rest-query-csv/src/auth.ts for v0.1.
-// TODO: when a third salesforce tool arrives, hoist to tools/_shared/salesforce/auth.ts.
+/**
+ * Shared Salesforce credential loader for kronos framework-shipped tools.
+ *
+ * Two credential sources supported at v0.1:
+ *   1. File on disk (default): `credentials/salesforce.json` — gitignored
+ *      per each tool's `credentials/.gitignore`.
+ *   2. Environment variables (fallback): KRONOS_SF_{USERNAME, PASSWORD,
+ *      SECURITY_TOKEN, LOGIN_URL}.
+ *
+ * `redactCredentials()` scrubs the password, security token, and session
+ * id from any string before it hits stderr or the run manifest. Every
+ * kronos tool that emits credential-adjacent errors must pass its
+ * outbound strings through this function.
+ *
+ * Future: ephemeral scoped credentials via secure channel (FD, UDS,
+ * kernel keyring) or secret-broker reference, per TOOL-BINDING.md §Sandbox
+ * and isolation.
+ */
 
 import { readFileSync, existsSync } from 'node:fs';
 
@@ -46,25 +62,21 @@ export function loadCredentials(opts: LoadCredentialsOptions): SalesforceCredent
 
 function loadFromFile(path: string, loginUrlOverride: string | undefined): SalesforceCredentials {
   let raw: string;
-  try {
-    raw = readFileSync(path, 'utf8');
-  } catch (err) {
+  try { raw = readFileSync(path, 'utf8'); }
+  catch (err) {
     throw new CredentialError(
       `Failed to read credentials file at "${path}": ${(err as Error).message}`,
       'credentials-missing',
     );
   }
-
   let parsed: Record<string, unknown>;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (err) {
+  try { parsed = JSON.parse(raw); }
+  catch (err) {
     throw new CredentialError(
       `Credentials file at "${path}" is not valid JSON: ${(err as Error).message}`,
       'credentials-malformed',
     );
   }
-
   const missing = ['username', 'password', 'securityToken'].filter(
     (k) => typeof parsed[k] !== 'string' || (parsed[k] as string).length === 0,
   );
@@ -74,7 +86,6 @@ function loadFromFile(path: string, loginUrlOverride: string | undefined): Sales
       'credentials-incomplete',
     );
   }
-
   return {
     username: parsed['username'] as string,
     password: parsed['password'] as string,

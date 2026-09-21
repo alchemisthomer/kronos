@@ -26,7 +26,7 @@ import {
   loadCredentials,
   redactCredentials,
   type SalesforceCredentials,
-} from './auth.ts';
+} from '../../_shared/salesforce/auth.ts';
 
 const TOOL_ID = 'salesforce-rest-sobjects-describe';
 const TOOL_VERSION = '0.1.0';

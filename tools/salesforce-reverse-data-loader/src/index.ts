@@ -22,7 +22,7 @@ import {
   loadCredentials,
   redactCredentials,
   type SalesforceCredentials,
-} from './auth.ts';
+} from '../../_shared/salesforce/auth.ts';
 import {
   assessSobject,
   extractSobject,

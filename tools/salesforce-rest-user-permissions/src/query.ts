@@ -1,5 +1,5 @@
 import jsforce from 'jsforce';
-import type { SalesforceCredentials } from './auth.ts';
+import type { SalesforceCredentials } from '../../_shared/salesforce/auth.ts';
 
 /**
  * The Permissions* fields we care about on Profile and PermissionSet.

@@ -26,9 +26,9 @@ import {
   loadCredentials,
   redactCredentials,
   type SalesforceCredentials,
-} from './auth.ts';
+} from '../../_shared/salesforce/auth.ts';
 import { analyzeLoginHistory } from './analyze.ts';
-import { toCsv } from './csv.ts';
+import { toCsv } from '../../_shared/salesforce/csv.ts';
 import { queryLoginHistory } from './query.ts';
 import { renderMarkdown } from './report.ts';
 

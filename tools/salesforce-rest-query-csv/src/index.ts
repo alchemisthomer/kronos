@@ -19,8 +19,8 @@ import {
   loadCredentials,
   redactCredentials,
   type SalesforceCredentials,
-} from './auth.ts';
-import { toCsv } from './csv.ts';
+} from '../../_shared/salesforce/auth.ts';
+import { toCsv } from '../../_shared/salesforce/csv.ts';
 import { runQuery } from './query.ts';
 import {
   fileBytes,

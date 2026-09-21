@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
-import { detectCompoundFields, toCsv } from './csv.ts';
+import { detectCompoundFields, toCsv } from '../../_shared/salesforce/csv.ts';
 import {
   countRows,
   describeSobject,

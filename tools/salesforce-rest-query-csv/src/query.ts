@@ -1,5 +1,5 @@
 import jsforce from 'jsforce';
-import type { SalesforceCredentials } from './auth.ts';
+import type { SalesforceCredentials } from '../../_shared/salesforce/auth.ts';
 
 export interface RunQueryOptions {
   credentials: SalesforceCredentials;

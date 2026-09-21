@@ -25,9 +25,9 @@ import {
   loadCredentials,
   redactCredentials,
   type SalesforceCredentials,
-} from './auth.ts';
+} from '../../_shared/salesforce/auth.ts';
 import { analyzeUserPermissions } from './analyze.ts';
-import { toCsv } from './csv.ts';
+import { toCsv } from '../../_shared/salesforce/csv.ts';
 import {
   closeSession,
   openSession,
