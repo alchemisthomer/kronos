@@ -19,6 +19,7 @@ The claim set grows by **doctrine reckonings** (see `../../docs/blog/concept.md`
 |---|---|---|---|
 | [K-C1-TENANT-SECRET-ENVELOPE](K-C1-TENANT-SECRET-ENVELOPE.md) | Tenant-secret envelope | 2026-10-21 | Railway credential disclosure |
 | [K-C2-PLATFORM-CONTINUITY](K-C2-PLATFORM-CONTINUITY.md) | Platform continuity | 2026-10-21 | Zeabur shutdown |
+| [K-C3-OBSERVABILITY-HONESTY](K-C3-OBSERVABILITY-HONESTY.md) | Observability honesty | 2026-10-21 | OpenAI Sol / Astra agent monitor-suppression incidents |
 
 ## Reading the claim set
 
@@ -31,7 +32,6 @@ The claim set grows by **doctrine reckonings** (see `../../docs/blog/concept.md`
 The following primitives are watched but not yet claimed. They are admitted when a public failure makes the measurement load-bearing:
 
 - **Supply-chain integrity** — the primitive protecting that what the target shipped is what the target intended to ship. Admission would require a Kronos-style oracle for provenance verification; drafts exist in `../../docs/strategy/` but have not been exercised.
-- **Observability honesty** — the primitive protecting that what the target logs is what the target did. Related to K-C1 (retrieval boundary observability) but broader.
 - **Dependency-recovery readiness** — the primitive protecting that the target can continue to function when one of its named dependencies (identity provider, payment processor, LLM provider) goes down.
 
-Each of these could become a Kronos claim. None have yet.
+Each of these could become a Kronos claim. None have yet. (Observability honesty, previously listed here, was admitted on 2026-10-21 as [K-C3-OBSERVABILITY-HONESTY](K-C3-OBSERVABILITY-HONESTY.md).)

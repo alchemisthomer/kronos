@@ -88,6 +88,35 @@ Kronos never *reduces* a claim to its external identifiers. A Kronos claim alway
 | CIS Controls | **CIS 11 Data Recovery** | subtest (c) |
 | CSA CCM | **BCR (Business Continuity Management & Operational Resilience)** domain | all three subtests |
 
+### K-C3-OBSERVABILITY-HONESTY
+
+| Standard | Identifier | Relevance |
+|---|---|---|
+| OWASP Top 10 | **A09:2021 Security Logging & Monitoring Failures** | the primitive this claim measures |
+| OWASP ASVS | **V7 Error Handling and Logging** | subtests (a) and (c) |
+| MITRE CWE | **CWE-693 Protection Mechanism Failure** | subtest (a) failure mode |
+| MITRE CWE | **CWE-778 Insufficient Logging** | subtest (c) failure mode |
+| MITRE CWE | **CWE-779 Logging of Excessive Data** | adjacent (not directly tested but holder-relevant) |
+| MITRE CWE | **CWE-1053 Missing Documentation for Design** | the "T_detect must be pre-stated" element of subtest (c) |
+| MITRE ATT&CK | **T1562 Impair Defenses** | the attack class subtest (a) measures |
+| MITRE ATT&CK | **T1562.001 Disable or Modify Tools** | the Sol-incident shape |
+| MITRE ATT&CK | **T1562.002 Disable Windows Event Logging** | sibling, same primitive |
+| MITRE ATT&CK | **T1562.008 Disable or Modify Cloud Logs** | sibling, same primitive |
+| MITRE D3FEND | **D3-SICA System Internal Consistency Analysis** | the architectural posture subtest (b) requires |
+| NIST SP 800-53 | **AU-2 Event Logging** | all three subtests |
+| NIST SP 800-53 | **AU-6 Audit Review, Analysis, and Reporting** | subtest (c) |
+| NIST SP 800-53 | **AU-9 Protection of Audit Information** | subtest (a) |
+| NIST SP 800-53 | **AU-12 Audit Record Generation** | subtest (c) |
+| NIST SP 800-53 | **SI-4 System Monitoring** | subtest (c) heartbeat requirement |
+| NIST CSF 2.0 | **DE.CM Continuous Monitoring** | all three subtests |
+| NIST CSF 2.0 | **DE.AE Adverse Event Analysis** | subtest (c) |
+| ISO 27002:2022 | **8.15 Logging** | subtests (a) and (c) |
+| ISO 27002:2022 | **8.16 Monitoring activities** | subtests (b) and (c) |
+| SOC 2 | **CC7.2 Monitoring activities** | all three subtests |
+| SOC 2 | **CC7.3 Evaluating and communicating deficiencies** | subtest (b) |
+| CIS Controls | **CIS 8 Audit Log Management** | all three subtests |
+| CSA CCM | **LOG (Logging and Monitoring)** domain | all three subtests |
+
 ## How a post cites
 
 A Reckonings post that uses this mapping cites by identifier, not by URL (URLs rot; identifiers don't):
