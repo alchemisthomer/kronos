@@ -70,8 +70,23 @@ Zeabur named a second kind of ending. A platform does not only fail at the envel
 
 Zeabur is dead. The envelope is still live in every other system. The continuity claim is new in the claim set. Reckonings has moved. That is what today was.
 
+## In Response
+
+What the Operator (CloudPremise / Olympus-Grid) is doing about this:
+
+- **Nothing yet, honestly.** Olympus-Grid does not have a pre-published shutdown-criteria document. There is no `olympus-grid/CONTINUITY.md` naming the shutdown decision-maker, no stated `T_migrate` for a tenant off the Pantheon fleet, no stated `T_return` for `Identity__c` + `Memory__c` + `Conversation__c` + `TurtleshellProfile__c` data. Zeabur's reckoning today admitted K-C2 into the Kronos claim set; the Operator has not yet responded to the admission.
+- **Hardening in progress.** The EOS discipline (`foundation/eos/`) already treats continuity-adjacent concerns at the cycle-gate level (§5 planning phase includes an "assume you ship this and it breaks" step). What is missing is the specific document that would satisfy K-C2 subtest (a). Decision window: the next EOS cycle that opens after this post merges should include a cycle item to draft `olympus-grid/CONTINUITY.md`.
+- **Already covered — evidence pointer, partial.** For subtest (b) migration-off: tenant workloads on the olympus-grid managed package are already portable off Salesforce in theory (the package is 2GP + source-available under AGPL-3.0; a tenant could in principle self-host). Theoretical portability is not what K-C2 subtest (b) measures. A migration rehearsal has not been run; stated `T_migrate` would need to be derived from the rehearsal.
+- **Deliberate deferral.** For subtest (c) return-or-destroy: Olympus-Grid relies on Salesforce's own data-return and destruction tooling for the managed-package-held data (Setup → Data Export, API-driven data deletion). Attestation beyond "Salesforce's standard tooling was used" is not currently produced. The Operator has considered a bespoke destruction attestation and deferred it; condition for revisit: first real tenant off-boarding, or a Kronos engagement that scores K-C2.
+
+**Scorecard delta — Olympus-Grid on K-C2-PLATFORM-CONTINUITY:** L? → L? (unchanged). The L? persists until the continuity document exists and `O-PLATFORM-CONTINUITY` runs against Olympus-Grid.
+
+**Scorecard delta — Zeabur on K-C1-TENANT-SECRET-ENVELOPE:** L? → **L0 (permanent)**. Zeabur's shutdown means the evidence to move it will never be produced. This is the first permanent L0 in the Kronos scorecard — a sentence the discipline did not previously have grammatical room to utter.
+
 ---
 
 **Primary source:** [Zeabur](https://zeabur.com/) (shutdown announcement + disclosure statements; retrieved 2026-10-21).
+
+**Standards cross-reference:** OWASP SAMM Operations: Incident Management · CWE-1053 · NIST SP 800-53 CP-2, CP-9, CP-10, MP-6 · NIST SP 800-34 Rev. 1 · ISO 22301:2019 · ISO 27002:2022 §5.29 · SOC 2 CC9.1, A1.2 · CSA CCM BCR domain. Full mapping in [`../../methodology/STANDARDS.md`](../../methodology/STANDARDS.md).
 
 **Companion reckoning published same day:** [Railway's credential envelope collapsed](2026-10-21-railway-credential-envelope-collapse.md).

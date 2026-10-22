@@ -80,14 +80,17 @@ summary: <one paragraph; appears in post listings>
 ---
 ```
 
-The body must have four sections in this order:
+The body must have five sections in this order:
 
 1. **What happened.** A short, factual recounting. Links to authoritative sources (vendor status page, CVE, press release). No speculation beyond what has been publicly confirmed.
 2. **The primitive that failed.** Name the pattern. Describe it in general terms. State what it protects when it is intact and what it exposes when it collapses.
 3. **Who else holds this primitive.** Enumerate the class of systems that share the pattern. Say what each of them is doing right now, if known. If Kronos's own host (olympus-grid) is in the class, name it in the enumeration — no exceptions.
 4. **The reckoning.** What claim does Kronos make about this primitive? What oracle would evaluate it? What evidence would be sufficient? If a scorecard delta is being asserted, state it.
+5. **In Response.** What the Operator (CloudPremise / Olympus-Grid) is actually doing differently as a result of this incident. One or more of: *hardening in progress* (specific control change with target date), *already covered — evidence pointer* (specific control + what evidence would raise the Kronos score), *deliberate deferral* (why not now, condition for revisit), *nothing yet* (acknowledged gap, decision window). The In Response section is what makes Reckonings a working surface rather than outside commentary. Full semantics in [`../../operations/wakeup-protocol.md`](../../operations/wakeup-protocol.md).
 
 A post that cannot be written to that structure is not a reckoning. It is a draft.
+
+Each post also carries a trailing **Standards cross-reference** line enumerating the OWASP / CWE / NIST / ISO / SOC 2 identifiers the primitive maps to. The identifier format is strict (`OWASP A02:2021`, `CWE-312`, `NIST SP 800-53 SC-28`, `SOC 2 CC6.1`). The full mapping lives in [`../../methodology/STANDARDS.md`](../../methodology/STANDARDS.md).
 
 ## The index
 

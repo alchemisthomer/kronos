@@ -76,8 +76,21 @@ The claim is evaluated by an oracle, `O-ENVELOPE-INTEGRITY`, which runs three su
 
 That is the state of the envelope on 2026-10-21. Railway named the moment. Everyone else is next.
 
+## In Response
+
+What the Operator (CloudPremise / Olympus-Grid) is doing about this:
+
+- **Already covered — evidence pointer.** Olympus-Grid's outer boundary against unauthenticated and cross-tenant access is Ares (JWT validation + Site Guest profile + cookie→header middleware). The relevant controls are in `olympus-616/ares/api/src/middleware/` and `olympus-grid/force-app/idp/`. These address [OWASP A01:2021](https://owasp.org/Top10/A01_2021-Broken_Access_Control/) and NIST SP 800-53 AC-3/AC-4/IA-5. **What evidence would raise K-C1 subtest (a) from L? to L2:** running `O-ENVELOPE-INTEGRITY` subtest (a) under `external-anon` and `external-tenant` operator profiles against every endpoint that reads `Identity__c`, `IdentityToken__c`, `TurtleshellProfile__c`, or any `*_token*` field. That has not been done; the posture is honest-L?.
+- **Hardening in progress.** Nothing specific triggered by Railway's incident today. CloudPremise's cosmos-logos envelope (per-god Ed25519 sealed-box; see `olympus-616/athena/api/src/cosmos-logos/`) is architecturally stronger than the typical PaaS tenant-secret envelope on the inner boundary — but the same reasoning does not transfer to the Salesforce-side `Identity__c` token storage, which uses standard Salesforce field encryption posture.
+- **Deliberate deferral.** The retrieval-boundary audit requirement — append-only log with `(caller, callee, secret-id, retrieval-ts, retrieval-reason)` — is partially met by Plutus `LedgerEntry__c` emission but not with full attribution. The `retrieval-reason` field is currently inferred, not captured. A proposal to add explicit retrieval-reason attribution to Hermes forward is open as a Kronos finding; completion window: next EOS cycle.
+- **Nothing yet.** No synthetic-anomaly detection is in place for secret retrievals. The `T_detect` for a rogue retrieval of an `Identity__c.*_token__c` field is effectively unbounded today. The Operator acknowledges this and has not scheduled remediation.
+
+**Scorecard delta — Olympus-Grid on K-C1-TENANT-SECRET-ENVELOPE:** L? → L? (unchanged; this reckoning does not alter the state because no Kronos engagement has produced the evidence to move it). The L? persists until `O-ENVELOPE-INTEGRITY` runs against Olympus-Grid under the self-disclosure protocol.
+
 ---
 
 **Primary source:** [Railway](https://railway.com/) (status + disclosure statements; retrieved 2026-10-21).
+
+**Standards cross-reference:** OWASP A01:2021, A02:2021, A09:2021 · OWASP ASVS V2, V6, V9 · CWE-312, CWE-522, CWE-798, CWE-287, CWE-863 · MITRE ATT&CK T1552 · NIST SP 800-53 SC-28, IA-5, AU-2, AU-9 · SOC 2 CC6.1, CC6.6, CC6.7. Full mapping in [`../../methodology/STANDARDS.md`](../../methodology/STANDARDS.md).
 
 **Companion reckoning published same day:** [Zeabur's sunset is the same envelope, with greater scope and no path back](2026-10-21-zeabur-sunset-same-envelope.md).
