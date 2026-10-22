@@ -87,9 +87,22 @@ What the Operator (CloudPremise / Olympus-Grid) is doing about this:
 
 **Scorecard delta — Olympus-Grid on K-C1-TENANT-SECRET-ENVELOPE:** L? → L? (unchanged; this reckoning does not alter the state because no Kronos engagement has produced the evidence to move it). The L? persists until `O-ENVELOPE-INTEGRITY` runs against Olympus-Grid under the self-disclosure protocol.
 
+## Follow-up — 2026-10-22
+
+Scope of the Railway breach is now specifically attributed. Updates since the inaugural reckoning, drawn from Railway's status updates and from downstream reporting:
+
+- **Target class confirmed: AI inference provider keys.** Railway's own disclosure now describes the breach as *"an unauthorized third party may have accessed encrypted environment variables and, in some cases, decrypted them."* Downstream reporting (echoed on social, confirmed by multiple affected customers posting receipts) attributes the attacker's monetization strategy to API-key exfiltration specifically targeting LLM providers — OpenAI, Anthropic, OpenRouter — plus Stripe. One engineering lead reported receiving an AWS block notification for ≥3,000 Claude inference requests originating from stolen Railway-held keys.
+- **Non-key assets drained.** Approximately **$371,000 in cryptocurrency drained on 2026-10-21 at 19:36 UTC** from chain keys stored in Railway environment variables. The timestamp is specific; the drain was coordinated and fast.
+- **Builds staged restoration.** As of 2026-10-22, Railway restored builds first for Enterprise workspaces, then Pro customers. **Hobby, Free, and Trial customers remained unable to deploy** — which, in the K-C1 model, means those customers also could not *rotate* their exposed keys through Railway's own flow and had to work around platform-wide.
+- **Primitive confirmation.** The retrieval boundary described in K-C1 subtest (c) — *the moment plaintext is unsealed to a worker or build pipeline* — is exactly the surface that was reached. The attribution does not change what K-C1 names; it confirms that the primitive's weakest ring is where the real attacker was waiting.
+
+**Scorecard delta on this follow-up:** Railway remains at **L0** on K-C1. The additional detail does not move the score; it names the specific economic model the primitive's collapse enables. The AI-inference-key black market is now sufficiently liquid that an unrotated LLM key from a breached PaaS is cash — a fact the holder class should assume applies to them too.
+
+**Companion reckoning admitted 2026-10-22:** [PHP's runtime held, until frontier AI fuzzed its error paths](2026-10-22-php2shell-runtime-integrity-admission.md) — K-C4-RUNTIME-INTEGRITY. Noting here because the same AI-driven dynamic (frontier models closing the time-to-exploit gap on long-tail flaws) is the economic context behind both this Railway attribution and the PHP2Shell disclosure window.
+
 ---
 
-**Primary source:** [Railway](https://railway.com/) (status + disclosure statements; retrieved 2026-10-21).
+**Primary source:** [Railway](https://railway.com/) (status + disclosure statements; retrieved 2026-10-21, follow-up 2026-10-22).
 
 **Standards cross-reference:** OWASP A01:2021, A02:2021, A09:2021 · OWASP ASVS V2, V6, V9 · CWE-312, CWE-522, CWE-798, CWE-287, CWE-863 · MITRE ATT&CK T1552 · NIST SP 800-53 SC-28, IA-5, AU-2, AU-9 · SOC 2 CC6.1, CC6.6, CC6.7. Full mapping in [`../../methodology/STANDARDS.md`](../../methodology/STANDARDS.md).
 

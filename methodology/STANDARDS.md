@@ -117,6 +117,40 @@ Kronos never *reduces* a claim to its external identifiers. A Kronos claim alway
 | CIS Controls | **CIS 8 Audit Log Management** | all three subtests |
 | CSA CCM | **LOG (Logging and Monitoring)** domain | all three subtests |
 
+### K-C4-RUNTIME-INTEGRITY
+
+| Standard | Identifier | Relevance |
+|---|---|---|
+| OWASP Top 10 | **A03:2021 Injection** | subtest (a) — attacker-controlled bytes reaching the runtime |
+| OWASP Top 10 | **A08:2021 Software and Data Integrity Failures** | subtest (b) — error-path integrity |
+| OWASP ASVS | **V5 Validation, Sanitization and Encoding** | subtest (a) |
+| OWASP ASVS | **V10 Malicious Code** | all three subtests (adjacent) |
+| MITRE CWE | **CWE-416 Use After Free** | the archetypal subtest (b) + (c) failure mode; both PHP2Shell CVEs live here |
+| MITRE CWE | **CWE-787 Out-of-bounds Write** | subtest (a) classic failure |
+| MITRE CWE | **CWE-125 Out-of-bounds Read** | subtest (a) |
+| MITRE CWE | **CWE-120 Buffer Copy without Checking Size of Input** | subtest (a) |
+| MITRE CWE | **CWE-20 Improper Input Validation** | subtest (a) — upstream of memory corruption |
+| MITRE CWE | **CWE-754 Improper Check for Unusual or Exceptional Conditions** | subtest (b) |
+| MITRE CWE | **CWE-909 Missing Initialization of Resource** | subtest (c) |
+| MITRE ATT&CK | **T1190 Exploit Public-Facing Application** | the attack class K-C4 defends against |
+| MITRE ATT&CK | **T1203 Exploitation for Client Execution** | adjacent (client-side runtimes also in holder class) |
+| MITRE D3FEND | **D3-IOPM Input Output Policy Mapping** | subtest (a) |
+| NIST SP 800-53 | **SI-7 Software, Firmware, and Information Integrity** | all three subtests |
+| NIST SP 800-53 | **SI-10 Information Input Validation** | subtest (a) |
+| NIST SP 800-53 | **SI-16 Memory Protection** | subtest (b) + (c) |
+| NIST SP 800-53 | **SC-39 Process Isolation** | subtest (c) |
+| NIST SP 800-53 | **SR-3 Supply Chain Controls** | adjacent — patch cadence from upstream runtime CVEs |
+| NIST CSF 2.0 | **PR.PS-02 Software maintained** | L1 patch-cadence evidence |
+| NIST CSF 2.0 | **DE.CM-09 Computing hardware and software monitored** | L1 CVE-monitoring evidence |
+| ISO 27002:2022 | **8.9 Configuration Management** | L1 posture |
+| ISO 27002:2022 | **8.28 Secure coding** | subtest (a) |
+| SOC 2 | **CC7.1 System operations — monitoring** | L1 posture (CVE monitoring + patching) |
+| SOC 2 | **CC8.1 Change management** | L1 patch deployment |
+| CIS Controls | **CIS 7 Continuous Vulnerability Management** | L1 / L3 posture |
+| CIS Controls | **CIS 16 Application Software Security** | all three subtests |
+| CSA CCM | **AIS (Application & Interface Security)** domain | all three subtests |
+| CSA CCM | **TVM (Threat & Vulnerability Management)** domain | L1 / L3 posture |
+
 ## How a post cites
 
 A Reckonings post that uses this mapping cites by identifier, not by URL (URLs rot; identifiers don't):

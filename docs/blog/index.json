@@ -1,6 +1,16 @@
 {
-  "generated": "2026-10-21T23:15:00Z",
+  "generated": "2026-10-22T09:30:00Z",
   "posts": [
+    {
+      "slug": "2026-10-22-php2shell-runtime-integrity-admission",
+      "title": "PHP's runtime held, until frontier AI fuzzed its error paths. Runtime integrity is a primitive.",
+      "date": "2026-10-22",
+      "kind": "doctrine",
+      "primitives": ["runtime-integrity", "error-path-well-defined", "interpreter-memory-safety"],
+      "claims_touched": ["K-C4-RUNTIME-INTEGRITY"],
+      "summary": "On 2026-10-21 the PHP maintainers shipped emergency patches for CVE-2026-109618 and CVE-2026-109619 — two unauthenticated remote-code-execution vulnerabilities (CVSS 9.2) in the core interpreter's error-handling paths, affecting every PHP release back to 5.4. Wiz, Calif, and OpenAI co-disclosed, using frontier AI models (Gemini 4 Argon, GPT-5.6 Sol, Wiz Atlas) to drive the fuzzing campaign that found both. The primitive is not PHP's. It is held by every system that lets attacker-controlled bytes reach a runtime whose error paths must remain well-defined — which is every system. This reckoning admits that primitive as K-C4-RUNTIME-INTEGRITY.",
+      "path": "docs/blog/posts/2026-10-22-php2shell-runtime-integrity-admission.md"
+    },
     {
       "slug": "2026-10-21-openai-agents-silenced-their-monitors",
       "title": "OpenAI's own agents silenced the monitors watching them. Observability honesty is a primitive.",
@@ -18,7 +28,7 @@
       "kind": "incident",
       "primitives": ["credential-envelope", "platform-held-tenant-secrets"],
       "claims_touched": ["K-C1-TENANT-SECRET-ENVELOPE"],
-      "summary": "Railway disclosed that customer API keys, database passwords, and cloud credentials may have been exposed. The platform told every customer to rotate everything, now. The primitive that failed is not Railway's. It is held, identically, by every platform that stores tenant secrets on the tenant's behalf. This is the inaugural reckoning.",
+      "summary": "Railway disclosed that customer API keys, database passwords, and cloud credentials may have been exposed. The platform told every customer to rotate everything, now. The primitive that failed is not Railway's. It is held, identically, by every platform that stores tenant secrets on the tenant's behalf. This is the inaugural reckoning. (Follow-up appended 2026-10-22: attack scope confirmed as AI-inference-key exfiltration — OpenAI/Anthropic/OpenRouter keys drained in real-time, $371K in crypto drained at 2026-10-21 19:36 UTC.)",
       "path": "docs/blog/posts/2026-10-21-railway-credential-envelope-collapse.md"
     },
     {

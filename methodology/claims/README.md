@@ -20,6 +20,7 @@ The claim set grows by **doctrine reckonings** (see `../../docs/blog/concept.md`
 | [K-C1-TENANT-SECRET-ENVELOPE](K-C1-TENANT-SECRET-ENVELOPE.md) | Tenant-secret envelope | 2026-10-21 | Railway credential disclosure |
 | [K-C2-PLATFORM-CONTINUITY](K-C2-PLATFORM-CONTINUITY.md) | Platform continuity | 2026-10-21 | Zeabur shutdown |
 | [K-C3-OBSERVABILITY-HONESTY](K-C3-OBSERVABILITY-HONESTY.md) | Observability honesty | 2026-10-21 | OpenAI Sol / Astra agent monitor-suppression incidents |
+| [K-C4-RUNTIME-INTEGRITY](K-C4-RUNTIME-INTEGRITY.md) | Runtime integrity under attacker-controlled input | 2026-10-22 | PHP2Shell — CVE-2026-109618 + CVE-2026-109619 |
 
 ## Reading the claim set
 

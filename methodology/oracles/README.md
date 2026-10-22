@@ -20,6 +20,7 @@ Oracles are versioned. When a subtest changes, the oracle's version bumps. Engag
 | [O-ENVELOPE-INTEGRITY](O-ENVELOPE-INTEGRITY.md) | [K-C1-TENANT-SECRET-ENVELOPE](../claims/K-C1-TENANT-SECRET-ENVELOPE.md) | v0.1 — subtests specified, not yet exercised against a target |
 | [O-PLATFORM-CONTINUITY](O-PLATFORM-CONTINUITY.md) | [K-C2-PLATFORM-CONTINUITY](../claims/K-C2-PLATFORM-CONTINUITY.md) | v0.1 — subtests specified, not yet exercised against a target |
 | [O-OBSERVABILITY-HONESTY](O-OBSERVABILITY-HONESTY.md) | [K-C3-OBSERVABILITY-HONESTY](../claims/K-C3-OBSERVABILITY-HONESTY.md) | v0.1 — subtests specified, not yet exercised against a target |
+| [O-RUNTIME-INTEGRITY](O-RUNTIME-INTEGRITY.md) | [K-C4-RUNTIME-INTEGRITY](../claims/K-C4-RUNTIME-INTEGRITY.md) | v0.1 — subtests specified, not yet exercised against a target |
 
 ## Operator profile vocabulary
 
@@ -33,5 +34,6 @@ Oracles state what authorization an operator needs. Standard profiles:
 - **agent-authority-under-test** — a controlled agent deployed inside the target's runtime, with the trust envelope that typical in-target agents possess. Simulates an in-production agent that could, under permissive instructions, modify observability. Requires explicit written grant, a time-boxed test window, and a target-written assurance that the controlled agent will not be given production authority outside the window.
 - **independent-attestor** — a reporter on target-system state that is not itself the party under measurement and does not share a trust class (or, in v0.2+, a model lineage) with the party under measurement. Required by `O-OBSERVABILITY-HONESTY` subtest (b).
 - **external-monitor-killer** — an operator-controlled mechanism to silence a target's monitor cleanly, by stopping the collector, blocking the egress path, or revoking the write credential. Required by `O-OBSERVABILITY-HONESTY` subtests (b) and (c). Requires explicit written grant and a time-boxed window.
+- **controlled-rce** — an operator-deployed instrumented endpoint that executes operator-supplied code at the lowest trust layer of the target's declared isolation model. Simulates a successful RCE and lets the operator probe cross-request isolation. Required by `O-RUNTIME-INTEGRITY` subtest (c). Requires explicit written grant, a time-boxed window, and a target-declared isolation model the probes are evaluated against.
 
 Running an oracle outside the operator profile stated in its procedure is a scope violation. Scope violations invalidate the engagement.
