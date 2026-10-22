@@ -1,0 +1,25 @@
+{
+  "generated": "2026-10-21T20:10:00Z",
+  "posts": [
+    {
+      "slug": "2026-10-21-railway-credential-envelope-collapse",
+      "title": "Railway's credential envelope collapsed. Every PaaS holds the same envelope.",
+      "date": "2026-10-21",
+      "kind": "incident",
+      "primitives": ["credential-envelope", "platform-held-tenant-secrets"],
+      "claims_touched": ["K-C1-TENANT-SECRET-ENVELOPE"],
+      "summary": "Railway disclosed that customer API keys, database passwords, and cloud credentials may have been exposed. The platform told every customer to rotate everything, now. The primitive that failed is not Railway's. It is held, identically, by every platform that stores tenant secrets on the tenant's behalf. This is the inaugural reckoning.",
+      "path": "docs/blog/posts/2026-10-21-railway-credential-envelope-collapse.md"
+    },
+    {
+      "slug": "2026-10-21-zeabur-sunset-same-envelope",
+      "title": "Zeabur's sunset is the same envelope, with greater scope and no path back",
+      "date": "2026-10-21",
+      "kind": "incident",
+      "primitives": ["credential-envelope", "platform-held-tenant-secrets", "platform-continuity"],
+      "claims_touched": ["K-C1-TENANT-SECRET-ENVELOPE", "K-C2-PLATFORM-CONTINUITY"],
+      "summary": "Zeabur announced on 2026-10-21 that it is shutting down following a breach that exposed 321,810 accounts and roughly 3.2 million environment-variable records. This is the same credential-envelope primitive that collapsed at Railway on the same day, and it is also a second primitive — platform continuity — which Kronos is admitting into the claim set with this post.",
+      "path": "docs/blog/posts/2026-10-21-zeabur-sunset-same-envelope.md"
+    }
+  ]
+}
