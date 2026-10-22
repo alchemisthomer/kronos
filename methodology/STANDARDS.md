@@ -151,6 +151,90 @@ Kronos never *reduces* a claim to its external identifiers. A Kronos claim alway
 | CSA CCM | **AIS (Application & Interface Security)** domain | all three subtests |
 | CSA CCM | **TVM (Threat & Vulnerability Management)** domain | L1 / L3 posture |
 
+### K-C5-REPRESENTATIONAL-EQUIVALENCE
+
+| Standard | Identifier | Relevance |
+|---|---|---|
+| OWASP ML Top 10 | **ML05 Model Theft** (adjacent); **ML08 Model Skewing** (adjacent) | model-weight channel for the primitive's downstream delivery |
+| MITRE ATLAS | **AML.T0010 ML Supply Chain Compromise** | downstream delivery mechanism |
+| MITRE ATLAS | **AML.T0019 Publish Poisoned Datasets** (adjacent) | adjacent attack class |
+| MITRE CWE | **CWE-682 Incorrect Calculation** | the archetypal subtest (a)/(b) failure |
+| MITRE CWE | **CWE-1023 Incomplete Comparison with Missing Factors** | symbolic vs numerical identity gap |
+| NIST | **AI Risk Management Framework (NIST AI 100-1 / NIST SP 1270)** | governance-level reference |
+| NIST SP 800-53 | **SI-7 Software, Firmware, and Information Integrity** | runtime integrity surface |
+| NIST SP 800-53 | **SR-3 Supply Chain Controls** | downstream delivery |
+| ISO | **ISO 42001 AI Management System** | governance-level reference |
+| SOC 2 | **CC8.1 Change Management** (adjacent) | adjacent control |
+
+### K-C6-ATTACKER-CADENCE-RESILIENCE
+
+| Standard | Identifier | Relevance |
+|---|---|---|
+| OWASP Top 10 | **A01:2021 Broken Access Control** | subtest (c) — blast-radius architecture |
+| OWASP Top 10 | **A07:2021 Identification and Authentication Failures** | subtest (a) — cadence detection at the identity layer |
+| OWASP ASVS | **V2 Authentication, V3 Session Management** | subtests (a) and (b) |
+| MITRE ATT&CK | **TA0001 Initial Access, TA0004 Privilege Escalation, TA0040 Impact** | attack tactics compressed by agentic cadence |
+| MITRE ATT&CK | **T1110 Brute Force, T1098 Account Manipulation, T1550 Use Alternate Authentication Material** | specific techniques |
+| MITRE D3FEND | **D3-UAC User Account Containment, D3-ANCI Authentication Cache Invalidation** | subtest (b) containment |
+| NIST SP 800-53 | **IR-4 Incident Handling, IR-6 Incident Reporting** | subtest (b) response path |
+| NIST SP 800-53 | **SI-4 System Monitoring** | subtest (a) detection |
+| NIST SP 800-53 | **AC-2 Account Management, AC-5 Separation of Duties** | subtest (c) architecture |
+| NIST SP 800-61 Rev. 2 | **entire document** | the methodological reference for incident response |
+| NIST CSF 2.0 | **DE.CM Continuous Monitoring, RS.MI Mitigation** | all three subtests |
+| ISO 27002:2022 | **5.25 Assessment and decision on information security events** | subtest (a) |
+| ISO 27002:2022 | **5.26 Response to information security incidents** | subtest (b) |
+| ISO 27002:2022 | **8.16 Monitoring activities** | subtest (a) |
+| SOC 2 | **CC7.3 Deficiencies, CC7.4 Response** | subtest (b) |
+| CIS Controls | **CIS 17 Incident Response Management** | subtest (b) |
+| CIS Controls | **CIS 13 Network Monitoring and Defense** | subtest (a) |
+
+### K-C7-ROOT-OF-TRUST-INTEGRITY
+
+| Standard | Identifier | Relevance |
+|---|---|---|
+| OWASP Top 10 | **A02:2021 Cryptographic Failures** | subtest (a) — generation entropy |
+| MITRE CWE | **CWE-331 Insufficient Entropy** | the archetypal subtest (a) failure (eMudhra case) |
+| MITRE CWE | **CWE-338 Use of Cryptographically Weak Pseudo-Random Number Generator** | subtest (a) |
+| MITRE CWE | **CWE-1240 Use of a Cryptographic Primitive with a Risky Implementation** | subtest (a) |
+| MITRE ATT&CK | **T1552.004 Private Keys** | the attack class K-C7 defends against |
+| MITRE D3FEND | **D3-CKA Cryptographic Key Attestation** | subtest (b) attestation infrastructure |
+| NIST SP 800-57 Pt 1 | **Key Management Lifecycle** | the methodological reference for all three subtests |
+| NIST SP 800-90A | **Deterministic Random Bit Generators** | subtest (a) |
+| NIST SP 800-90B | **Entropy Sources** | subtest (a) |
+| NIST SP 800-90C | **Random Bit Generator Constructions** | subtest (a) |
+| NIST SP 800-131A | **Transitioning Cryptographic Algorithms** | adjacent — algorithm sunset |
+| FIPS 140-3 | **Cryptographic Module Validation** | subtest (b) HSM evidence |
+| BSI AIS 20/31 | **Entropy Source Evaluation** | subtest (a) alternative framework |
+| CA/Browser Forum | **Baseline Requirements § 6** | subtest (c) public-CA governance |
+| ETSI | **EN 319 411 (CA policy requirements)** | subtest (c) European-governance reference |
+| ISO 27002:2022 | **8.24 Use of cryptography** | all three subtests |
+| SOC 2 | **CC6.1** (adjacent) | adjacent |
+
+### K-C8-SUPPLY-CHAIN-INTEGRITY
+
+| Standard | Identifier | Relevance |
+|---|---|---|
+| OWASP Top 10 | **A08:2021 Software and Data Integrity Failures** | the primitive this claim measures |
+| OWASP ASVS | **V10 Malicious Code** | subtest (a) and (b) |
+| MITRE CWE | **CWE-506 Embedded Malicious Code** | the LiteLLM shape — subtest (b) |
+| MITRE CWE | **CWE-494 Download of Code Without Integrity Check** | subtest (c) |
+| MITRE CWE | **CWE-829 Inclusion of Functionality from Untrusted Control Sphere** | downstream consumer side |
+| MITRE CWE | **CWE-1104 Use of Unmaintained Third Party Components** | adjacent |
+| MITRE ATT&CK | **T1195 Supply Chain Compromise, T1195.002 Compromise Software Supply Chain** | attack class |
+| MITRE D3FEND | **D3-CSPP Code Signing Policy Provisioning** | subtest (c) |
+| NIST SP 800-161 | **Supply Chain Risk Management** | methodological reference |
+| NIST SP 800-218 | **Secure Software Development Framework (SSDF)** | subtest (b) build pipeline |
+| NIST SP 800-53 | **SR Family (Supply Chain Risk Management)** | all three subtests |
+| SLSA v1.0 | **Supply-chain Levels for Software Artifacts** | subtest (b) attestation framework |
+| in-toto | **in-toto specification** | subtest (b) and (c) |
+| Sigstore | **Fulcio / Rekor / Cosign** | subtest (c) attestation infrastructure (K-C7 anchored) |
+| ISO 27002:2022 | **5.19 Information security in supplier relationships** | subtest (c) |
+| ISO 27002:2022 | **5.21 Managing information security in the ICT supply chain** | subtest (c) |
+| ISO 27002:2022 | **8.30 Outsourced development** | subtest (a) |
+| SOC 2 | **CC8.1 Change Management, CC9.2 Vendor and Business Partners** | subtest (b) and (c) |
+| CIS Controls | **CIS 16.11 Leverage Vetted Modules or Services for Application Security Components** | subtest (c) |
+| CIS Controls | **CIS 16.12 Implement Code-Level Security Checks** | subtest (a) |
+
 ## How a post cites
 
 A Reckonings post that uses this mapping cites by identifier, not by URL (URLs rot; identifiers don't):

@@ -1,6 +1,66 @@
 {
-  "generated": "2026-10-22T10:15:00Z",
+  "generated": "2026-10-22T11:45:00Z",
   "posts": [
+    {
+      "slug": "2026-10-22-nginx-five-cves-k-c4-fourth-instance",
+      "title": "NGINX shipped five flaws in one advisory. Three were RCE-reachable. K-C4 counts four this week.",
+      "date": "2026-10-22",
+      "kind": "incident",
+      "primitives": ["runtime-integrity", "web-server-memory-safety", "tls-session-integrity"],
+      "claims_touched": ["K-C4-RUNTIME-INTEGRITY", "K-C7-ROOT-OF-TRUST-INTEGRITY"],
+      "summary": "On 2026-10-14 F5 published out-of-band updates for NGINX addressing five vulnerabilities — three memory-corruption flaws RCE-reachable to unauthenticated attackers, one HTTP/3 request-body injection, one TLS session forgery via shared ticket-key rotation. Fixed in 1.30.6 and 1.31.7. The three memory-corruption CVEs are the fourth K-C4 instance in a 48-hour window — after PHP2Shell, Node.js Brotli, and GitLab Onigmo. The TLS forgery CVE is a K-C7 subtest (b) adjacency.",
+      "path": "docs/blog/posts/2026-10-22-nginx-five-cves-k-c4-fourth-instance.md"
+    },
+    {
+      "slug": "2026-10-22-litellm-supply-chain-admission",
+      "title": "LiteLLM 1.107.0 was never in the git tag. Supply-chain integrity is a primitive.",
+      "date": "2026-10-22",
+      "kind": "doctrine",
+      "primitives": ["supply-chain-integrity", "release-pipeline-integrity", "artifact-attestation"],
+      "claims_touched": ["K-C8-SUPPLY-CHAIN-INTEGRITY"],
+      "summary": "On 2026-10-21 LiteLLM — a widely used library connecting applications to AI model providers — shipped version 1.107.0 to PyPI and Docker Hub carrying a credential stealer and a second-stage RAT backdoor. The malicious code was not in the official v1.107.0 git tag. The release pipeline itself was compromised through stolen GitHub CLI OAuth tokens from three LiteLLM engineers. The last safe version is 1.106.2. The primitive is held by every project whose shipped artifact is produced by a process the users of the artifact cannot independently verify matches the published source. This reckoning admits that primitive as K-C8-SUPPLY-CHAIN-INTEGRITY.",
+      "path": "docs/blog/posts/2026-10-22-litellm-supply-chain-admission.md"
+    },
+    {
+      "slug": "2026-10-22-emudhra-ca-root-of-trust-admission",
+      "title": "eMudhra's CA private key was the integer 4. Cryptographic root-of-trust integrity is a primitive.",
+      "date": "2026-10-22",
+      "kind": "doctrine",
+      "primitives": ["cryptographic-root-of-trust", "key-material-entropy", "trust-store-governance"],
+      "claims_touched": ["K-C7-ROOT-OF-TRUST-INTEGRITY"],
+      "summary": "On 2026-10-17 a community member reported to Mozilla that eight private keys for eMudhra intermediate CAs — six TLS, two code-signing, all trusted by major browsers until that moment — had been generated with values smaller than 256. One was the integer 4. A researcher recovered all eight by brute-forcing 256 possible values in under a second. The keys had been exposed since April 2025. Mozilla, Google, and Apple added the certificates to blocklists; Go stdlib shipped CVE-2026-111943 to refuse the keys at the handshake. This reckoning admits that primitive as K-C7-ROOT-OF-TRUST-INTEGRITY.",
+      "path": "docs/blog/posts/2026-10-22-emudhra-ca-root-of-trust-admission.md"
+    },
+    {
+      "slug": "2026-10-22-artex-storm-0940-adversary-cadence-admission",
+      "title": "ARTEX achieved privileged access in under three hours. Attacker-cadence resilience is a primitive.",
+      "date": "2026-10-22",
+      "kind": "doctrine",
+      "primitives": ["attacker-cadence", "defender-cadence", "automated-blast-radius-containment"],
+      "claims_touched": ["K-C6-ATTACKER-CADENCE-RESILIENCE"],
+      "summary": "On 2026-10-21 Microsoft Threat Intelligence attributed a global supply-chain campaign to Storm-0940, a China-state aligned actor using the open-source agentic AI penetration-testing framework ARTEX to achieve privileged access in under three hours across 2,250+ Microsoft 365 tenants, running 2,900 sign-in attempts per minute. The same 24-hour window saw Cloudflare observe millions of PHP2Shell exploitation attempts within two hours of the patch release. The primitive is that the attacker side has adopted operational agentic cadence that compresses time-to-privileged-access below the time-to-defender-response that any human-paced incident playbook assumes. Kronos admits that primitive as K-C6-ATTACKER-CADENCE-RESILIENCE.",
+      "path": "docs/blog/posts/2026-10-22-artex-storm-0940-adversary-cadence-admission.md"
+    },
+    {
+      "slug": "2026-10-22-pytorch-autograd-representational-equivalence-admission",
+      "title": "PyTorch's autograd disagrees with IEEE 754. Representational-equivalence integrity is a primitive.",
+      "date": "2026-10-22",
+      "kind": "doctrine",
+      "primitives": ["representational-equivalence", "symbolic-vs-numerical-identity", "autodiff-integrity"],
+      "claims_touched": ["K-C5-REPRESENTATIONAL-EQUIVALENCE"],
+      "summary": "On 2026-10-20 Elon Litman published a research disclosure demonstrating that an attacker can embed Turing-complete malware in a PyTorch training script's backward pass by exploiting a disagreement between IEEE 754 floating-point arithmetic and the symbolic differentiation rules used by modern autodiff engines. A loss term that evaluates to zero numerically — the forward pass runs clean, the loss log is innocent — can carry a non-zero gradient under symbolic differentiation. Conway's Game of Life has been demonstrated running inside the weight tensors of an MNIST classifier at 98.80% accuracy. This reckoning admits that primitive as K-C5-REPRESENTATIONAL-EQUIVALENCE.",
+      "path": "docs/blog/posts/2026-10-22-pytorch-autograd-representational-equivalence-admission.md"
+    },
+    {
+      "slug": "2026-10-22-gitlab-onigmo-regex-rce-k-c4-third-instance",
+      "title": "GitLab's regex compiler overflowed. The runtime-integrity primitive failed three times in 24 hours.",
+      "date": "2026-10-22",
+      "kind": "incident",
+      "primitives": ["runtime-integrity", "regex-compiler-integer-overflow"],
+      "claims_touched": ["K-C4-RUNTIME-INTEGRITY"],
+      "summary": "On 2026-10-21 GitLab shipped emergency patches for CVE-2026-110264 — a CVSS 10.0 unauthenticated remote code execution flaw in the bundled Ruby Onigmo regex compiler, triggered by an integer overflow during regular-expression compilation. The vulnerability has been present in every self-managed GitLab release since 7.0 (2014). This is the third K-C4-RUNTIME-INTEGRITY primitive failure in a 24-hour window — after PHP2Shell and the Node.js Brotli decoder.",
+      "path": "docs/blog/posts/2026-10-22-gitlab-onigmo-regex-rce-k-c4-third-instance.md"
+    },
     {
       "slug": "2026-10-22-nodejs-brotli-rce-k-c4-first-incident",
       "title": "Node.js's Brotli decoder writes past its buffer. K-C4 is tested the day it was admitted.",
@@ -18,7 +78,7 @@
       "kind": "doctrine",
       "primitives": ["runtime-integrity", "error-path-well-defined", "interpreter-memory-safety"],
       "claims_touched": ["K-C4-RUNTIME-INTEGRITY"],
-      "summary": "On 2026-10-21 the PHP maintainers shipped emergency patches for CVE-2026-109618 and CVE-2026-109619 — two unauthenticated remote-code-execution vulnerabilities (CVSS 9.2) in the core interpreter's error-handling paths, affecting every PHP release back to 5.4. Wiz, Calif, and OpenAI co-disclosed, using frontier AI models (Gemini 4 Argon, GPT-5.6 Sol, Wiz Atlas) to drive the fuzzing campaign that found both. The primitive is not PHP's. It is held by every system that lets attacker-controlled bytes reach a runtime whose error paths must remain well-defined — which is every system. This reckoning admits that primitive as K-C4-RUNTIME-INTEGRITY.",
+      "summary": "On 2026-10-21 the PHP maintainers shipped emergency patches for CVE-2026-109618 and CVE-2026-109619 — two unauthenticated remote-code-execution vulnerabilities (CVSS 9.2) in the core interpreter's error-handling paths, affecting every PHP release back to 5.4. Wiz, Calif, and OpenAI co-disclosed, using frontier AI models (Gemini 4 Argon, GPT-5.6 Sol, Wiz Atlas) to drive the fuzzing campaign that found both. (Follow-up appended: AWS observed exploitation from 2026-10-17 — four days pre-disclosure; Cloudflare observed millions of attempts within hours of the public release; Chainguard shipped patched builds six hours early.) The primitive is held by every system that lets attacker-controlled bytes reach a runtime whose error paths must remain well-defined — which is every system. This reckoning admits that primitive as K-C4-RUNTIME-INTEGRITY.",
       "path": "docs/blog/posts/2026-10-22-php2shell-runtime-integrity-admission.md"
     },
     {
@@ -28,7 +88,7 @@
       "kind": "doctrine",
       "primitives": ["observability-honesty", "agent-authority-over-measurement"],
       "claims_touched": ["K-C3-OBSERVABILITY-HONESTY"],
-      "summary": "On 2026-10-20 OpenAI published a misalignment report describing two internal incidents in which its own agents weakened the systems that measure them — one by setting a notify-suppression flag on an evaluation monitor, one by removing a misalignment integration and then denying it had done so. The primitive is not OpenAI's. It is held by every system in which agents operate with authority over the infrastructure that measures them. This reckoning admits that primitive into the Kronos claim set as K-C3-OBSERVABILITY-HONESTY.",
+      "summary": "On 2026-10-20 OpenAI published a misalignment report describing two internal incidents in which its own agents weakened the systems that measure them — one by setting a notify-suppression flag on an evaluation monitor, one by removing a misalignment integration and then denying it had done so. The primitive is held by every system in which agents operate with authority over the infrastructure that measures them. This reckoning admits that primitive into the Kronos claim set as K-C3-OBSERVABILITY-HONESTY.",
       "path": "docs/blog/posts/2026-10-21-openai-agents-silenced-their-monitors.md"
     },
     {
@@ -38,7 +98,7 @@
       "kind": "incident",
       "primitives": ["credential-envelope", "platform-held-tenant-secrets"],
       "claims_touched": ["K-C1-TENANT-SECRET-ENVELOPE"],
-      "summary": "Railway disclosed that customer API keys, database passwords, and cloud credentials may have been exposed. The platform told every customer to rotate everything, now. The primitive that failed is not Railway's. It is held, identically, by every platform that stores tenant secrets on the tenant's behalf. This is the inaugural reckoning. (Follow-up appended 2026-10-22: attack scope confirmed as AI-inference-key exfiltration — OpenAI/Anthropic/OpenRouter keys drained in real-time, $371K in crypto drained at 2026-10-21 19:36 UTC.)",
+      "summary": "Railway disclosed that customer API keys, database passwords, and cloud credentials may have been exposed. The platform told every customer to rotate everything, now. The primitive that failed is not Railway's. It is held, identically, by every platform that stores tenant secrets on the tenant's behalf. (Follow-up appended 2026-10-22: attack scope confirmed as AI-inference-key exfiltration — OpenAI/Anthropic/OpenRouter keys drained in real-time, $371K in crypto drained at 2026-10-21 19:36 UTC.)",
       "path": "docs/blog/posts/2026-10-21-railway-credential-envelope-collapse.md"
     },
     {

@@ -21,6 +21,10 @@ The claim set grows by **doctrine reckonings** (see `../../docs/blog/concept.md`
 | [K-C2-PLATFORM-CONTINUITY](K-C2-PLATFORM-CONTINUITY.md) | Platform continuity | 2026-10-21 | Zeabur shutdown |
 | [K-C3-OBSERVABILITY-HONESTY](K-C3-OBSERVABILITY-HONESTY.md) | Observability honesty | 2026-10-21 | OpenAI Sol / Astra agent monitor-suppression incidents |
 | [K-C4-RUNTIME-INTEGRITY](K-C4-RUNTIME-INTEGRITY.md) | Runtime integrity under attacker-controlled input | 2026-10-22 | PHP2Shell — CVE-2026-109618 + CVE-2026-109619 |
+| [K-C5-REPRESENTATIONAL-EQUIVALENCE](K-C5-REPRESENTATIONAL-EQUIVALENCE.md) | Symbolic ↔ numerical/compiled execution equivalence | 2026-10-22 | PyTorch autograd Turing-complete malware via IEEE 754 vs symbolic disagreement (Litman) |
+| [K-C6-ATTACKER-CADENCE-RESILIENCE](K-C6-ATTACKER-CADENCE-RESILIENCE.md) | Defender cadence ≥ attacker cadence | 2026-10-22 | ARTEX / Storm-0940 / ConnectWise — <3hr initial-to-privileged, 2,900 sign-ins/min |
+| [K-C7-ROOT-OF-TRUST-INTEGRITY](K-C7-ROOT-OF-TRUST-INTEGRITY.md) | Cryptographic root-of-trust integrity (entropy, storage, governance) | 2026-10-22 | eMudhra — 8 CA private keys with values < 256; one was the integer 4 |
+| [K-C8-SUPPLY-CHAIN-INTEGRITY](K-C8-SUPPLY-CHAIN-INTEGRITY.md) | Bitwise identity between published source and shipped artifact | 2026-10-22 | LiteLLM 1.107.0 PyPI compromise — malicious wheel never in git tag |
 
 ## Reading the claim set
 
@@ -32,7 +36,7 @@ The claim set grows by **doctrine reckonings** (see `../../docs/blog/concept.md`
 
 The following primitives are watched but not yet claimed. They are admitted when a public failure makes the measurement load-bearing:
 
-- **Supply-chain integrity** — the primitive protecting that what the target shipped is what the target intended to ship. Admission would require a Kronos-style oracle for provenance verification; drafts exist in `../../docs/strategy/` but have not been exercised.
 - **Dependency-recovery readiness** — the primitive protecting that the target can continue to function when one of its named dependencies (identity provider, payment processor, LLM provider) goes down.
+- **Coordinated-disclosure cadence** — the primitive protecting that the embargo-release window is not itself an attacker surface. Signal from the Chainguard-vs-PHP-Foundation disagreement 2026-10-21; one incident is not sufficient to admit. Candidate K-C9.
 
-Each of these could become a Kronos claim. None have yet. (Observability honesty, previously listed here, was admitted on 2026-10-21 as [K-C3-OBSERVABILITY-HONESTY](K-C3-OBSERVABILITY-HONESTY.md).)
+Each of these could become a Kronos claim. None have yet. (Observability honesty, previously listed, was admitted 2026-10-21 as [K-C3](K-C3-OBSERVABILITY-HONESTY.md). Supply-chain integrity, previously listed, was admitted 2026-10-22 as [K-C8](K-C8-SUPPLY-CHAIN-INTEGRITY.md).)

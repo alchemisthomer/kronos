@@ -109,6 +109,16 @@ What the Operator (CloudPremise / Olympus-Grid) is doing about this:
 
 **Scorecard delta — Olympus-Grid on K-C4-RUNTIME-INTEGRITY:** admitted at L?. L? persists until `O-RUNTIME-INTEGRITY` runs under the self-disclosure protocol.
 
+## Follow-up — 2026-10-22
+
+Facts emerged within the same 24-hour window that materially re-frame the PHP2Shell disclosure:
+
+- **Active exploitation preceded the public disclosure by four days.** AWS honeypot sensors observed exploitation attempts dating back to **2026-10-17** — meaning attackers held and used the vulnerability for the full embargo window, during which defenders had no public knowledge to protect against it. The exploitation-before-disclosure fact changes K-C6-ATTACKER-CADENCE-RESILIENCE (admitted today) scoring for every PHP operator who assumed the embargo window was a defender-safe period: it was not.
+- **Chainguard shipped patched container images at 2026-10-21 07:41 UTC — six hours before the coordinated 14:00 UTC release.** Chainguard co-founder Dan Lorenc cited existing leaks and reports of active exploitation as justification. The PHP Foundation said the early release gave attackers six hours to study the fix in binary form while every other PHP operator was still waiting. Both positions are defensible; the primitive underneath is that **the embargo-release-coordination window itself is a defender attack surface** whose timing can be exploited by whichever party moves first — attacker (via leak) or defender (via unilateral release). A doctrine amendment on coordinated-disclosure cadence is a candidate for a future K-C9 admission; for now, the fact is logged here.
+- **Cloudflare observed millions of PHP2Shell exploitation attempts across its network in the hours following the public release.** Specifically: *thousands* of attempts in the 10 hours before the public announcement, *tens of thousands* in the first 45 minutes post-announcement, *hundreds of thousands* within 2 hours, and *millions* within the first day. The scale and cadence require automated attacker infrastructure; the shape is consistent with the ARTEX-class attacker-cadence named in [today's K-C6 reckoning](2026-10-22-artex-storm-0940-adversary-cadence-admission.md).
+
+**Scorecard delta on this follow-up:** PHP remains at L0 on K-C4 subtests (b) and (c) per the admission. The follow-up adds two signals: (i) K-C6 scoring is relevant to every PHP operator — the window for patching was effectively negative (attackers knew first), and (ii) the Chainguard-vs-Foundation disagreement names a sub-primitive about who controls the embargo release window.
+
 **On the AI-assisted discovery angle.** The PHP2Shell disclosure confirms that frontier LLMs can, under supervised research direction, complete the reasoning chains needed to find decade-old memory-safety flaws in large-codebase runtimes. This is a positive outcome in a research harness. It is also, inevitably, an attacker-side capability. Kronos registers both. The appropriate response is not to oppose the research — the research is how the primitive gets named. It is to raise the K-C4 scoring floor across the holder class, because the time-to-exploit curve has moved, and systems that were implicitly resting on "nobody will spend the time to find this specific bug in us" need to produce evidence rather than hope.
 
 ---
