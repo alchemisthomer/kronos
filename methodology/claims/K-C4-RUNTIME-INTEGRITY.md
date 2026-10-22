@@ -84,3 +84,4 @@ Non-exhaustive list of system classes that hold this primitive:
 ## Posts that touch this claim
 
 - [PHP's runtime held, until frontier AI fuzzed its error paths](../../docs/blog/posts/2026-10-22-php2shell-runtime-integrity-admission.md) — admission post
+- [Node.js's Brotli decoder writes past its buffer. K-C4 is tested the day it was admitted.](../../docs/blog/posts/2026-10-22-nodejs-brotli-rce-k-c4-first-incident.md) — first live incident, same-day; introduces *ingress-WAF mitigation cadence* as a sub-primitive worth naming (modeled by Vercel's same-day WAF rule rollout for CVE-2026-111497)
