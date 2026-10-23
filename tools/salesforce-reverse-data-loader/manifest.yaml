@@ -1,0 +1,210 @@
+kind: kronos-tool
+apiVersion: v1
+
+metadata:
+  id: salesforce-reverse-data-loader
+  version: 0.1.0
+  vendor: kronos
+  license: AGPL-3.0
+  homepage: https://github.com/alchemisthomer/kronos
+  description: >
+    Reverse Data Loader. Reproduces what a Salesforce user could pull —
+    from the attacker's seat. Two modes: assess (probe access, count rows,
+    enumerate fields; no data extraction) and extract (assess plus pull
+    all records per accessible sobject). Composes probe/count/fields/extract
+    SOQL primitives in a single authenticated session.
+
+capabilities:
+  attack_classes:
+    - id: recon.enumeration.salesforce.user-access-surface
+      subclasses:
+        - sobject-access-enumeration
+        - sobject-row-count-enumeration
+        - sobject-field-enumeration
+        - sobject-record-extraction  # extract mode only
+  api_family: salesforce.rest
+  endpoints:
+    - "/services/data/v{{apiVersion}}/sobjects"      # --use-describe
+    - "/services/data/v{{apiVersion}}/query"          # probe / count / fields / extract
+  evidence_types:
+    - assessment-report-json
+    - assessment-report-markdown
+    - sobject-sample-csv
+    - sobject-extract-csv   # extract mode only
+    - run-manifest
+  protocols_supported: [https]
+
+invocation:
+  binding_layer: 1
+  adapter: ./src/index.ts
+  invocation_type: subprocess
+  runtime: node
+  entry_command: ["npx", "tsx", "src/index.ts"]
+  timeout_seconds: 1800   # allow long extractions
+
+  argv:
+    - name: sobjects
+      type: string
+      required: false
+      default: null
+      description: Comma-separated sobject list; overrides the default (Account,Contact,Lead,Opportunity).
+    - name: append-sobjects
+      type: string
+      required: false
+      default: null
+      description: Additional sobjects added to the base list.
+    - name: use-describe
+      type: boolean
+      required: false
+      default: false
+      description: Enumerate every queryable sobject via /sobjects (requires API Enabled).
+    - name: extract-data
+      type: boolean
+      required: false
+      default: false
+      description: Pull all records per accessible sobject. Data-extraction guardrail.
+    - name: extract-limit
+      type: number
+      required: false
+      default: null
+      description: Row cap per sobject during extract. Default unbounded.
+    - name: credentials
+      type: path
+      required: false
+      default: "../salesforce-rest-query-csv/credentials/salesforce.json"
+      description: JSON credentials file. Shared with salesforce-rest-query-csv.
+    - name: login-url
+      type: string
+      required: false
+      default: "https://login.salesforce.com"
+    - name: api-version
+      type: string
+      required: false
+      default: "60.0"
+    - name: output-dir
+      type: path
+      required: false
+      default: "./output"
+    - name: report-json
+      type: path
+      required: false
+      default: "<output-dir>/assessment-report.json"
+    - name: report-md
+      type: path
+      required: false
+      default: "<output-dir>/assessment-report.md"
+
+  outputs:
+    - name: assessment-report
+      format: json
+      channel: file
+      path: "{{argv.report-json}}"
+      hash_algorithm: sha256
+    - name: assessment-report
+      format: markdown
+      channel: file
+      path: "{{argv.report-md}}"
+      hash_algorithm: sha256
+    - name: sobject-sample
+      format: csv
+      channel: file
+      path_pattern: "{{argv.output-dir}}/<sobject-lower>-fields200.csv"
+      hash_algorithm: sha256
+    - name: sobject-extract
+      format: csv
+      channel: file
+      path_pattern: "{{argv.output-dir}}/<sobject-lower>-extract.csv"
+      hash_algorithm: sha256
+      condition: "argv.extract-data == true"
+    - name: run-manifest
+      format: json
+      channel: stdout
+      hash_algorithm: sha256
+
+authorization:
+  requires_network:
+    - "{{argv.login-url}}"
+    - "*.salesforce.com"
+    - "*.force.com"
+    - "*.my.salesforce.com"
+  requires_credentials: true
+  requires_elevated_privilege: false
+  # Read-only. Never mutates. But extract mode's data volume warrants
+  # engagement-level explicit authorization; the tool itself only enforces
+  # the --extract-data flag as a per-invocation guardrail.
+  destructive_testing: false
+  authorization_ceiling_max: 2
+
+data_class:
+  # Extract mode is the primary data-class-affecting operation. Under the
+  # kronos incidentState/dataClassPreservation model, invoking with
+  # --extract-data during a declared incident on the target org would be
+  # refused by the framework's authorization gate (see TOOL-BINDING.md §6).
+  extract_mode:
+    resource_classes_affected:
+      - salesforce.records
+      - salesforce.pii
+      - salesforce.phi
+      - salesforce.financial
+    warn_on_declared_incident: true
+
+enumeration:
+  reconcile: true
+  filter_variants:
+    - unfiltered           # via /sobjects/<name>/describe (future sibling)
+    - fields-all-200-sample  # this tool's FIELDS(ALL) LIMIT 200 result
+  delta_threshold: 0
+  delta_finding_severity: high
+  notes: >
+    A per-sobject field count of exactly 200 in the sample warrants a
+    scanner-drift finding; the true accessible field set may be larger
+    and the response truncated. Cross-check via describe resolves.
+
+sandbox:
+  recommended: process
+  container_image: null
+  network_restrictions:
+    - allowlist:
+        - "*.salesforce.com"
+        - "*.force.com"
+        - "*.my.salesforce.com"
+        - "*.my.site.com"
+  resource_limits:
+    memory_mb: 2048     # extract mode can pull >100MB of records
+    cpu_cores: 1
+
+credentials:
+  file_credentials_permitted: true
+  env_variables_permitted: true
+  env_variables_expected:
+    - KRONOS_SF_USERNAME
+    - KRONOS_SF_PASSWORD
+    - KRONOS_SF_SECURITY_TOKEN
+    - KRONOS_SF_LOGIN_URL
+  credential_leakage_audit: true
+
+evidence_mapping:
+  assessment_report:
+    source_field: internal
+    hash_algorithm: sha256
+  sobject_sample_csv:
+    source_field: enumeration.records
+    hash_algorithm: sha256
+  sobject_extract_csv:
+    source_field: extraction.records
+    hash_algorithm: sha256
+
+conformance:
+  golden_target_verified: false
+  last_verified_at: null
+
+runtime:
+  language: typescript
+  node_engine: ">=22.0.0"
+  package_dependencies:
+    - jsforce@^3
+
+related_tools:
+  # This tool composes the same primitives as salesforce-rest-query-csv,
+  # but in a single session across many sobjects. Both survive.
+  - salesforce-rest-query-csv:0.1.0

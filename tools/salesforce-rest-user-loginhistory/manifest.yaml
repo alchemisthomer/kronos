@@ -1,0 +1,177 @@
+kind: kronos-tool
+apiVersion: v1
+
+metadata:
+  id: salesforce-rest-user-loginhistory
+  version: 0.1.0
+  vendor: kronos
+  license: AGPL-3.0
+  homepage: https://github.com/alchemisthomer/kronos
+  description: >
+    Query the LoginHistory sobject for one Salesforce user (or org-wide
+    if admin credentials are supplied) and derive an analysis: timeline,
+    source-IP diversity, geographic distribution, channel breakdown,
+    burst pattern detection, weak-TLS observation, off-hours prevalence,
+    cross-country logins. Tier-2 API-endpoint primitive with tier-3
+    analysis attached.
+
+capabilities:
+  attack_classes:
+    - id: recon.enumeration.salesforce.user-authentication-history
+      subclasses:
+        - login-attempt-enumeration
+        - source-ip-enumeration
+        - geographic-diversity-analysis
+        - authentication-anomaly-detection
+  api_family: salesforce.rest
+  endpoint: /services/data/v{{apiVersion}}/query (LoginHistory sobject)
+  evidence_types:
+    - loginhistory-csv
+    - analysis-json
+    - analysis-markdown
+    - run-manifest
+  protocols_supported: [https]
+
+invocation:
+  binding_layer: 1
+  adapter: ./src/index.ts
+  invocation_type: subprocess
+  runtime: node
+  entry_command: ["npx", "tsx", "src/index.ts"]
+  timeout_seconds: 300
+
+  argv:
+    - name: user-id
+      type: string
+      required: false
+      default: null
+      description: Restrict to one user (18-char Salesforce Id). Omit for org-wide (admin only).
+    - name: since
+      type: string
+      required: false
+      default: null
+      description: ISO 8601 lower bound on LoginTime.
+    - name: until
+      type: string
+      required: false
+      default: null
+      description: ISO 8601 upper bound on LoginTime.
+    - name: limit
+      type: number
+      required: false
+      default: null
+      description: Row cap; default unbounded.
+    - name: credentials
+      type: path
+      required: false
+      default: "../salesforce-rest-query-csv/credentials/salesforce.json"
+    - name: login-url
+      type: string
+      required: false
+      default: "https://login.salesforce.com"
+    - name: api-version
+      type: string
+      required: false
+      default: "64.0"
+    - name: output-dir
+      type: path
+      required: false
+      default: "./output"
+    - name: csv-out
+      type: path
+      required: false
+      default: "<output-dir>/loginhistory-<user-slug>.csv"
+    - name: analysis-json
+      type: path
+      required: false
+      default: "<output-dir>/loginhistory-<user-slug>-analysis.json"
+    - name: analysis-md
+      type: path
+      required: false
+      default: "<output-dir>/loginhistory-<user-slug>-analysis.md"
+
+  outputs:
+    - name: loginhistory-csv
+      format: csv
+      channel: file
+      hash_algorithm: sha256
+    - name: analysis-json
+      format: json
+      channel: file
+      hash_algorithm: sha256
+    - name: analysis-markdown
+      format: markdown
+      channel: file
+      hash_algorithm: sha256
+    - name: run-manifest
+      format: json
+      channel: stdout
+      hash_algorithm: sha256
+
+authorization:
+  requires_network:
+    - "{{argv.login-url}}"
+    - "*.salesforce.com"
+    - "*.force.com"
+    - "*.my.salesforce.com"
+  requires_credentials: true
+  requires_elevated_privilege: false
+  destructive_testing: false
+  authorization_ceiling_max: 2
+  # Note: reading LoginHistory for users other than self typically requires
+  # "Manage Users" permission on Salesforce. Reading own login history is
+  # permitted by default. This is a target-side permission check, not a tool
+  # constraint — the tool cheerfully attempts either and reports what it can see.
+
+data_class:
+  # LoginHistory contains authentication metadata (source IPs, geographies,
+  # user identities). Not PII in the strictest sense but sensitive under
+  # SOC 2 / ISO 27001 / most privacy frameworks. Treat exports as CONFIDENTIAL.
+  resource_classes_affected:
+    - salesforce.authentication-metadata
+    - salesforce.source-ip-inventory
+    - salesforce.user-identity-catalog
+
+sandbox:
+  recommended: process
+  container_image: null
+  network_restrictions:
+    - allowlist:
+        - "*.salesforce.com"
+        - "*.force.com"
+        - "*.my.salesforce.com"
+  resource_limits:
+    memory_mb: 512
+    cpu_cores: 1
+
+credentials:
+  file_credentials_permitted: true
+  env_variables_permitted: true
+  env_variables_expected:
+    - KRONOS_SF_USERNAME
+    - KRONOS_SF_PASSWORD
+    - KRONOS_SF_SECURITY_TOKEN
+    - KRONOS_SF_LOGIN_URL
+  credential_leakage_audit: true
+
+evidence_mapping:
+  loginhistory_csv:
+    source_field: query.records
+    hash_algorithm: sha256
+  analysis_json:
+    source_field: analyze.result
+    hash_algorithm: sha256
+
+conformance:
+  golden_target_verified: false
+  last_verified_at: null
+
+runtime:
+  language: typescript
+  node_engine: ">=22.0.0"
+  package_dependencies:
+    - jsforce@^3
+
+related_tools:
+  - salesforce-rest-query-csv:0.1.0             # the general query primitive; this tool specializes on LoginHistory
+  - salesforce-rest-sobjects-describe:0.1.0     # authoritative field enumeration; this tool assumes LoginHistory field set is stable across API versions

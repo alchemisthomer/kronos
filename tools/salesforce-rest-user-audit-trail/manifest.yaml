@@ -1,0 +1,45 @@
+kind: kronos-tool
+apiVersion: v1
+metadata:
+  id: salesforce-rest-user-audit-trail
+  version: 0.1.0
+  vendor: kronos
+  license: AGPL-3.0
+  description: >
+    Enumerate SetupAuditTrail entries attributed to a target user. Derives
+    action-class classification (create/modify/delete/read/other), section
+    breakdown with high-privilege flagging, delegate-activity capture, and
+    6 anomaly heuristics.
+capabilities:
+  attack_classes:
+    - id: recon.enumeration.salesforce.user-setup-audit
+  api_family: salesforce.rest
+  endpoint: /services/data/v{{apiVersion}}/query
+  sobjects_queried:
+    - User
+    - SetupAuditTrail
+invocation:
+  binding_layer: 1
+  adapter: ./src/index.ts
+  invocation_type: subprocess
+  runtime: node
+  entry_command: ["npx", "tsx", "src/index.ts"]
+  timeout_seconds: 300
+  argv:
+    - name: user-id
+      type: string
+      required: true
+    - name: since
+      type: string
+      required: false
+    - name: limit
+      type: number
+      required: false
+authorization:
+  requires_credentials: true
+  destructive_testing: false
+  authorization_ceiling_max: 2
+runtime:
+  language: typescript
+  node_engine: ">=22.0.0"
+  package_dependencies: [jsforce@^3]

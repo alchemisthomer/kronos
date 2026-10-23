@@ -1,0 +1,23 @@
+{
+  "name": "@kronos/salesforce-rest-user-permissions",
+  "version": "0.1.0",
+  "description": "Kronos tool: enumerate a Salesforce user's effective permissions — Profile, PermissionSets, object permissions, field permissions — and detect anomalies. Answers 'why does this user have the access they have.'",
+  "type": "module",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "describe": "tsx src/index.ts --describe"
+  },
+  "dependencies": {
+    "jsforce": "^3.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

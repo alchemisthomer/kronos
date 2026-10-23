@@ -1,0 +1,38 @@
+# Raw unsanitized founding-incident material — never commit.
+# Sanitized narrative documents live in docs/inception/founding-incident-archive/
+# The raw sources are preserved privately by the Steward, outside this repo.
+/2026-07-17-aws-billing-anomaly.zip
+/2026-07-17-aws-billing-anomaly/
+
+# OS + editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Local scratch
+/tmp/
+/.tmp/
+*.bak
+
+# ────────────────────────────────────────────────────────────────────
+# STRUCTURAL CONTENT-ISOLATION RULES — see SECURITY.md and CLAUDE.md.
+# Real engagement content MUST NOT be committed to this framework repo.
+# ────────────────────────────────────────────────────────────────────
+
+# Never publish a root-level engagement folder from this framework repo.
+# The template lives at templates/engagement/. Real engagements live in
+# adopter repos, not here. If you see this path in `git status`, delete it
+# and move the work to a per-client operator repo.
+/engagement/
+
+# Tools — Node artifacts.
+/tools/**/node_modules/
+/tools/**/dist/
+/tools/**/*.log
+/tools/**/.env
+/tools/**/.env.*
+!/tools/**/.env.example

@@ -1,0 +1,23 @@
+{
+  "name": "@kronos/salesforce-rest-user-loginhistory",
+  "version": "0.1.0",
+  "description": "Kronos tool: query the LoginHistory sobject for one Salesforce user and derive an analysis (timeline, IPs, geos, anomalies). Tier-2 API-endpoint primitive with tier-3 analysis attached.",
+  "type": "module",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "describe": "tsx src/index.ts --describe"
+  },
+  "dependencies": {
+    "jsforce": "^3.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

@@ -1,0 +1,44 @@
+kind: kronos-tool
+apiVersion: v1
+metadata:
+  id: salesforce-rest-user-connected-apps
+  version: 0.1.0
+  vendor: kronos
+  license: AGPL-3.0
+  description: >
+    Enumerate a user's OAuth grants and third-party account links.
+    Each active grant is a compromise vector — a stolen token bypasses
+    password and 2FA. Detects stale tokens, dev-tool grants, and token
+    churn patterns.
+capabilities:
+  attack_classes:
+    - id: recon.enumeration.salesforce.user-oauth-surface
+  api_family: salesforce.rest
+  endpoint: /services/data/v{{apiVersion}}/query
+  sobjects_queried:
+    - User
+    - OauthToken
+    - ThirdPartyAccountLink
+invocation:
+  binding_layer: 1
+  adapter: ./src/index.ts
+  invocation_type: subprocess
+  runtime: node
+  entry_command: ["npx", "tsx", "src/index.ts"]
+  timeout_seconds: 120
+  argv:
+    - name: user-id
+      type: string
+      required: true
+    - name: credentials
+      type: path
+      required: false
+      default: "../salesforce-rest-query-csv/credentials/salesforce.json"
+authorization:
+  requires_credentials: true
+  destructive_testing: false
+  authorization_ceiling_max: 2
+runtime:
+  language: typescript
+  node_engine: ">=22.0.0"
+  package_dependencies: [jsforce@^3]
