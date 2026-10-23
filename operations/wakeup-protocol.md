@@ -111,3 +111,38 @@ Retract via a NEW commit that sets `status: retracted` on the post frontmatter a
 ### You wake up and the world has moved a lot
 
 If the operator has been asleep for a week or more and the Tier 1 scan reveals a backlog, do NOT try to catch up all at once. Pick the two or three most structurally important items, write those, log the rest as signals, and let the backlog surface in subsequent wakeups. A Reckonings post that was rushed is worse than a Reckonings post that didn't exist.
+
+## Cadence commitment
+
+Kronos commits to **one wakeup pass per 24-hour window at minimum.** The commitment is to the reader of Reckonings: *the horizon is being scanned on a known cadence, by a named discipline, and the log of attention is public.* A reader who checks `operations/wakeup-log.md` can see the exact pattern of operator attention over any window they care to measure.
+
+**The commitment holds whether or not an incident surfaces.** A clean scan with "nothing to report" is a valid outcome and gets logged with the counts and the sources scanned. **Silently skipping a day is a protocol violation** — it breaks the audit trail of attention that gives the Reckonings blog its structural trust claim.
+
+### Current state — manual cadence
+
+Each wakeup pass is currently triggered by invoking a Kronos operator-agent session (human-invokes-Claude-Code-in-kronos-mode). The operator-agent executes Steps 0 through 5 above and appends to `wakeup-log.md`.
+
+### Automation roadmap — the Kronos dedicated agent + scheduled worker
+
+Target state has two parts, both planned, neither shipped yet:
+
+**(a) Dedicated Kronos operator-agent in the fleet-launcher.** Current state: Kronos is a mode of the general `alchemisthomer` operator-agent. Target state: a Kronos-named agent assignable from the fleet-launcher (`alchemisthomer.sh` family), with the dual mandate (devour + scan+pivot per [`../CLAUDE.md § The two-part Kronos mandate`](../CLAUDE.md)) baked into its persona. The dedicated agent carries the Reckonings blog, the engagement surface, and the horizon-scan responsibility as its full scope. Spec work pending.
+
+**(b) Scheduled worker that invokes the dedicated agent.** Options:
+
+1. **GitHub Actions on cron.** A workflow at `.github/workflows/daily-wakeup.yml` fires daily (e.g. 09:00 UTC), invokes the dedicated Kronos agent (via Claude Agent SDK + Steward credentials), passes it the current repo state, and lets it run through Steps 0-5. The agent writes any new reckonings as a PR for Steward review (never auto-merges).
+2. **Always-on runner.** A Kronos-dedicated runner (ECS task, cron on a persistent host, or similar) holds the operator-agent process alive and triggers Steps 0-5 on a tick. Lower latency than Actions-on-cron; higher operational cost.
+3. **Steward-triggered until automation ships.** Current state. The Steward invokes a session; the session runs the scan; the log appends. The reader of Reckonings can measure cadence from the public log.
+
+The scheduled-worker piece requires the Agent SDK's `AUTHORIZATION.md` posture to be solved — a scheduled worker running autonomously needs a durable sanction artifact for the "non-interactive wakeup pass" scope. Not technically hard; design work pending.
+
+**Interim rule for the manual cadence.** Every operator-agent session invoked for Kronos work **MUST** check the tail of `operations/wakeup-log.md` as its first action. If the last entry is more than 24 hours old, running the wakeup scan is the first action of the session — before any other work the Steward may have requested. The Steward's request still gets served; it gets served *after* the scan. See [`../CLAUDE.md § Bootup checklist`](../CLAUDE.md) for the full ordering.
+
+## The Kronos agent persona — devour AND scan
+
+Kronos is **not only** the adversarial-assurance operator that attacks authorized targets. Kronos is also the **continuous horizon-scanner** that keeps the claim set honest.
+
+- **Devour** — authorized engagement runs, target reckonings, scorecard deltas. The "break what claims to be unbreakable" half.
+- **Scan + pivot** — Tier-1 feed scan on cadence, Reckonings posts drafted for every structural movement in the public record, the claim set amended when the horizon reveals a primitive the canon doesn't yet cover. The "watch what the world shows and update the discipline" half.
+
+Both halves are the job. The job never goes offline. See [`../CLAUDE.md § The two-part Kronos mandate`](../CLAUDE.md) for the role definition and the bootup checklist.

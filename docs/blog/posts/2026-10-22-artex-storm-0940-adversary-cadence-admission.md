@@ -134,6 +134,18 @@ What the Operator (CloudPremise / Olympus-Grid) is doing about this:
 
 **On what ARTEX teaches about the shape of 2026 security.** The framework is open-source. Microsoft's attribution to a state actor is specific, but the capability is not state-restricted — any attacker with modest compute budget can run ARTEX themselves. The agentic pen-test tooling ecosystem is at the point of commodification; the public-knowledge attacker's `T_attacker` is going to continue falling for the foreseeable future, and K-C6 will not get easier to score high on by waiting.
 
+## Follow-up — 2026-10-23
+
+Additional ConnectWise-side disclosure since this reckoning was published:
+
+- **ConnectWise disabled its Cloud Backup product** as part of the containment response. A named containment path executed, with a product-level kill-switch invoked. This is positive K-C6 subtest (b) evidence from the breached-party side: the containment action was architectural (disable the compromised product category), not just operational (rotate credentials). The architecture had the mechanism; it took the compromise to exercise it.
+- **At least 173 Microsoft 365 tenants were confirmed authenticated-through by the compromised credentials.** This narrows the 2,250+ "targeted" number in the original reckoning to a 173 "confirmed-reached" subset. The ratio — ~7.7% conversion from targeted-to-reached — is itself a K-C6 subtest (c) blast-radius signal: the attacker's agentic cadence outran defender detection in 173 cases out of 2,250 tries. For the other ~2,077, something — tenant-side MFA, tenant-side anomaly detection, timing, luck — intervened before the ARTEX-driven agent completed the enumeration cycle.
+- **The commodification signal strengthens.** As of this follow-up, no public evidence has surfaced that any defender-side product has shipped an equivalent-cadence response capability — same-day WAF-rule deployment plus automated containment on anomaly plus pre-authorized revocation. Vercel's PHP2Shell WAF-rollout remains the only publicly-named example of this capability shape from the defender side in Black October. The ask across every K-C6 holder stands.
+
+**Scorecard delta on this follow-up:** ConnectWise moves marginally better on K-C6 subtest (b) based on exercised-containment evidence (named containment path demonstrably invoked). K-C6 subtest (a) remains L0 for ConnectWise for the finding window — the detection path that would have caught the ARTEX pattern earlier than it did was absent. ConnectWise's path back to L1 on (a) requires publishing a measured `T_detect` number for the ARTEX-class attacker class.
+
+**Companion incident same day:** [PingCAP's attacker had 28 days before anyone noticed](2026-10-23-pingcap-28-day-dwell-k-c1-k-c6-incident.md) — the dwell-time measurement question that K-C6 asks has one new specific answer in the public record.
+
 ---
 
 **Primary source:** [*AI-driven, large-scale nation-state campaign using ARTEX enables supply chain compromise*](https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/), Microsoft Threat Intelligence, 2026-10-21. **ConnectWise advisory:** 2026-10-16 initial, expanded subsequently.

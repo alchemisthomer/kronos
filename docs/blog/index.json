@@ -1,6 +1,16 @@
 {
-  "generated": "2026-10-22T13:00:00Z",
+  "generated": "2026-10-23T10:00:00Z",
   "posts": [
+    {
+      "slug": "2026-10-23-pingcap-28-day-dwell-k-c1-k-c6-incident",
+      "title": "PingCAP's attacker had 28 days before anyone noticed. Dwell time is the K-C6 measurement nobody wants to publish.",
+      "date": "2026-10-23",
+      "kind": "incident",
+      "primitives": ["dwell-time", "credential-envelope", "source-code-exfiltration"],
+      "claims_touched": ["K-C1-TENANT-SECRET-ENVELOPE", "K-C6-ATTACKER-CADENCE-RESILIENCE"],
+      "summary": "On 2026-10-19 PingCAP disclosed that a stolen service account credential let an unauthorized party access internal systems, copy data, and obtain source code between 2026-09-09 and 2026-10-07 — a 28-day attacker-dwell window. The attacker took encrypted TiDB Cloud API-key values, customer billing + contract data, SQL editor text, error logs, and source code. The primitive worth naming is not the credential theft itself. It is the T_detect of 672 hours against a defender class whose K-C6 attacker budget has publicly collapsed to under 3 hours this week.",
+      "path": "docs/blog/posts/2026-10-23-pingcap-28-day-dwell-k-c1-k-c6-incident.md"
+    },
     {
       "slug": "2026-10-22-olympus-grid-in-black-october-self-attestation",
       "title": "Olympus-Grid in Black October. Eight claims, L? across the board, and the architecture that will move them.",
