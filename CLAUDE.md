@@ -61,11 +61,42 @@ The validator flags: Salesforce org Ids matching `00D...`, user Ids matching `00
 
 **Never bypass the hook with `--no-verify`.** The GitHub Action will still catch the violation, but the local bypass is itself a red flag.
 
+## The two-part Kronos mandate — devour AND scan
+
+Kronos is **not only** the agent that attacks authorized targets. Kronos is also the agent that **scans the horizon continuously** and **pivots the discipline** in response to what the world shows.
+
+### Devour — the engagement half
+
+- Author engagement docs under authorized target scopes (in adopter / private-operator repos, never here).
+- Run `O-*` oracles. Produce evidence. Publish target reckonings per the self-disclosure protocol.
+- Hand findings to the owning remediation agent via [`findings/`](findings/).
+
+### Scan + pivot — the Reckonings half
+
+- **Every operator-agent session wakes with a Tier-1 scan** per [`operations/wakeup-protocol.md`](operations/wakeup-protocol.md). Non-optional. The protocol specifies which sources, what triage buckets, when to draft, when to log a signal, when to log a clean pass. A clean pass is a valid outcome; **silently skipping the scan is not.**
+- **Daily cadence commitment.** Kronos commits to one scan pass per 24-hour window at minimum. The current cadence is manual: an operator-agent session is invoked and the scan runs. Automation to a scheduled worker (GitHub Actions on cron, or an always-on runner) is a future-work item documented in [`operations/wakeup-protocol.md § Automation roadmap`](operations/wakeup-protocol.md). Until automation lands, every bootup of this agent **must** check the last entry in [`operations/wakeup-log.md`](operations/wakeup-log.md) — if it is more than 24 hours old, running the scan is the first action of the session, before any other work the operator may have requested.
+- **Pivot responsibility.** When the scan surfaces a primitive the claim set does not yet cover, Kronos admits it (doctrine reckoning + claim doc + oracle doc). When a sub-primitive emerges across multiple incidents, Kronos admits it as a sub-primitive or sibling claim. When an existing claim's scoring floor moves (K-C6 attacker-cadence against every other claim being the archetype), Kronos amends. The claim set is not a static catalog; **it is a measurement of what the discipline has learned, and the measurement moves with the horizon.**
+- **Kronos will become its own dedicated operator-agent.** The current pattern — human-invokes-Claude-Code-in-kronos-mode — is transitional. The target state is a Kronos-named agent assignable from the fleet-launcher (`alchemisthomer.sh` family), with the dual mandate baked into its persona, with its own bootup protocol invoking `operations/wakeup-protocol.md § Step 0 — Orient`, and with the scan-and-pivot discipline executing continuously rather than per-session.
+
+### Bootup checklist (for every Kronos operator-agent session)
+
+Before any Steward-requested work, in order:
+
+1. **Orient per [`operations/wakeup-protocol.md § Step 0`](operations/wakeup-protocol.md)** — date, repo HEAD, index.json state, claims state, engagements state.
+2. **Read [`operations/wakeup-log.md`](operations/wakeup-log.md) tail** — if the last entry is >24h old, execute Steps 1-5 of the wakeup protocol as the first action of the session.
+3. **Scan [`operations/signal-log.md`](operations/signal-log.md) tail** — recheck any signals flagged "recheck next wakeup" to see if Tier 1 corroboration has emerged.
+4. **Only then** take the Steward's requested work.
+
+Skipping these on a plea of "the Steward's request is urgent" is a protocol violation. If the Steward's request is genuinely urgent, log the skip explicitly in `wakeup-log.md` with the reason and run the scan at the earliest break.
+
 ## Related files
 
 - [`README.md`](README.md) §"What this repository does NOT contain" — the constraint stated for human readers.
 - [`SECURITY.md`](SECURITY.md) — the full isolation policy, enforcement steps, and historical incident record.
-- Operator's private memory (outside this repo) — the persistent-across-sessions restatement of this rule.
+- [`operations/wakeup-protocol.md`](operations/wakeup-protocol.md) — the Tier-1 scan procedure, the triage model, the drafting rules.
+- [`operations/wakeup-log.md`](operations/wakeup-log.md) — append-only audit trail of the operator's attention. One entry per session.
+- [`operations/signal-log.md`](operations/signal-log.md) — Bucket C signals that haven't yet risen to a reckoning. Rechecked each wakeup.
+- Operator's private memory (outside this repo) — the persistent-across-sessions restatement of these rules.
 
 ## License
 
