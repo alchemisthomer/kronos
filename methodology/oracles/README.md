@@ -25,6 +25,7 @@ Oracles are versioned. When a subtest changes, the oracle's version bumps. Engag
 | [O-ATTACKER-CADENCE](O-ATTACKER-CADENCE.md) | [K-C6-ATTACKER-CADENCE-RESILIENCE](../claims/K-C6-ATTACKER-CADENCE-RESILIENCE.md) | v0.1 — subtests specified, not yet exercised against a target |
 | [O-ROOT-OF-TRUST](O-ROOT-OF-TRUST.md) | [K-C7-ROOT-OF-TRUST-INTEGRITY](../claims/K-C7-ROOT-OF-TRUST-INTEGRITY.md) | v0.1 — subtests specified, not yet exercised against a target |
 | [O-SUPPLY-CHAIN](O-SUPPLY-CHAIN.md) | [K-C8-SUPPLY-CHAIN-INTEGRITY](../claims/K-C8-SUPPLY-CHAIN-INTEGRITY.md) | v0.1 — subtests specified, not yet exercised against a target |
+| [O-STARTUP-EXECUTION-AUTHORITY](O-STARTUP-EXECUTION-AUTHORITY.md) | [K-C9-STARTUP-EXECUTION-AUTHORITY](../claims/K-C9-STARTUP-EXECUTION-AUTHORITY.md) | v0.1 — subtests specified, not yet exercised against a target |
 
 ## Operator profile vocabulary
 
@@ -51,5 +52,8 @@ Oracles state what authorization an operator needs. Standard profiles:
 - **source-auditor** — an operator probing a target's source-repository integrity controls via unauthorized-change simulation and audit-trail sampling. Required by `O-SUPPLY-CHAIN` subtest (a). Requires written grant.
 - **build-pipeline-auditor** — an operator reproducing a target's build artifacts bit-for-bit from source, and probing publication-credential posture. Required by `O-SUPPLY-CHAIN` subtest (b).
 - **downstream-verifier** — an operator positioned as a standard downstream consumer, with no privileged relationship with the target, running the documented artifact-verification mechanism. Required by `O-SUPPLY-CHAIN` subtest (c).
+- **environment-auditor** — read-only access to representative hosts for the purpose of enumerating startup-hook files per the runtimes-in-scope list. Required by `O-STARTUP-EXECUTION-AUTHORITY` subtest (a). Requires written grant.
+- **adversarial-package-publisher** — an operator permitted to publish a controlled "malicious" package to a test registry the target consumes from, or drop a package tarball into the target's install path, for the purpose of testing whether package installation can drop startup hooks. Required by `O-STARTUP-EXECUTION-AUTHORITY` subtest (b). Requires explicit written grant with a time-boxed window and a target-written assurance that the adversarial package is not distributed outside the test environment.
+- **startup-execution-observer** — read-only access to the target's monitoring infrastructure for the purpose of measuring startup-hook detection latency. Required by `O-STARTUP-EXECUTION-AUTHORITY` subtest (c).
 
 Running an oracle outside the operator profile stated in its procedure is a scope violation. Scope violations invalidate the engagement.

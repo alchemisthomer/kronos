@@ -25,6 +25,7 @@ The claim set grows by **doctrine reckonings** (see `../../docs/blog/concept.md`
 | [K-C6-ATTACKER-CADENCE-RESILIENCE](K-C6-ATTACKER-CADENCE-RESILIENCE.md) | Defender cadence ≥ attacker cadence | 2026-10-22 | ARTEX / Storm-0940 / ConnectWise — <3hr initial-to-privileged, 2,900 sign-ins/min |
 | [K-C7-ROOT-OF-TRUST-INTEGRITY](K-C7-ROOT-OF-TRUST-INTEGRITY.md) | Cryptographic root-of-trust integrity (entropy, storage, governance) | 2026-10-22 | eMudhra — 8 CA private keys with values < 256; one was the integer 4 |
 | [K-C8-SUPPLY-CHAIN-INTEGRITY](K-C8-SUPPLY-CHAIN-INTEGRITY.md) | Bitwise identity between published source and shipped artifact | 2026-10-22 | LiteLLM 1.107.0 PyPI compromise — malicious wheel never in git tag |
+| [K-C9-STARTUP-EXECUTION-AUTHORITY](K-C9-STARTUP-EXECUTION-AUTHORITY.md) | Package install does not grant startup-hook execution authority | 2026-10-24 | LiteLLM `.pth` + `sitecustomize.py` hooks (Microsoft TI forensic deep-dive) |
 
 ## Reading the claim set
 
