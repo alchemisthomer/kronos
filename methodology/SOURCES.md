@@ -85,6 +85,20 @@ The sections below enumerate sources with all three axes stated. Where a structu
 | **Apache HTTP Server** | [`httpd.apache.org/security/`](https://httpd.apache.org/security/) | HTML | Weekly |
 | **OpenSSL** | [`openssl.org/news/vulnerabilities.html`](https://www.openssl.org/news/vulnerabilities.html) | HTML + RSS | Daily |
 
+### Olympus-Grid substrate — mandatory daily scan
+
+The current Olympus-Grid deployment substrate is **Salesforce (spine) + AWS (compute) + Anthropic (one of the Athena LLM providers) + GitHub (source + CI/CD)**. These four sources are the specific substrate under the operator's own trust envelope. **Any security advisory on any of them is directly actionable for the operator**, independent of whether the advisory touches a Kronos claim. Scan every wakeup.
+
+| Substrate | Primary channel | Access | Why mandatory |
+|---|---|---|---|
+| **Salesforce Trust Advisories** | [`security.salesforce.com/advisory-archives/`](https://security.salesforce.com/advisory-archives/) + [`status.salesforce.com`](https://status.salesforce.com/) | HTML | Olympus-Grid runs as a managed package on the Salesforce platform; every Trust advisory is substrate-level. Historical Salesloft/Drift incident still referenced as the governance precedent. |
+| **AWS Security Bulletins** | [`aws.amazon.com/security/security-bulletins/`](https://aws.amazon.com/security/security-bulletins/) + RSS | HTML + RSS | Pantheon runs on ECS Fargate in account 842485730943. The 2026-10-21 → 2026-10-23 window alone shipped nine bulletins — AWS MCP Server sandbox escape (2026-149), Multi Model Server multi-CVE (2026-148), aws-c-mqtt memory allocation (2026-147), **Strands Agents SDK cross-session data disclosure (2026-146 — K-C1 outer-boundary in an AWS agent SDK)**, SAM CLI command injection (2026-145), Athena authorization bypass (2026-144), PHP runtime pass-through (2026-143), SageMaker bucket ownership (2026-142), CI/CD privilege-assignment (2026-141). AWS's own cadence this week is itself a K-C6 confirmation. |
+| **Anthropic news (safety + security)** | [`anthropic.com/news`](https://www.anthropic.com/news) + Anthropic alignment publications | HTML | Athena invokes Anthropic as one of the LLM providers; Anthropic incidents propagate downstream to every Athena-mediated inference. Recent substrate-relevant posts: *Strengthening defenses against distillation attacks* (2026-10-12, 90% reduction in illicit distillation), *Anthropic Cyber Mission* (2026-10-08), *2026 Usage Policy update* (2026-10-08), *Cyber Verification Program expansion* (2026-10-06). |
+| **GitHub Security blog** | [`github.blog/category/security/`](https://github.blog/category/security/) + RSS | HTML + RSS | Source control + Actions is the Pantheon build pipeline. A GitHub Actions runner compromise, token leakage, or Advanced Security advisory is substrate-level. Also check [`github.com/advisories`](https://github.com/advisories) for ecosystem-wide npm advisories affecting Pantheon dependencies. |
+| **GitHub Status** | [`githubstatus.com`](https://www.githubstatus.com/) | HTML + Atom | Runner availability affects CI; outages affect release cadence (K-C2 adjacency). |
+
+**Additional substrate adjacencies** worth per-event scanning: Datadog (Pantheon telemetry if adopted), Sentry (error aggregation), Cloudflare (CDN if adopted), AWS KMS / IAM / Secrets Manager advisories (K-C7 anchor).
+
 ### Vendor security advisories (first-party)
 
 Vendors whose incidents Kronos is likely to reckon with. **Subscribe to the native disclosure channel, not aggregator mirrors.**
@@ -202,6 +216,20 @@ These are the "quiet-but-high-signal" sources. **Many drop infrequently but thei
 | **Snyk Security** | [`snyk.io/blog/category/security/`](https://snyk.io/blog/category/security/) + Snyk vulnerability database | Dependency scanning |
 | **GitGuardian** | [`blog.gitguardian.com`](https://blog.gitguardian.com/) | Secret sprawl + leaked credentials |
 | **chainguard** | [`chainguard.dev/unchained`](https://chainguard.dev/unchained) | Supply-chain + container image security — see 2026-10-21 PHP2Shell disclosure-cadence controversy |
+| **VulnCheck** | [`vulncheck.com/blog`](https://vulncheck.com/blog) + VulnCheck research notes | Quantitative CVE / exploit telemetry. Produced the "AI drove a doubling of digital flaws discovered year-over-year" number cited by Reuters/Prince 2026-10-23 — the first publishable trailing baseline for K-C6 attacker-side cadence. |
+
+### Named-individual industry voices (per-event, high-signal)
+
+Specific industry leaders whose public statements carry K-C-level framing weight. **Not citeable as Tier 1 in the "authoritative primary breach disclosure" sense, but Tier 1 for industry-posture evidence** when the individual's observational scale is non-replicable (CEO of a Tier-1 CDN seeing traffic no researcher sees).
+
+| Person / Role | Channels | Why |
+|---|---|---|
+| **Matthew Prince** / Cloudflare CEO | Cloudflare blog + conference talks + Reuters/Bloomberg interviews | Cloudflare's network sees ~20% of global HTTP traffic; Prince's public statements have observational scale no academic has. **Confirmed K-C6 framing in Reuters interview 2026-10-23**: "I think we're going to have a couple years where every single week it's going to feel like the sky is falling." His "monsters from a haunted house" long-term framing is the industry's first widely-circulated optimistic counter-frame to the Black October narrative. |
+| **Charlie Hero** / various CTOs of CDN peers | Fastly, Akamai executive channels | Peer-vendor executive statements that corroborate or disagree with Cloudflare-tier framing |
+| **Dustin Moody** / NIST post-quantum lead | NIST announcements | K-C7 governance framing (algorithm sunset) |
+| **CISA leadership** / Jen Easterly historical, current CISA Director | CISA press + blog | Government framing of KEV posture, agency-level T_detect commitment |
+
+Industry-voice sources are logged specifically because the Kronos canon's claim framing often lags or precedes industry framing by weeks. A convergence event (Microsoft TI naming the K-C9 technique, Prince naming the K-C6 phenomenon) is itself evidence that the primitive has stabilized in the public discourse and is reckoning-worthy.
 
 ### Attack-side intelligence (research publication venues)
 
@@ -303,6 +331,7 @@ Source admissions are logged in the next wakeup entry (`operations/wakeup-log.md
 
 ## Changelog
 
+- **2026-10-24 (second pass, same day)** — Added **Olympus-Grid substrate** mandatory-daily-scan section (Salesforce / AWS / Anthropic / GitHub) with specific URLs + cadence. Added **VulnCheck** as a quantitative-telemetry research source (the "AI doubled discovery YoY" number). Added **Named-individual industry voices** section with Matthew Prince / Cloudflare CEO as the inaugural entry (Reuters 2026-10-23 K-C6 framing confirmation + "monsters from a haunted house" optimistic counter-frame). Documented the AWS 2026-10-21 → 10-23 nine-bulletin wave as the first substrate-specific cadence confirmation (Strands Agents SDK cross-session disclosure is K-C1-at-the-agent-infrastructure-layer; AWS MCP Server sandbox is K-C9 adjacency).
 - **2026-10-24** — Major restructure introducing the three-axis source model (trust tier · access method · attention cadence). Added:
   - Structured-feed emphasis for CISA KEV JSON, NVD CVE API, GHSA GraphQL, OSV API, RustSec, Node.js RSS, PostgreSQL RSS, Go pkg.go.dev/vuln (replaces search-snippet discovery as the recommended daily-scan path for CVE / advisory material).
   - Ecosystem-specific maintainer feed section (Node / PHP / Python / Ruby / Go / Rust / JVM / .NET / V8 / PostgreSQL / Redis / nginx / Apache / OpenSSL).
