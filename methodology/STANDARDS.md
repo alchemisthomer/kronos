@@ -235,6 +235,38 @@ Kronos never *reduces* a claim to its external identifiers. A Kronos claim alway
 | CIS Controls | **CIS 16.11 Leverage Vetted Modules or Services for Application Security Components** | subtest (c) |
 | CIS Controls | **CIS 16.12 Implement Code-Level Security Checks** | subtest (a) |
 
+### K-C9-STARTUP-EXECUTION-AUTHORITY
+
+| Standard | Identifier | Relevance |
+|---|---|---|
+| OWASP Top 10 | **A08:2021 Software and Data Integrity Failures** | the primitive this claim measures |
+| OWASP Top 10 | **A05:2021 Security Misconfiguration** | subtest (a) startup-hook posture |
+| OWASP ASVS | **V10 Malicious Code** | subtest (b) adversarial install |
+| MITRE CWE | **CWE-250 Execution with Unnecessary Privileges** | package-install authority escalation |
+| MITRE CWE | **CWE-506 Embedded Malicious Code** | the LiteLLM shape |
+| MITRE CWE | **CWE-829 Inclusion of Functionality from Untrusted Control Sphere** | subtest (b) |
+| MITRE CWE | **CWE-1104 Use of Unmaintained Third Party Components** | adjacent (holder-class membership) |
+| MITRE ATT&CK | **T1546 Event Triggered Execution** | the attack class |
+| MITRE ATT&CK | **T1546.016 Installer Packages** | the specific LiteLLM `.pth` instance |
+| MITRE ATT&CK | **T1195.002 Compromise Software Supply Chain** | upstream delivery mechanism (K-C8 overlap) |
+| MITRE ATT&CK | **T1053 Scheduled Task/Job** | adjacent (startup-time-adjacent) |
+| MITRE D3FEND | **D3-SCF System Call Filtering** | subtest (c) observability |
+| MITRE D3FEND | **D3-SCFW System Configuration File Whitelist** | subtest (a) enumeration + policy |
+| NIST SP 800-53 | **CM-5 Access Restrictions for Change** | subtest (b) install-time control |
+| NIST SP 800-53 | **CM-7 Least Functionality** | subtest (a) hook minimization |
+| NIST SP 800-53 | **SI-7 Software, Firmware, and Information Integrity** | all three subtests |
+| NIST SP 800-53 | **SR-3 Supply Chain Controls** | subtest (b) upstream chain |
+| NIST SP 800-53 | **SR-4 Provenance** | subtest (a) attribution |
+| NIST SP 800-161 | **Supply Chain Risk Management** | methodological reference |
+| NIST SP 800-218 | **Secure Software Development Framework (SSDF)** | subtest (b) build-time controls |
+| ISO 27002:2022 | **8.19 Installation of software on operational systems** | subtest (b) direct relevance |
+| ISO 27002:2022 | **8.28 Secure coding** | adjacent |
+| ISO 27002:2022 | **8.30 Outsourced development** | subtest (b) upstream chain |
+| SOC 2 | **CC8.1 Change Management** | subtest (a) + (b) |
+| CIS Controls | **CIS 2 Inventory and Control of Software Assets** | subtest (a) enumeration |
+| CIS Controls | **CIS 16.11 Leverage Vetted Modules** | subtest (b) install-time |
+| CSA CCM | **AIS (Application & Interface Security)** domain | all three subtests |
+
 ## How a post cites
 
 A Reckonings post that uses this mapping cites by identifier, not by URL (URLs rot; identifiers don't):

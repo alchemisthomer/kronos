@@ -1,6 +1,16 @@
 {
-  "generated": "2026-10-23T10:00:00Z",
+  "generated": "2026-10-24T13:00:00Z",
   "posts": [
+    {
+      "slug": "2026-10-24-litellm-pth-startup-execution-authority-admission",
+      "title": "LiteLLM's malware ran before anyone imported it. Startup-execution authority is a primitive.",
+      "date": "2026-10-24",
+      "kind": "doctrine",
+      "primitives": ["startup-execution-authority", "interpreter-initialization-hooks", "install-time-authority-escalation"],
+      "claims_touched": ["K-C9-STARTUP-EXECUTION-AUTHORITY"],
+      "summary": "On 2026-10-23 Microsoft Threat Intelligence published a forensic deep-dive on the LiteLLM 1.107.0 compromise naming the specific technique: the malicious wheel installed a .pth file plus a sitecustomize.py that caused Python's own site-initialization machinery to execute the attacker's code on every interpreter start, regardless of whether the host application ever imported litellm. The primitive this names is not supply-chain compromise. K-C8 already names that. The primitive is older and broader — a package installed into a runtime should not acquire the authority to execute code at interpreter startup, container boot, or shell initialization. Kronos admits it as K-C9-STARTUP-EXECUTION-AUTHORITY.",
+      "path": "docs/blog/posts/2026-10-24-litellm-pth-startup-execution-authority-admission.md"
+    },
     {
       "slug": "2026-10-23-pingcap-28-day-dwell-k-c1-k-c6-incident",
       "title": "PingCAP's attacker had 28 days before anyone noticed. Dwell time is the K-C6 measurement nobody wants to publish.",
