@@ -126,7 +126,7 @@ Each wakeup pass is currently triggered by invoking a Kronos operator-agent sess
 
 Target state has two parts, both planned, neither shipped yet:
 
-**(a) Dedicated Kronos operator-agent in the fleet-launcher.** Current state: Kronos is a mode of the general `alchemisthomer` operator-agent. Target state: a Kronos-named agent assignable from the fleet-launcher (`alchemisthomer.sh` family), with the dual mandate (devour + scan+pivot per [`../CLAUDE.md § The two-part Kronos mandate`](../CLAUDE.md)) baked into its persona. The dedicated agent carries the Reckonings blog, the engagement surface, and the horizon-scan responsibility as its full scope. Spec work pending.
+**(a) Dedicated Kronos operator-agent, hosted inside olympus-grid.** The persona + handoff prompt is now authored at [`dedicated-agent-persona.md`](dedicated-agent-persona.md). The spawner on the olympus-grid side reads the authoritative persona from the public git tree (so olympus-grid, which hosts the convenience interface, cannot gatekeep the persona definition). The dedicated agent carries the Reckonings blog, the engagement surface, the horizon-scan responsibility, and the content-path discipline (content lives at `raw.githubusercontent.com/alchemisthomer/kronos/brain/2.7.x.x`, outside olympus-grid Salesforce custody) as its full scope. **Spawner implementation pending** on the olympus-grid side.
 
 **(b) Scheduled worker that invokes the dedicated agent.** Options:
 
