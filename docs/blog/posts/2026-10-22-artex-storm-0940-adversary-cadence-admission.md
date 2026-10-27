@@ -160,6 +160,23 @@ Industry-leadership confirmation of the K-C6 primitive from the operator of a ne
 
 **Anthropic distillation defense (2026-10-12).** Direct response to the ongoing OpenCode-class distillation-attack signal: Anthropic reported reducing *illicit distillation rates by over 90%* through strengthened safeguards. This is positive K-C3 subtest (a) + K-C8-adjacent evidence from an LLM-provider substrate — the detection + mitigation path for model-mediated secret exfiltration is actively being improved by at least one upstream provider Athena invokes. Logged as a positive data point on the LLM-provider substrate's K-C3 / K-C8 posture; does not change Olympus-Grid's own L? scoring.
 
+## Follow-up — 2026-10-27
+
+First publicly-measurable instance of **formal defender-side cadence closing on attacker-side cadence**, via the PHP2Shell CISA KEV listing timeline:
+
+- **2026-10-17** — Amazon Threat Intelligence observes PHP2Shell exploitation attempt against government target. Attacker-side cadence: **-3 days ahead of public disclosure.**
+- **2026-10-20** — PHP team publishes CVE-2026-109618 + CVE-2026-109619 with CVSS 9.2 each; emergency security releases of 8.2.35 / 8.3.36 / 8.4.27 / 8.5.12 ship same day.
+- **2026-10-21** — public PoC release. Same-day attack enablement; Chainguard ships patched container images 6 hours ahead of coordinated embargo (sub-primitive candidate logged in signal-log 2026-10-22).
+- **2026-10-26** — [CISA formally lists both CVEs on the KEV catalog](https://www.cisa.gov/known-exploited-vulnerabilities-catalog) and issues a Binding Operational Directive 22-01 federal-agency remediation requirement with deadline **2026-10-29 (3-day federal window — unusually aggressive, matching the Plex2Shell 2026-10-20 BOD precedent)**.
+
+**Defender-side cadence measurement:** CVE publication 2026-10-20 → KEV listing 2026-10-26 = **6-day lag**. Historical CISA KEV listing lag for actively-exploited critical CVEs has averaged 14–28 days per CISA's own [KEV catalog historical data](https://www.cisa.gov/known-exploited-vulnerabilities). The PHP2Shell window is roughly half of the previous norm, and the federal remediation window (3 days) is a specific instance of the formal-defender posture catching up to attacker-side cadence. The ARTEX reckoning's K-C6 framing stated: *the discovery rate is going up permanently; defender response times have not symmetrically compressed yet.* The PHP2Shell timeline is the first public instance in Black October where the formal-defender-cadence number genuinely compressed to match. One instance is not yet a trend, but it is the first measurable data point.
+
+**Why this specific primitive got the compressed treatment:** PHP2Shell's holder class is ~every public-facing web server running PHP — a holder-class so broad that CISA's 3-day federal mandate was triggered by a mass-exposure calculus not applied to narrower-scope K-C4 instances in the same window (Plex2Shell got the same 3-day treatment on the same reasoning; Collabora Online got a 3-day deadline; Arista VeloCloud got a 3-day deadline; but NGINX, GitLab, and most Node CVEs got the standard 14+ day treatment). The pattern that emerges: **CISA federal-cadence compression is correlated to holder-class breadth, not to CVSS score alone.** The K-C6 subtest (b) ladder — the holder's ability to invoke a formal-containment path at attacker-cadence speed — needs an explicit multiplier for holder-class breadth. Named for the next K-C6 claim-doc revision.
+
+**On Vercel's 2026-10-21 same-day WAF-rule rollout.** The Follow-up — 2026-10-23 noted Vercel's rollout as the only publicly-named example of defender-side-cadence capability shape from Black October. The CISA KEV 2026-10-26 federal-cadence event sits adjacent — a formal-defender-side cadence capability shape that complements the private-platform-defender capability Vercel demonstrated. Both exist. Together they constitute a weak but non-zero positive K-C6 signal from the defender side of the week's cadence balance.
+
+**Scorecard delta on this follow-up:** no scorecard movement on specific targets. Logged as the first measurable *formal-defender-cadence* data point to score against the K-C6 attacker-side cadence number (VulnCheck's "AI drove a doubling of discovered flaws YoY" as the attacker-side anchor; CISA's 6-day KEV lag + 3-day federal mandate as the first defender-side anchor).
+
 ---
 
 **Primary source:** [*AI-driven, large-scale nation-state campaign using ARTEX enables supply chain compromise*](https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/), Microsoft Threat Intelligence, 2026-10-21. **ConnectWise advisory:** 2026-10-16 initial, expanded subsequently.
