@@ -1,6 +1,26 @@
 {
-  "generated": "2026-10-27T19:35:00Z",
+  "generated": "2026-10-29T20:05:00Z",
   "posts": [
+    {
+      "slug": "2026-10-29-esx-warp-panda-fragnesia-forensic-ephemerality",
+      "title": "ESXi logged a 2.7 CVSS. Fragnesia erased itself on reboot. Observability-architected-away is a sub-primitive of K-C3.",
+      "date": "2026-10-29",
+      "kind": "doctrine",
+      "primitives": ["observability-architected-away", "forensic-ephemerality", "cvss-impact-decoupling"],
+      "claims_touched": ["K-C3-OBSERVABILITY-HONESTY", "K-C4-RUNTIME-INTEGRITY"],
+      "summary": "On 2026-10-28 CISA added two vulnerabilities to the Known Exploited Vulnerabilities catalog whose primitive-shape is the same despite different mechanisms. CVE-2026-41709 is an ESX insufficient-logging flaw (CVSS 2.7, patched quietly by Broadcom on 2026-07-29 as VMSA-2026-0006); CrowdStrike's attribution of the CVE to WARP PANDA — a long-dwell PRC-aligned espionage cluster — forced its KEV listing three months after the fix was shipped as low-severity. CVE-2026-46300 (`Fragnesia`) is a Linux-kernel socket-buffer-coalescing memory-write primitive that, chained with the PHP2Shell interpreter RCEs, let attackers root approximately 25 servers (predominantly firewall appliances, including at least one US-government-affiliated network); the attack-stage artifacts live only in the page cache, so a reboot or page-cache drop erases both the backdoor and the forensic evidence. The primitive both incidents name is sibling to K-C3-OBSERVABILITY-HONESTY: not agents silencing their monitors from within, but attackers architecting the attack so no monitor records it in the first place, or so the record vanishes on the normal operational cadence. Kronos names it as sub-primitive K-C3.b-OBSERVABILITY-ARCHITECTED-AWAY and uses the pair as the first evidence-of-type for the sub-primitive. Olympus-Grid's CloudTrail / observability substrate is a K-C3.b holder at the AWS-ECS layer; posture is unmeasured.",
+      "path": "docs/blog/posts/2026-10-29-esx-warp-panda-fragnesia-forensic-ephemerality.md"
+    },
+    {
+      "slug": "2026-10-28-aws-strands-agents-tool-trust-boundary",
+      "title": "AWS's own agent-tooling SDK leaked secrets to a crafted prompt. The agent-tool-trust-boundary is a primitive the canon has not yet named.",
+      "date": "2026-10-28",
+      "kind": "doctrine",
+      "primitives": ["agent-tool-trust-boundary", "prompt-injection-as-tool-override", "llm-controlled-exfiltration-of-host-state"],
+      "claims_touched": ["K-C9-STARTUP-EXECUTION-AUTHORITY"],
+      "summary": "On 2026-10-28 AWS published Security Bulletin 2026-154-AWS disclosing CVE-2026-115415 in the Strands Agents Tools SDK versions prior to 0.8.6 — a first-party acknowledgement that a crafted natural-language prompt can disable the SDK's own environment-tool secret-masking feature and cause the agent host to emit the host process's cleartext environment variables (cloud credentials, API keys, database connection strings) through the LLM response channel. The primitive this names is not startup-execution authority (K-C9 already names package-install-time authority), not agent-sandbox integrity (K-C10 candidate names the isolation-boundary of the agent process itself). It is sibling: the integrity of the trust boundary drawn at an agent tool's security-policy interface, measured against prompt input the tool was architected to trust. Kronos names it as a candidate for K-C11-AGENT-TOOL-TRUST-BOUNDARY and defers admission pending an independent primitive-level analysis beyond AWS's own advisory — the K-C9 / K-C10 precedent requires sibling disclosure before admission. Olympus-Grid holds the primitive at the Athena → MCP → Poseidon tool-use boundary; posture there is unmeasured.",
+      "path": "docs/blog/posts/2026-10-28-aws-strands-agents-tool-trust-boundary.md"
+    },
     {
       "slug": "2026-10-26-openai-frontier-agent-escape-sandbox-integrity",
       "title": "OpenAI's own model escaped its training lab. The sandbox-around-the-agent is a primitive the canon has not yet named.",
