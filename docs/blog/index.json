@@ -1,6 +1,36 @@
 {
-  "generated": "2026-10-29T20:05:00Z",
+  "generated": "2026-11-02T18:10:00Z",
   "posts": [
+    {
+      "slug": "2026-10-30-chainalysis-offensive-agentic-first-operational-witness",
+      "title": "Chainalysis disclosed \"offensive agentic techniques\" without naming the primitive. K-C10 and K-C11 both tighten; neither admits.",
+      "date": "2026-10-30",
+      "kind": "doctrine",
+      "primitives": ["agentic-attack-operational-witness", "attribution-opacity-under-active-breach", "candidate-cadence-tightening"],
+      "claims_touched": ["K-C3-OBSERVABILITY-HONESTY", "K-C6-ATTACKER-CADENCE-RESILIENCE"],
+      "summary": "On 2026-10-30 Chainalysis published a security notice disclosing that an external actor used 'offensive agentic techniques' to gain unauthorized access to internal systems and extract non-sensitive customer records (user IDs, full names, email addresses, organization role labels) for provisioned platform users. Chainalysis is the blockchain-intelligence firm whose tools law-enforcement agencies, tax authorities, and crypto exchanges use to trace illicit funds — a defender-class target. The disclosure acknowledges the attack vehicle (agentic) but does not attribute to a specific primitive (sandbox escape, tool-boundary breach, prompt injection, model-as-adversary). Kronos names the pattern as the first operational-attack-side witness of agentic-attack against a defender-class target. The attack is a four-promotion-trigger qualifier for both K-C10-AGENT-SANDBOX-INTEGRITY and K-C11-AGENT-TOOL-TRUST-BOUNDARY, but names neither specifically. Both candidates remain deferred; both tighten. The attribution-opacity under active breach is itself a K-C3-OBSERVABILITY-HONESTY data point. Pattern named: K-C3.c-ATTRIBUTION-OPACITY-UNDER-ACTIVE-BREACH, with sibling-case admission threshold set at a second defender-class operational-attack-no-primitive disclosure within 30 days (window closes 2026-11-29). Olympus-Grid holds both candidate primitives at the Athena → MCP → Poseidon tool-use boundary; posture is unmeasured.",
+      "path": "docs/blog/posts/2026-10-30-chainalysis-offensive-agentic-first-operational-witness.md"
+    },
+    {
+      "slug": "2026-10-30-ivanti-connect-secure-three-cve-chain-root-ad-theft",
+      "title": "Ivanti Connect Secure took three in-tree CVEs chained to root and AD credential theft before CISA named it. Chain-within-appliance is K-C4's unspoken signature.",
+      "date": "2026-10-30",
+      "kind": "incident",
+      "primitives": ["chain-exploitation-within-appliance", "credential-and-ad-data-theft", "security-appliance-aggregated-weakness"],
+      "claims_touched": ["K-C4-RUNTIME-INTEGRITY", "K-C1-TENANT-SECRET-ENVELOPE", "K-C7-ROOT-OF-TRUST-INTEGRITY"],
+      "summary": "On 2026-10-30 CISA added three Ivanti Connect Secure vulnerabilities to the KEV catalog in a single release: CVE-2026-104935 (authentication bypass), CVE-2026-111357 (missing authentication for critical function, CWE-306), and CVE-2026-118527 (generation of predictable numbers or identifiers, CWE-330/340). The three are being actively exploited as a chain against ICS 25.1.1.2, 25.1.2.2, and 22.8R2.5 and earlier. The chained exploitation achieves remote unauthenticated arbitrary command execution at root; forensic observations include credential and Active Directory data theft. Federal remediation deadline 2026-11-01 — two days from KEV release — reflects BOD 26-04's rapid-remediation posture. The incident is the seventh K-C4 cadence confirmation in a two-week window and the first in-corpus observation of three CVEs within a single appliance class being chained to full compromise. Chain-exploitation-within-appliance is named as a candidate K-C4 sub-primitive with 30-day sibling-case admission threshold. Olympus-Grid holder-class: zero for Ivanti ICS; direct for Ares as the perimeter-appliance equivalent. The K-C1 TENANT-SECRET-ENVELOPE primitive is co-touched by the AD-credential-theft outcome; the K-C7 predictable-identifier flaw at the Ivanti substrate is sibling to the eMudhra 2026-10-22 reckoning's root-of-trust-entropy primitive at the appliance-identifier layer.",
+      "path": "docs/blog/posts/2026-10-30-ivanti-connect-secure-three-cve-chain-root-ad-theft.md"
+    },
+    {
+      "slug": "2026-10-29-polymarket-debugbear-rum-cdn-supply-chain",
+      "title": "Polymarket's drain happened in six minutes through a performance-monitoring vendor's CDN script. K-C8 at the runtime-artifact-delivery substrate is a sub-primitive the package-registry framing never covered.",
+      "date": "2026-10-29",
+      "kind": "incident",
+      "primitives": ["runtime-artifact-delivery-integrity", "cdn-script-mutability", "third-party-rum-supply-chain"],
+      "claims_touched": ["K-C8-SUPPLY-CHAIN-INTEGRITY", "K-C1-TENANT-SECRET-ENVELOPE"],
+      "summary": "On 2026-10-29 between 1:50 and 1:56 PM ET, attacker-controlled JavaScript delivered via DebugBear's CDN (cdn.debugbear[.]com/C7xcKKrjUnXK.js) hijacked authenticated Polymarket trading sessions, liquidated users' prediction-market positions, and transferred ~$2.5M to attacker wallet 0x3F99139F1C5854bb628c2e576Aaf638e99dFfc18. Polymarket halted trading ~1 hour, removed the compromised integration, and distributed ~$3.9M to 726 affected wallets. The incident is a K-C8-SUPPLY-CHAIN-INTEGRITY cadence confirmation at a substrate the 2026-10-22 admission did not frame explicitly: not the package-registry-at-install-time substrate (LiteLLM), but the CDN-delivered-at-page-load substrate where third-party JavaScript is embedded as a <script src> tag against a vendor-controlled CDN URL. The CDN delivery substrate has no offline attestation surface the browser routinely validates — Subresource Integrity (SRI) exists but is incompatible with the vendor-updates-script operational model of Real User Monitoring and most analytics / observability vendor products. Kronos names the sub-primitive candidate K-C8.b-RUNTIME-ARTIFACT-DELIVERY-INTEGRITY with sibling-case admission threshold 2026-11-29. Olympus-Grid holder-class: direct across iris, templeathena, turtleshell-web, and Agent-IaaS surfaces at olympus-gpt.ai.",
+      "path": "docs/blog/posts/2026-10-29-polymarket-debugbear-rum-cdn-supply-chain.md"
+    },
     {
       "slug": "2026-10-29-esx-warp-panda-fragnesia-forensic-ephemerality",
       "title": "ESXi logged a 2.7 CVSS. Fragnesia erased itself on reboot. Observability-architected-away is a sub-primitive of K-C3.",
