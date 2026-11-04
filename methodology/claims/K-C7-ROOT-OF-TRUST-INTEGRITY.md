@@ -55,3 +55,7 @@ K-C7 is distinct from K-C1 in a specific way: K-C1 protects tenant-held secrets 
 ## Posts that touch this claim
 
 - [eMudhra's CA private key was the integer 4](../../docs/blog/posts/2026-10-22-emudhra-ca-root-of-trust-admission.md) — admission post
+
+## Cadence confirmation (not reckoned as a post, logged for the record)
+
+- **CVE-2026-119922 Babelfish for PostgreSQL privilege escalation** — AWS 2026-165-AWS published 2026-11-03. Authorization-boundary violation inside the DB engine's Babelfish Transact-SQL compatibility layer. **K-C7 subtest (b) adjacency** at the storage-side authorization boundary of a DB-engine identity substrate. Olympus-Grid holder-class membership: zero (no Babelfish; PostgreSQL direct). Logged for cadence record alongside the [2026-11-04 Firecracker reckoning](../../docs/blog/posts/2026-11-04-aws-firecracker-microvm-guest-memory-disclosure-k-c10-substrate-cadence.md).

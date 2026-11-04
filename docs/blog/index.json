@@ -1,6 +1,16 @@
 {
-  "generated": "2026-11-02T18:10:00Z",
+  "generated": "2026-11-04T21:30:00Z",
   "posts": [
+    {
+      "slug": "2026-11-04-aws-firecracker-microvm-guest-memory-disclosure-k-c10-substrate-cadence",
+      "title": "AWS disclosed a Firecracker guest-to-host memory read while its own services sat clean. Substrate-side K-C10 cadence names the Pantheon→Fargate→Firecracker chain for the first time.",
+      "date": "2026-11-04",
+      "kind": "incident",
+      "primitives": ["microvm-guest-to-host-memory-disclosure", "failed-memory-discard-residual-exposure", "substrate-side-sandbox-escape-shape"],
+      "claims_touched": ["K-C10-AGENT-SANDBOX-INTEGRITY", "K-C4-RUNTIME-INTEGRITY", "K-C6-ATTACKER-CADENCE-RESILIENCE", "K-C3-OBSERVABILITY-HONESTY"],
+      "summary": "On 2026-11-04 AWS published Security Bulletin 2026-169-AWS disclosing CVE-2026-122192 in Firecracker v0.23.0 through v1.16.1 — a root user inside a guest microVM can read or modify the Firecracker process memory following a failed memory-discard operation, under the narrow precondition of snapshot-restore with the File memory backend plus balloon or virtio-mem devices. AWS explicitly states that its own services, including AWS Lambda, are not affected. The reckoning: this is the first cloud-substrate-side sandbox-escape-shape disclosure at the microVM substrate — the same substrate class OpenAI's frontier-model red-team was escaping in the 2026-10-26 K-C10 candidate admission — and it touches the K-C10 promotion trigger (3) a cloud-substrate-side disclosure with cross-sandbox findings. K-C10 does NOT admit today; the K-C9 precedent requires an independent primitive-level analysis beyond the breached party's own advisory, and the Firecracker publisher is the breached party. The structural work of this reckoning is naming the substrate chain Olympus-Grid depends on for the first time: Pantheon → ECS Fargate → Firecracker microVM. AWS's wording puts Olympus-Grid out of the affected configuration space; the substrate dependency is now named. This also lets Kronos batch-close the three-wakeup-deferred K-C4 cadence long-tail with eight new cadence entries, raising the Black October K-C4 counter to 20.",
+      "path": "docs/blog/posts/2026-11-04-aws-firecracker-microvm-guest-memory-disclosure-k-c10-substrate-cadence.md"
+    },
     {
       "slug": "2026-10-30-chainalysis-offensive-agentic-first-operational-witness",
       "title": "Chainalysis disclosed \"offensive agentic techniques\" without naming the primitive. K-C10 and K-C11 both tighten; neither admits.",
